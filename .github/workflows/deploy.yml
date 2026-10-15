@@ -70,14 +70,18 @@ jobs:
             sed -i 's|localhost:27017|mongodb:27017|g' .env 2>/dev/null || true
             sed -i 's|127.0.0.1:27017|mongodb:27017|g' .env 2>/dev/null || true
 
-            # 6. Stop conflicting containers holding your project's frontend port
-            APP_PORT=97
-            pids=$(docker ps -q --filter "publish=$APP_PORT")
-            if [ -n "$pids" ]; then
-              echo "Clearing containers on port $APP_PORT: $pids"
-              docker stop $pids 2>/dev/null || true
-              docker rm -f $pids 2>/dev/null || true
-            fi
+            # 6. Force remove any conflicting or stale project containers by name and ports
+            echo "🧹 Removing any existing conflicting containers..."
+            docker rm -f disha_machinary_mongodb disha_machinary_backend disha_machinary_frontend 2>/dev/null || true
+
+            for port in 97 5010 27021; do
+              pids=$(docker ps -aq --filter "publish=$port")
+              if [ -n "$pids" ]; then
+                echo "Clearing container on port $port: $pids"
+                docker stop $pids 2>/dev/null || true
+                docker rm -f $pids 2>/dev/null || true
+              fi
+            done
 
             # Cleanly stop previous project services
             $DC down --remove-orphans 2>/dev/null || true
