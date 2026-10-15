@@ -31,6 +31,9 @@ async function startServer() {
     require(path.resolve(filePath));
   }
 
+  const autoInitDatabase = require('./setup/autoInitDatabase');
+  await autoInitDatabase();
+
   const app = require('./app');
   app.set('port', process.env.PORT || 8888);
   const server = app.listen(app.get('port'), () => {
