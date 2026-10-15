@@ -31,7 +31,7 @@ export default function TaxForm({isUpdateForm = false}) {
                     },
                 ]}
             >
-                <InputNumber min={0} max={100} suffix={"%"} style={{width: '100%'}}/>
+                <InputNumber min={0} max={100} placeholder="e.g. 18" suffix={"%"} style={{width: '100%'}}/>
             </Form.Item>
 
             <Form.Item

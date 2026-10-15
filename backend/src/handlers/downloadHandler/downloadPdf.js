@@ -1,7 +1,7 @@
 const custom = require('@/controllers/pdfController');
 const mongoose = require('mongoose');
 
-module.exports = downloadPdf = async (req, res, { directory, id }) => {
+module.exports = downloadPdf = async (req, res, { directory, id, format }) => {
   try {
     const modelName = directory.slice(0, 1).toUpperCase() + directory.slice(1);
     if (mongoose.models[modelName]) {
@@ -16,13 +16,24 @@ module.exports = downloadPdf = async (req, res, { directory, id }) => {
       }
 
       // Continue process if result is returned
+      const isThermal = Boolean(
+        format === 'thermal' ||
+        req.query.format === 'thermal' ||
+        (req.params?.file && req.params.file.includes('-thermal-'))
+      );
 
-      const fileId = modelName.toLowerCase() + '-' + result._id + '.pdf';
+      const fileId = `${modelName.toLowerCase()}${isThermal ? '-thermal' : ''}-${result._id}.pdf`;
       const folderPath = modelName.toLowerCase();
       const targetLocation = `src/public/download/${folderPath}/${fileId}`;
+
       await custom.generatePdf(
         modelName,
-        { filename: folderPath, format: 'A4', targetLocation },
+        {
+          filename: folderPath,
+          format: isThermal ? 'thermal' : 'A4',
+          isThermal,
+          targetLocation,
+        },
         result,
         async () => {
           return res.download(targetLocation, (error) => {

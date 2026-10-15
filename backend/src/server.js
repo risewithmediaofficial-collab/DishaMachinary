@@ -14,26 +14,31 @@ if (major < 20) {
 require('dotenv').config({ path: '.env' });
 require('dotenv').config({ path: '.env.local' });
 
-mongoose.connect(process.env.DATABASE);
-
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
 mongoose.connection.on('error', (error) => {
-  console.log(
-    `1. 🔥 Common Error caused issue → : check your .env file first and add your mongodb url`
-  );
-  console.error(`2. 🚫 Error → : ${error.message}`);
+  console.error(`MongoDB connection error: ${error.message}`);
 });
 
-const modelsFiles = globSync('./src/models/**/*.js');
+async function startServer() {
+  const databaseUrl = process.env.DATABASE?.trim();
+  if (!databaseUrl) {
+    throw new Error('DATABASE is not set. Add your MongoDB connection URI to backend/.env.');
+  }
 
-for (const filePath of modelsFiles) {
-  require(path.resolve(filePath));
+  await mongoose.connect(databaseUrl);
+
+  const modelsFiles = globSync('./src/models/**/*.js');
+  for (const filePath of modelsFiles) {
+    require(path.resolve(filePath));
+  }
+
+  const app = require('./app');
+  app.set('port', process.env.PORT || 8888);
+  const server = app.listen(app.get('port'), () => {
+    console.log(`Express running → On PORT : ${server.address().port}`);
+  });
 }
 
-// Start our app!
-const app = require('./app');
-app.set('port', process.env.PORT || 8888);
-const server = app.listen(app.get('port'), () => {
-  console.log(`Express running → On PORT : ${server.address().port}`);
+startServer().catch((error) => {
+  console.error(`Backend startup failed: ${error.message}`);
+  process.exit(1);
 });

@@ -161,10 +161,5 @@ const currencyFlag = [
 // };
 
 export const currencyOptions = () => {
-  return currencyFlag.map((x) => {
-    return {
-      value: x.currency_code,
-      label: x.flag + ' ' + x.currency_code,
-    };
-  });
+  return [{ value: 'INR', label: '🇮🇳 INR' }];
 };

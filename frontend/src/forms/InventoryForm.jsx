@@ -46,8 +46,8 @@ export default function InventoryForm() {
         ]}
       >
         <InputNumber
-          formatter={(value) => `$ ${value}`} // Optional: format value as currency
-          parser={(value) => value.replace(/\$\s?|(,*)/g, '')} // Optional: parse input as number
+          formatter={(value) => `₹ ${value}`}
+          parser={(value) => value.replace(/₹\s?|(,*)/g, '')}
         />
       </Form.Item>
     </>

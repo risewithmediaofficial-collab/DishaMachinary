@@ -3,7 +3,7 @@ const schema = Joi.object({
   client: Joi.alternatives().try(Joi.string(), Joi.object()).required(),
   number: Joi.number().required(),
   year: Joi.number().required(),
-  status: Joi.string().required(),
+  status: Joi.string().valid('draft', 'pending', 'sent', 'posted', 'cancelled').required(),
   notes: Joi.string().allow(''),
   expiredDate: Joi.date().required(),
   date: Joi.date().required(),
@@ -12,15 +12,20 @@ const schema = Joi.object({
     .items(
       Joi.object({
         _id: Joi.string().allow('').optional(),
-        itemName: Joi.string().required(),
+        product: Joi.string().hex().length(24).optional(),
+        itemName: Joi.string().allow('').optional(),
         description: Joi.string().allow(''),
-        quantity: Joi.number().required(),
-        price: Joi.number().required(),
-        total: Joi.number().required(),
+        quantity: Joi.number().positive().required(),
+        price: Joi.number().min(0).optional(),
+        gstRate: Joi.number().min(0).max(100).optional(),
+        total: Joi.number().optional(),
       }).required()
     )
     .required(),
-  taxRate: Joi.alternatives().try(Joi.number(), Joi.string()).required(),
+  gstEnabled: Joi.boolean().default(false),
+  taxRate: Joi.number().min(0).max(100).default(0),
+  discount: Joi.number().min(0).default(0),
+  currency: Joi.string().valid('INR').default('INR'),
 });
 
 module.exports = schema;

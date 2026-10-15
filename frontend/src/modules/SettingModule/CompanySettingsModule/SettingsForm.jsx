@@ -42,6 +42,10 @@ const formItems = [
     valueType: 'string',
   },
   {
+    settingKey: 'company_gstin',
+    valueType: 'string',
+  },
+  {
     settingKey: 'company_reg_number',
     valueType: 'string',
   },

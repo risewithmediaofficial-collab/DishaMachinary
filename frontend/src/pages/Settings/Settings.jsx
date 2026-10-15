@@ -1,7 +1,6 @@
 import {
   SettingOutlined,
   CreditCardOutlined,
-  DollarOutlined,
   FileImageOutlined,
   TrophyOutlined,
 } from '@ant-design/icons';
@@ -42,7 +41,7 @@ export default function Settings() {
     {
       key: 'currency_settings',
       label: translate('Currency Settings'),
-      icon: <DollarOutlined />,
+      icon: <span aria-hidden="true" style={{ fontWeight: 700, fontSize: 18 }}>₹</span>,
       children: <MoneyFormatSettings />,
     },
     {

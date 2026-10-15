@@ -13,6 +13,17 @@ const contextActions = (dispatch) => {
         dispatch({ type: actionTypes.COLLAPSE_NAV_MENU });
       },
     },
+    mobileMenu: {
+      open: () => {
+        dispatch({ type: actionTypes.OPEN_MOBILE_MENU });
+      },
+      close: () => {
+        dispatch({ type: actionTypes.CLOSE_MOBILE_MENU });
+      },
+      toggle: () => {
+        dispatch({ type: actionTypes.TOGGLE_MOBILE_MENU });
+      },
+    },
     app: {
       open: (appName) => {
         dispatch({ type: actionTypes.CHANGE_APP, playload: appName });

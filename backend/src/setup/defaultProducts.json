@@ -1,0 +1,21 @@
+[
+  { "name": "Pulverizer Machine", "sku": "DM-0001" },
+  { "name": "Flour Kneading Machine", "sku": "DM-0002" },
+  { "name": "Camphor Making Machine", "sku": "DM-0003" },
+  { "name": "Sweet Corn Machine", "sku": "DM-0004" },
+  { "name": "Butter Making Machine", "sku": "DM-0005" },
+  { "name": "Batter Mixer Machine", "sku": "DM-0006" },
+  { "name": "Gravy Making Machine", "sku": "DM-0007" },
+  { "name": "Murukku / Chakli Making Machine", "sku": "DM-0008" },
+  { "name": "Pani Puri Making Machine", "sku": "DM-0009" },
+  { "name": "Garlic Peeling Machine", "sku": "DM-0010" },
+  { "name": "Potato Peeling Machine", "sku": "DM-0011" },
+  { "name": "Appalam Making Machine", "sku": "DM-0012" },
+  { "name": "Hot Case Machine", "sku": "DM-0013" },
+  { "name": "Small Rice Machine", "sku": "DM-0014" },
+  { "name": "Vegetable Cutting Machine", "sku": "DM-0015" },
+  { "name": "Doop (Dhoop) Making Machine", "sku": "DM-0016" },
+  { "name": "Bakery Machines", "sku": "DM-0017" },
+  { "name": "Poultry Defeathering Machine", "sku": "DM-0018" },
+  { "name": "Milling Machine", "sku": "DM-0019" }
+]

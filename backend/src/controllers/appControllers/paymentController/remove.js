@@ -18,13 +18,19 @@ const remove = async (req, res) => {
     });
   }
 
+  if (previousPayment.status === 'reversed') {
+    return res.status(409).json({ success: false, result: null, message: 'Payment is already reversed' });
+  }
+  const reason = String(req.body?.reason || '').trim();
+  if (!reason) {
+    return res.status(400).json({ success: false, result: null, message: 'A reversal reason is required' });
+  }
+
   const { _id: paymentId, amount: previousAmount } = previousPayment;
   const { id: invoiceId, total, discount, credit: previousCredit } = previousPayment.invoice;
 
   // Find the document by id and delete it
-  let updates = {
-    removed: true,
-  };
+  let updates = { status: 'reversed', reversedAt: new Date(), reversalReason: reason };
   // Find the document by id and delete it
   const result = await Model.findOneAndUpdate(
     { _id: req.params.id, removed: false },
@@ -45,9 +51,6 @@ const remove = async (req, res) => {
   const updateInvoice = await Invoice.findOneAndUpdate(
     { _id: invoiceId },
     {
-      $pull: {
-        payment: paymentId,
-      },
       $inc: { credit: -previousAmount },
       $set: {
         paymentStatus: paymentStatus,
@@ -58,10 +61,19 @@ const remove = async (req, res) => {
     }
   ).exec();
 
+  await mongoose.model('AuditLog').create({
+    user: req.admin._id,
+    action: 'payment.reverse',
+    entity: 'Payment',
+    entityId: paymentId,
+    reason,
+    changes: { amount: previousAmount, invoice: invoiceId },
+  });
+
   return res.status(200).json({
     success: true,
     result,
-    message: 'Successfully Deleted the document ',
+    message: 'Payment reversed successfully',
   });
 };
 module.exports = remove;

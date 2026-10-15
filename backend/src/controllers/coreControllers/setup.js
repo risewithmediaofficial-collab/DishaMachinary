@@ -2,7 +2,7 @@ require('dotenv').config({ path: '.env' });
 require('dotenv').config({ path: '.env.local' });
 const { globSync } = require('glob');
 const fs = require('fs');
-const { generate: uniqueId } = require('shortid');
+const { generate: uniqueId } = require('@/utils/uniqueId');
 
 const mongoose = require('mongoose');
 
@@ -50,7 +50,6 @@ const setup = async (req, res) => {
 
   const AdminPasswordData = {
     password: passwordHash,
-    emailVerified: true,
     salt: salt,
     user: result._id,
   };
@@ -94,7 +93,7 @@ const setup = async (req, res) => {
   return res.status(200).json({
     success: true,
     result: {},
-    message: 'Successfully IDURAR App Setup',
+    message: 'Successfully completed Disha Machinary setup',
   });
 };
 

@@ -7,6 +7,12 @@ const custom = require('@/controllers/pdfController');
 const { calculate } = require('@/helpers');
 
 const update = async (req, res) => {
+  return res.status(409).json({
+    success: false,
+    result: null,
+    message: 'Posted payments are immutable. Reverse the payment and record a replacement.',
+  });
+  /* legacy implementation retained below for migration reference
   if (req.body.amount === 0) {
     return res.status(202).json({
       success: false,
@@ -81,6 +87,7 @@ const update = async (req, res) => {
     result,
     message: 'Successfully updated the Payment ',
   });
+  */
 };
 
 module.exports = update;

@@ -8,6 +8,9 @@ import useLanguage from '@/locale/useLanguage';
 
 export default function UpgradeButton() {
   const translate = useLanguage();
+  const upgradeUrl = import.meta.env.VITE_UPGRADE_URL;
+
+  if (!upgradeUrl) return null;
 
   return (
     <Badge count={1} size="small">
@@ -22,7 +25,7 @@ export default function UpgradeButton() {
         }}
         icon={<RocketOutlined />}
         onClick={() => {
-          window.open(`https://entreprise.idurarapp.com`);
+          window.open(upgradeUrl, '_blank', 'noopener,noreferrer');
         }}
       >
         {translate('Try Entreprise Version')}
@@ -30,7 +33,3 @@ export default function UpgradeButton() {
     </Badge>
   );
 }
-
-console.log(
-  '🚀 Welcome to IDURAR ERP CRM! Did you know that we also offer commercial customization services? Contact us at hello@idurarapp.com for more information.'
-);

@@ -1,22 +1,21 @@
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
-import { Avatar, Dropdown, Layout, Badge, Button } from 'antd';
+import { Avatar, Dropdown, Layout, Button } from 'antd';
 
-// import Notifications from '@/components/Notification';
-
-import { LogoutOutlined, ToolOutlined, UserOutlined } from '@ant-design/icons';
-
+import { LogoutOutlined, ToolOutlined, UserOutlined, MenuOutlined } from '@ant-design/icons';
 import { selectCurrentAdmin } from '@/redux/auth/selectors';
-
 import { FILE_BASE_URL } from '@/config/serverApiConfig';
-
 import useLanguage from '@/locale/useLanguage';
+import useResponsive from '@/hooks/useResponsive';
+import { useAppContext } from '@/context/appContext';
 
 import UpgradeButton from './UpgradeButton';
 
 export default function HeaderContent() {
   const currentAdmin = useSelector(selectCurrentAdmin);
   const { Header } = Layout;
+  const { isMobile } = useResponsive();
+  const { appContextAction } = useAppContext();
 
   const translate = useLanguage();
 
@@ -47,7 +46,7 @@ export default function HeaderContent() {
   };
 
   const DropdownMenu = ({ text }) => {
-    return <span style={{}}>{text}</span>;
+    return <span>{text}</span>;
   };
 
   const items = [
@@ -87,47 +86,79 @@ export default function HeaderContent() {
   return (
     <Header
       style={{
-        padding: '20px',
-        background: '#ffffff',
+        padding: isMobile ? '0 14px' : '0 24px',
+        height: '64px',
+        background: 'rgba(255, 255, 255, 0.92)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid #e2e8f0',
         display: 'flex',
-        flexDirection: 'row-reverse',
-        justifyContent: 'flex-start',
-        gap: ' 15px',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        position: 'sticky',
+        top: 0,
+        zIndex: 999,
       }}
     >
-      <Dropdown
-        menu={{
-          items,
-        }}
-        trigger={['click']}
-        placement="bottomRight"
-        stye={{ width: '280px', float: 'right' }}
-      >
-        {/* <Badge dot> */}
-        <Avatar
-          className="last"
-          src={currentAdmin?.photo ? FILE_BASE_URL + currentAdmin?.photo : undefined}
-          style={{
-            color: '#f56a00',
-            backgroundColor: currentAdmin?.photo ? 'none' : '#fde3cf',
-            boxShadow: 'rgba(150, 190, 238, 0.35) 0px 0px 10px 2px',
-            float: 'right',
-            cursor: 'pointer',
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {isMobile && (
+          <Button
+            type="text"
+            icon={<MenuOutlined style={{ fontSize: 19, color: '#0f172a' }} />}
+            onClick={() => appContextAction.mobileMenu.toggle()}
+            style={{ width: 36, height: 36, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+          />
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontWeight: 800, fontSize: isMobile ? 15 : 16, color: '#0f172a', letterSpacing: -0.2 }}>
+            Disha Machinary
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 700,
+              color: '#2563eb',
+              background: '#eff6ff',
+              padding: '0 6px',
+              borderRadius: 4,
+              border: '1px solid #dbeafe',
+              display: 'inline-flex',
+              alignItems: 'center',
+              height: 20,
+              lineHeight: '18px',
+              verticalAlign: 'middle',
+            }}
+          >
+            ERP
+          </span>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <UpgradeButton />
+        <Dropdown
+          menu={{
+            items,
           }}
-          size="large"
+          trigger={['click']}
+          placement="bottomRight"
         >
-          {currentAdmin?.name?.charAt(0)?.toUpperCase()}
-        </Avatar>
-        {/* </Badge> */}
-      </Dropdown>
-
-      {/* <AppsButton /> */}
-
-      <UpgradeButton />
+          <Avatar
+            className="last"
+            src={currentAdmin?.photo ? FILE_BASE_URL + currentAdmin?.photo : undefined}
+            style={{
+              color: '#f56a00',
+              backgroundColor: currentAdmin?.photo ? 'none' : '#fde3cf',
+              boxShadow: 'rgba(150, 190, 238, 0.35) 0px 0px 8px 1px',
+              cursor: 'pointer',
+            }}
+            size="large"
+          >
+            {currentAdmin?.name?.charAt(0)?.toUpperCase()}
+          </Avatar>
+        </Dropdown>
+      </div>
     </Header>
   );
 }
 
-//  console.log(
-//    '🚀 Welcome to IDURAR ERP CRM! Did you know that we also offer commercial customization services? Contact us at hello@idurarapp.com for more information.'
-//  );

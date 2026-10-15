@@ -49,16 +49,16 @@ export default function Payment() {
       },
     },
     {
-      title: translate('Number'),
+      title: 'Bill No',
       dataIndex: ['invoice', 'number'],
-    },
-    {
-      title: translate('year'),
-      dataIndex: ['invoice', 'year'],
+      render: (number, record) => `#${number || '-'}/${record?.invoice?.year || ''}`,
     },
     {
       title: translate('Payment Mode'),
-      dataIndex: ['paymentMode', 'name'],
+      render: (_, record) => {
+        const mode = record.method || record?.paymentMode?.name || 'cash';
+        return <span style={{ textTransform: 'uppercase', fontWeight: 600 }}>{mode}</span>;
+      },
     },
   ];
 

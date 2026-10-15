@@ -66,7 +66,7 @@ export default function OrderForm({ isUpdateForm = false }) {
           },
         ]}
       >
-        <InputNumber min={0} precision={2} prefix="$" style={{ width: '100%' }} />
+        <InputNumber min={0} precision={2} prefix="₹" style={{ width: '100%' }} />
       </Form.Item>
 
       <Form.Item

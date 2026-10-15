@@ -1,0 +1,108 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Execute Remote SSH Commands & Deploy Docker
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 15m
+          script: |
+            set -e
+            echo "=================================================="
+            echo "🚀 Starting Automated Deployment Pipeline on VPS"
+            echo "=================================================="
+
+            # 1. Resolve Docker Compose command
+            if docker compose version >/dev/null 2>&1; then
+              DC="docker compose"
+            elif command -v docker-compose >/dev/null 2>&1; then
+              DC="docker-compose"
+            else
+              echo "❌ Error: Docker Compose is not installed on VPS!"
+              exit 1
+            fi
+
+            # 2. Set deployment target directory
+            DEPLOY_DIR="/docker/disha-machinary"
+
+            # 3. Clone repository if not already present
+            if [ ! -d "$DEPLOY_DIR/.git" ]; then
+              echo "⚡ Initializing repository in $DEPLOY_DIR..."
+              mkdir -p "$DEPLOY_DIR"
+              git clone https://github.com/${{ github.repository }}.git "$DEPLOY_DIR" 2>/dev/null || \
+              git clone git@github.com:${{ github.repository }}.git "$DEPLOY_DIR"
+            fi
+
+            cd "$DEPLOY_DIR"
+
+            # 4. Pull and sync to latest origin branch
+            TARGET_BRANCH="${{ github.ref_name }}"
+            echo "📥 Fetching and syncing to latest origin/$TARGET_BRANCH..."
+            git fetch origin "$TARGET_BRANCH"
+            git reset --hard "origin/$TARGET_BRANCH"
+            git clean -fd
+
+
+            # 5. Setup production environment file
+            if [ ! -f .env ]; then
+              echo "⚙️ Creating .env from .env.example..."
+              cp .env.example .env
+            fi
+
+            # Configure specific ports / database hosts dynamically if needed
+            sed -i 's|localhost:27017|mongodb:27017|g' .env 2>/dev/null || true
+            sed -i 's|127.0.0.1:27017|mongodb:27017|g' .env 2>/dev/null || true
+
+            # 6. Stop conflicting containers holding your project's frontend port
+            APP_PORT=97
+            pids=$(docker ps -q --filter "publish=$APP_PORT")
+            if [ -n "$pids" ]; then
+              echo "Clearing containers on port $APP_PORT: $pids"
+              docker stop $pids 2>/dev/null || true
+              docker rm -f $pids 2>/dev/null || true
+            fi
+
+            # Cleanly stop previous project services
+            $DC down --remove-orphans 2>/dev/null || true
+
+            # 7. Rebuild Docker images without cache (forces clean bundle)
+            echo "🔨 Building Docker images..."
+            $DC build --no-cache
+
+            # 8. Start containers in detached mode
+            echo "🚀 Starting new containers..."
+            if ! $DC up -d --force-recreate; then
+              echo "⚠️ Startup issue encountered. Checking backend logs:"
+              $DC logs --tail 50 backend 2>/dev/null || true
+              exit 1
+            fi
+
+            # 9. Prune dangling images to conserve VPS disk space
+            echo "🧹 Pruning unused images..."
+            docker image prune -f
+
+            # 10. Status check
+            echo "📋 Checking container status:"
+            sleep 5
+            $DC ps
+
+            echo "=================================================="
+            echo "✅ Deployment Successful and Verified!"
+            echo "=================================================="

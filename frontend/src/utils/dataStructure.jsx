@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { Switch, Tag } from 'antd';
 import { CloseOutlined, CheckOutlined } from '@ant-design/icons';
 import { countryList } from '@/utils/countryList';
-import { generate as uniqueId } from 'shortid';
+import { generate as uniqueId } from '@/utils/uniqueId';
 import color from '@/utils/color';
 
 export const dataForRead = ({ fields, translate }) => {
@@ -20,7 +20,14 @@ export const dataForRead = ({ fields, translate }) => {
   return columns;
 };
 
-export function dataForTable({ fields, translate, moneyFormatter, dateFormat }) {
+export function dataForTable({
+  fields,
+  translate,
+  moneyFormatter,
+  dateFormat,
+  onBooleanChange,
+  interactiveBooleanFields = [],
+}) {
   let columns = [];
 
   Object.keys(fields).forEach((key) => {
@@ -38,13 +45,18 @@ export function dataForTable({ fields, translate, moneyFormatter, dateFormat }) 
             },
           },
         }),
-        render: (_, record) => (
-          <Switch
-            checked={record[key]}
-            checkedChildren={<CheckOutlined />}
-            unCheckedChildren={<CloseOutlined />}
-          />
-        ),
+        render: (_, record) => {
+          const canToggle = interactiveBooleanFields.includes(key) && Boolean(onBooleanChange);
+          return (
+            <Switch
+              checked={record[key]}
+              checkedChildren={<CheckOutlined />}
+              unCheckedChildren={<CloseOutlined />}
+              disabled={!canToggle}
+              onChange={canToggle ? (checked) => onBooleanChange(record, key, checked) : undefined}
+            />
+          );
+        },
       },
       date: {
         title: field.label ? translate(field.label) : translate(key),

@@ -6,16 +6,19 @@ import { PageHeader } from '@ant-design/pro-layout';
 import {
   EditOutlined,
   FilePdfOutlined,
+  BarcodeOutlined,
   CloseCircleOutlined,
   RetweetOutlined,
   MailOutlined,
+  ArrowLeftOutlined,
 } from '@ant-design/icons';
+import BillViewer from '@/components/BillTemplate';
 
 import { useSelector, useDispatch } from 'react-redux';
 import useLanguage from '@/locale/useLanguage';
 import { erp } from '@/redux/erp/actions';
 
-import { generate as uniqueId } from 'shortid';
+import { generate as uniqueId } from '@/utils/uniqueId';
 
 import { selectCurrentItem } from '@/redux/erp/selectors';
 
@@ -125,117 +128,186 @@ export default function ReadItem({ config, selectedItem }) {
 
   return (
     <>
-      <PageHeader
-        onBack={() => {
-          navigate(`/${entity.toLowerCase()}`);
-        }}
-        title={`${ENTITY_NAME} # ${currentErp.number}/${currentErp.year || ''}`}
-        ghost={false}
-        tags={[
-          <span key="status">{currentErp.status && translate(currentErp.status)}</span>,
-          currentErp.paymentStatus && (
-            <span key="paymentStatus">
-              {currentErp.paymentStatus && translate(currentErp.paymentStatus)}
-            </span>
-          ),
-        ]}
-        extra={[
-          <Button
-            key={`${uniqueId()}`}
-            onClick={() => {
+      {entity === 'invoice' ? (
+        <div style={{ marginBottom: 12 }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 12,
+              padding: '10px 16px',
+              background: '#ffffff',
+              borderRadius: 10,
+              border: '1px solid #e2e8f0',
+              marginBottom: 14,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <Button
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate('/invoice')}
+                style={{ borderRadius: 6 }}
+              >
+                Invoices
+              </Button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
+                  Invoice #{currentErp.number}/{currentErp.year || ''}
+                </span>
+                {currentErp.paymentStatus && (
+                  <Tag
+                    color={
+                      currentErp.paymentStatus === 'paid'
+                        ? 'green'
+                        : currentErp.paymentStatus === 'partially'
+                        ? 'orange'
+                        : 'red'
+                    }
+                    style={{ textTransform: 'uppercase', fontWeight: 700 }}
+                  >
+                    {currentErp.paymentStatus}
+                  </Tag>
+                )}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <Button
+                loading={mailInProgress}
+                onClick={() => send(currentErp._id)}
+                icon={<MailOutlined />}
+              >
+                {translate('Send by Email')}
+              </Button>
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={() => {
+                  dispatch(erp.currentAction({ actionType: 'update', data: currentErp }));
+                  navigate(`/invoice/update/${currentErp._id}`);
+                }}
+              >
+                {translate('Edit')}
+              </Button>
+            </div>
+          </div>
+
+          <BillViewer invoice={currentErp} entity={entity} defaultFormat="a4" />
+        </div>
+      ) : (
+        <>
+          <PageHeader
+            onBack={() => {
               navigate(`/${entity.toLowerCase()}`);
             }}
-            icon={<CloseCircleOutlined />}
-          >
-            {translate('Close')}
-          </Button>,
-          <Button
-            key={`${uniqueId()}`}
-            onClick={() => {
-              window.open(
-                `${DOWNLOAD_BASE_URL}${entity}/${entity}-${currentErp._id}.pdf`,
-                '_blank'
-              );
-            }}
-            icon={<FilePdfOutlined />}
-          >
-            {translate('Download PDF')}
-          </Button>,
-          <Button
-            key={`${uniqueId()}`}
-            loading={mailInProgress}
-            onClick={() => {
-              send(currentErp._id);
-            }}
-            icon={<MailOutlined />}
-          >
-            {translate('Send by Email')}
-          </Button>,
-          <Button
-            key={`${uniqueId()}`}
-            onClick={() => {
-              dispatch(erp.convert({ entity, id: currentErp._id }));
-            }}
-            icon={<RetweetOutlined />}
-            style={{ display: entity === 'quote' ? 'inline-block' : 'none' }}
-          >
-            {translate('Convert to Invoice')}
-          </Button>,
-
-          <Button
-            key={`${uniqueId()}`}
-            onClick={() => {
-              dispatch(
-                erp.currentAction({
-                  actionType: 'update',
-                  data: currentErp,
-                })
-              );
-              navigate(`/${entity.toLowerCase()}/update/${currentErp._id}`);
-            }}
-            type="primary"
-            icon={<EditOutlined />}
-          >
-            {translate('Edit')}
-          </Button>,
-        ]}
-        style={{
-          padding: '20px 0px',
-        }}
-      >
-        <Row>
-          <Statistic title="Status" value={currentErp.status} />
-          <Statistic
-            title={translate('SubTotal')}
-            value={moneyFormatter({
-              amount: currentErp.subTotal,
-              currency_code: currentErp.currency,
-            })}
+            title={`${ENTITY_NAME} # ${currentErp.number}/${currentErp.year || ''}`}
+            ghost={false}
+            tags={[
+              <span key="status">{currentErp.status && translate(currentErp.status)}</span>,
+              currentErp.paymentStatus && (
+                <span key="paymentStatus">
+                  {currentErp.paymentStatus && translate(currentErp.paymentStatus)}
+                </span>
+              ),
+            ]}
+            extra={[
+              <Button
+                key={`${uniqueId()}`}
+                onClick={() => {
+                  navigate(`/${entity.toLowerCase()}`);
+                }}
+                icon={<CloseCircleOutlined />}
+              >
+                {translate('Close')}
+              </Button>,
+              <Button
+                key={`${uniqueId()}`}
+                onClick={() => {
+                  window.open(
+                    `${DOWNLOAD_BASE_URL}${entity}/${entity}-${currentErp._id}.pdf`,
+                    '_blank'
+                  );
+                }}
+                icon={<FilePdfOutlined />}
+              >
+                {translate('Download PDF')}
+              </Button>,
+              <Button
+                key={`${uniqueId()}`}
+                loading={mailInProgress}
+                onClick={() => {
+                  send(currentErp._id);
+                }}
+                icon={<MailOutlined />}
+              >
+                {translate('Send by Email')}
+              </Button>,
+              <Button
+                key={`${uniqueId()}`}
+                onClick={() => {
+                  dispatch(erp.convert({ entity, id: currentErp._id }));
+                }}
+                icon={<RetweetOutlined />}
+                style={{ display: entity === 'quote' ? 'inline-block' : 'none' }}
+              >
+                {translate('Convert to Invoice')}
+              </Button>,
+              <Button
+                key={`${uniqueId()}`}
+                onClick={() => {
+                  dispatch(
+                    erp.currentAction({
+                      actionType: 'update',
+                      data: currentErp,
+                    })
+                  );
+                  navigate(`/${entity.toLowerCase()}/update/${currentErp._id}`);
+                }}
+                type="primary"
+                icon={<EditOutlined />}
+              >
+                {translate('Edit')}
+              </Button>,
+            ]}
             style={{
-              margin: '0 32px',
+              padding: '20px 0px',
             }}
-          />
-          <Statistic
-            title={translate('Total')}
-            value={moneyFormatter({ amount: currentErp.total, currency_code: currentErp.currency })}
-            style={{
-              margin: '0 32px',
-            }}
-          />
-          <Statistic
-            title={translate('Paid')}
-            value={moneyFormatter({
-              amount: currentErp.credit,
-              currency_code: currentErp.currency,
-            })}
-            style={{
-              margin: '0 32px',
-            }}
-          />
-        </Row>
-      </PageHeader>
-      <Divider dashed />
-      <Descriptions title={`Client : ${currentErp.client.name}`}>
+          >
+            <Row>
+              <Statistic title="Status" value={currentErp.status} />
+              <Statistic
+                title={translate('SubTotal')}
+                value={moneyFormatter({
+                  amount: currentErp.subTotal,
+                  currency_code: currentErp.currency,
+                })}
+                style={{
+                  margin: '0 32px',
+                }}
+              />
+              <Statistic
+                title={translate('Total')}
+                value={moneyFormatter({ amount: currentErp.total, currency_code: currentErp.currency })}
+                style={{
+                  margin: '0 32px',
+                }}
+              />
+              <Statistic
+                title={translate('Paid')}
+                value={moneyFormatter({
+                  amount: currentErp.credit,
+                  currency_code: currentErp.currency,
+                })}
+                style={{
+                  margin: '0 32px',
+                }}
+              />
+            </Row>
+          </PageHeader>
+          <Divider dashed />
+          <Descriptions title={`Client : ${currentErp.client.name}`}>
         <Descriptions.Item label={translate('Address')}>{client.address}</Descriptions.Item>
         <Descriptions.Item label={translate('email')}>{client.email}</Descriptions.Item>
         <Descriptions.Item label={translate('Phone')}>{client.phone}</Descriptions.Item>
@@ -317,6 +389,8 @@ export default function ReadItem({ config, selectedItem }) {
           </Col>
         </Row>
       </div>
+        </>
+      )}
     </>
   );
 }

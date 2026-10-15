@@ -6,7 +6,7 @@ import useLanguage from '@/locale/useLanguage';
 import { useMoney, useDate } from '@/settings';
 import AutoCompleteAsync from '@/components/AutoCompleteAsync';
 import SelectAsync from '@/components/SelectAsync';
-import { generate as uniqueId } from 'shortid';
+import { generate as uniqueId } from '@/utils/uniqueId';
 
 import { countryList } from '@/utils/countryList';
 
@@ -296,18 +296,23 @@ function FormElement({ field, feedback, setFeedback }) {
 
   const compunedComponent = {
     string: (
-      <Input autoComplete="off" maxLength={field.maxLength} defaultValue={field.defaultValue} />
+      <Input
+        autoComplete="off"
+        maxLength={field.maxLength}
+        defaultValue={field.defaultValue === 0 ? undefined : field.defaultValue}
+        placeholder={field.placeholder || ''}
+      />
     ),
     url: <Input addonBefore="http://" autoComplete="off" placeholder="www.example.com" />,
-    textarea: <TextArea rows={4} />,
+    textarea: <TextArea rows={4} placeholder={field.placeholder || ''} />,
     email: <Input autoComplete="off" placeholder="email@example.com" />,
-    number: <InputNumber style={{ width: '100%' }} />,
-    phone: <Input style={{ width: '100%' }} placeholder="+1 123 456 789" />,
+    number: <InputNumber style={{ width: '100%' }} placeholder={field.placeholder || ''} />,
+    phone: <Input style={{ width: '100%' }} placeholder="+91 98765 43210" />,
     boolean: (
       <Switch
         checkedChildren={<CheckOutlined />}
         unCheckedChildren={<CloseOutlined />}
-        defaultValue={true}
+        defaultChecked={field.defaultValue}
       />
     ),
     date: (
@@ -334,6 +339,7 @@ function FormElement({ field, feedback, setFeedback }) {
         className="moneyInput"
         min={0}
         controls={false}
+        placeholder={field.placeholder || '0.00'}
         addonAfter={money.currency_position === 'after' ? money.currency_symbol : undefined}
         addonBefore={money.currency_position === 'before' ? money.currency_symbol : undefined}
       />
@@ -372,6 +378,7 @@ function FormElement({ field, feedback, setFeedback }) {
       <Form.Item
         label={translate(field.label)}
         name={field.name}
+        initialValue={field.defaultValue === 0 ? undefined : field.defaultValue}
         rules={[
           {
             required: field.required || false,

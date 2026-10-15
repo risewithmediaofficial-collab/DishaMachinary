@@ -1,10 +1,8 @@
 <div align="center">
-    <a href="https://www.idurarapp.com/">
-  <img src="https://avatars.githubusercontent.com/u/50052356?s=200&v=4" width="128px" />
-    </a>
-    <h1>Open Source ERP / CRM Accounting Invoice Quote</h1>
+  <img src="frontend/src/style/images/disha-machinary.svg" alt="Disha Machinary" width="300px" />
+    <h1>Disha Machinary</h1>
     <p align="center">
-        <p>IDURAR ERP CRM | Simple To Use</p>
+        <p>Disha Machinary ERP / CRM</p>
     </p>
     
 
@@ -12,13 +10,9 @@
  Give a Star ⭐️ & Fork to this project ... Happy coding! 🤩`
 ```
 
-IDURAR is Open Source ERP / CRM (Invoice / Quote / Accounting ) Based on Advanced Mern Stack (Node.js / Express.js / MongoDb / React.js ) with Ant Design (AntD) and Redux
+Disha Machinary is an open-source ERP / CRM for invoices, quotes, and accounting, built with Node.js, Express, MongoDB, React, Ant Design, and Redux.
 
 </div>
-
-**🚀 Self-hosted Entreprise Version** : [https://cloud.idurarapp.com](https://cloud.idurarapp.com)
-
-
 
 ## Features :
 
@@ -34,23 +28,21 @@ Ant Design Framework(AntD) 🐜
 
 Based on Mern Stack (Node.js / Express.js / MongoDb / React.js ) 👨‍💻
 
-### May i can use IDURAR for Commercial use :
+### Can I use Disha Machinary commercially?
 
-- Yes You can use IDURAR for free for personal or Commercial use.
+- Yes. Disha Machinary is available for personal and commercial use under its license.
 
 ## Our Sponsors
 
-  <a href="https://m.do.co/c/4ead8370b905?ref=idurarapp.com">
+  <a href="https://m.do.co/c/4ead8370b905">
     <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/PoweredByDO/DO_Powered_by_Badge_blue.svg" width="201px">
   </a>
 
 #
 
-<img width="1403" alt="Open Source ERP CRM" src="https://github.com/idurar/idurar-erp-crm/assets/136928179/a6712286-7ca6-4822-8902-fb7523533ee8">
+## Disha Machinary ERP / CRM
 
-## Free Open Source ERP / CRM App
-
-IDURAR is Open "Fair-Code" Source ERP / CRM (Invoice / Inventory / Accounting / HR) Based on Mern Stack (Node.js / Express.js / MongoDb / React.js ) with Ant Design (AntD) and Redux
+Disha Machinary is an open-source ERP / CRM for invoicing, inventory, accounting, and HR.
 
 
 ## Getting started
@@ -94,11 +86,9 @@ IDURAR is Open "Fair-Code" Source ERP / CRM (Invoice / Inventory / Accounting / 
 
 Dont forget to give a ⭐️ to this project ... Happy coding!
 
-**🚀 Self-hosted Entreprise Version** : [https://cloud.idurarapp.com](https://cloud.idurarapp.com)
-
 ## License
 
-IDURAR is Free Open Source Released under the GNU Affero General Public License v3.0.
+Disha Machinary is released under the GNU Affero General Public License v3.0.
 
 ## Maintainers
 

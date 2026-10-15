@@ -102,14 +102,18 @@ export default function AutoCompleteAsync({
     }
   }, [isSuccess, result]);
   useEffect(() => {
-    // this for update Form , it's for setField
-    if (value && isUpdating.current) {
+    const valueId = value?.[outputValue] || value;
+    if (!valueId || valueId === currentValue) return;
+    setCurrentValue(valueId);
+    isUpdating.current = false;
+    if (typeof value === 'object') {
       setOptions([value]);
-      setCurrentValue(value[outputValue] || value); // set nested value or value
-      onChange(value[outputValue] || value);
-      isUpdating.current = false;
+      return;
     }
-  }, [value]);
+    request.read({ entity, id: valueId }).then((response) => {
+      if (response?.success) setOptions([response.result]);
+    });
+  }, [value, entity, outputValue, currentValue]);
 
   return (
     <Select

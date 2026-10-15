@@ -1,8 +1,7 @@
 import React from 'react';
 import dayjs from 'dayjs';
-import { Form, Input, InputNumber } from 'antd';
+import { Form, Input, InputNumber, Select } from 'antd';
 import { DatePicker } from 'antd';
-import SelectAsync from '@/components/SelectAsync';
 import { useMoney, useDate } from '@/settings';
 
 import useLanguage from '@/locale/useLanguage';
@@ -36,7 +35,7 @@ export default function PaymentForm({ maxAmount = null, isUpdateForm = false }) 
             type: 'object',
           },
         ]}
-        initialValue={dayjs().add(30, 'days')}
+        initialValue={dayjs()}
         style={{ width: '100%' }}
       >
         <DatePicker format={dateFormat} style={{ width: '100%' }} />
@@ -47,26 +46,31 @@ export default function PaymentForm({ maxAmount = null, isUpdateForm = false }) 
           min={0}
           controls={false}
           max={maxAmount}
+          placeholder="0.00"
           addonAfter={money.currency_position === 'after' ? money.currency_symbol : undefined}
           addonBefore={money.currency_position === 'before' ? money.currency_symbol : undefined}
         />
       </Form.Item>
       <Form.Item
         label={translate('payment Mode')}
-        name="paymentMode"
+        name="method"
+        initialValue="cash"
         rules={[
           {
             required: true,
           },
         ]}
       >
-        <SelectAsync
-          entity={'paymentMode'}
-          displayLabels={['name']}
-          withRedirect={true}
-          urlToRedirect="/payment/mode"
-          redirectLabel="Add Payment Mode"
-        ></SelectAsync>
+        <Select options={[
+          { value: 'cash', label: 'Cash' },
+          { value: 'upi', label: 'UPI' },
+          { value: 'bank_transfer', label: 'Bank transfer' },
+          { value: 'card', label: 'Card' },
+          { value: 'credit', label: 'Credit adjustment' },
+        ]} />
+      </Form.Item>
+      <Form.Item label="Payment Account" name="account">
+        <Input placeholder="Cash counter or bank account" />
       </Form.Item>
       <Form.Item label={translate('Reference')} name="ref">
         <Input />

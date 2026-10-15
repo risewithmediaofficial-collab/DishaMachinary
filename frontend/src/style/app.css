@@ -5,7 +5,9 @@
 
 @import './partials/auth.css';
 @import './partials/navigation.css';
+@import './partials/pos.css';
 @import './partials/header.css';
 @import './partials/sidePanel.css';
 @import './partials/collapseBox.css';
 @import './partials/erp.css';
+@import './partials/bill.css';

@@ -3,7 +3,7 @@ import { Dropdown, Table } from 'antd';
 import { request } from '@/request';
 import useFetch from '@/hooks/useFetch';
 
-import { EllipsisOutlined, EyeOutlined, EditOutlined, FilePdfOutlined } from '@ant-design/icons';
+import { EllipsisOutlined, EyeOutlined, EditOutlined, FilePdfOutlined, BarcodeOutlined } from '@ant-design/icons';
 import { useDispatch } from 'react-redux';
 import { erp } from '@/redux/erp/actions';
 import useLanguage from '@/locale/useLanguage';
@@ -25,11 +25,26 @@ export default function RecentTable({ ...props }) {
       key: 'edit',
       icon: <EditOutlined />,
     },
-    {
-      label: translate('Download'),
-      key: 'download',
-      icon: <FilePdfOutlined />,
-    },
+    ...(entity === 'invoice'
+      ? [
+          {
+            label: 'Download A4 Bill',
+            key: 'download_a4',
+            icon: <FilePdfOutlined />,
+          },
+          {
+            label: 'Download Thermal (80mm)',
+            key: 'download_thermal',
+            icon: <BarcodeOutlined />,
+          },
+        ]
+      : [
+          {
+            label: translate('Download'),
+            key: 'download',
+            icon: <FilePdfOutlined />,
+          },
+        ]),
   ];
 
   const navigate = useNavigate();
@@ -45,6 +60,9 @@ export default function RecentTable({ ...props }) {
   };
   const handleDownload = (record) => {
     window.open(`${DOWNLOAD_BASE_URL}${entity}/${entity}-${record._id}.pdf`, '_blank');
+  };
+  const handleDownloadThermal = (record) => {
+    window.open(`${DOWNLOAD_BASE_URL}${entity}/${entity}-thermal-${record._id}.pdf`, '_blank');
   };
 
   dataTableColumns = [
@@ -65,7 +83,11 @@ export default function RecentTable({ ...props }) {
                   handleEdit(record);
                   break;
                 case 'download':
+                case 'download_a4':
                   handleDownload(record);
+                  break;
+                case 'download_thermal':
+                  handleDownloadThermal(record);
                   break;
 
                 default:
@@ -100,7 +122,6 @@ export default function RecentTable({ ...props }) {
       dataSource={isSuccess && firstFiveItems()}
       pagination={false}
       loading={isLoading}
-      scroll={{ x: true }}
     />
   );
 }

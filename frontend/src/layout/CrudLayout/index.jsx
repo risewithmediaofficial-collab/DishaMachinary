@@ -40,10 +40,11 @@ const ContentBox = ({ children }) => {
     <Content
       className="whiteBox shadow layoutPadding"
       style={{
-        margin: '30px auto',
+        margin: '12px auto 20px',
         width: '100%',
         maxWidth: '100%',
         flex: 'none',
+        borderRadius: 12,
       }}
     >
       {children}

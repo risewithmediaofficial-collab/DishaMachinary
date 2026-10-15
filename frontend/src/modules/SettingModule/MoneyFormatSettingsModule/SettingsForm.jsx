@@ -1,4 +1,5 @@
 import { Form, Select, Input, Switch, InputNumber } from 'antd';
+import { useEffect } from 'react';
 
 import useLanguage from '@/locale/useLanguage';
 
@@ -6,6 +7,14 @@ import { currencyOptions } from '@/utils/currencyList';
 
 export default function SettingsForm() {
   const translate = useLanguage();
+  const form = Form.useFormInstance();
+  const currencyCode = Form.useWatch('default_currency_code', form);
+
+  useEffect(() => {
+    if (currencyCode !== 'INR' || form.getFieldValue('currency_symbol') !== '₹') {
+      form.setFieldsValue({ default_currency_code: 'INR', currency_symbol: '₹' });
+    }
+  }, [currencyCode, form]);
 
   return (
     <div>

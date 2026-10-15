@@ -5,3 +5,74 @@
 .moneyInput input {
   text-align: right;
 }
+
+.invoice-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.invoice-summary {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(150px, 190px);
+  align-items: center;
+  gap: 4px 16px;
+  width: min(100%, 430px);
+}
+
+.invoice-summary .ant-form-item {
+  margin-bottom: 8px;
+}
+
+.invoice-summary-line {
+  display: contents;
+}
+
+.invoice-summary-line > span,
+.invoice-summary-total > strong {
+  text-align: right;
+}
+
+.invoice-summary-total {
+  font-size: 18px;
+}
+
+.invoice-summary-total .ant-form-item {
+  font-weight: 700;
+}
+
+@media (min-width: 769px) {
+  .mobile-item-label {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktop-table-header {
+    display: none !important;
+  }
+
+  .mobile-item-label {
+    display: inline-block !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .invoice-item-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 10px;
+    margin-bottom: 12px;
+  }
+
+  .invoice-summary {
+    width: 100% !important;
+    grid-template-columns: minmax(100px, 1fr) minmax(130px, 1.2fr);
+    gap: 4px 10px;
+  }
+}
+

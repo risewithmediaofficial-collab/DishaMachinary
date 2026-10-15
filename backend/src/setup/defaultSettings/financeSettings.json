@@ -7,8 +7,8 @@
   },
   {
     "settingCategory": "finance_settings",
-    "settingKey": "last_quote_number",
-    "settingValue": 0,
+    "settingKey": "default_gst_rate",
+    "settingValue": 18,
     "valueType": "number"
   },
   {
@@ -27,12 +27,6 @@
     "settingCategory": "finance_settings",
     "settingKey": "invoice_prefix",
     "settingValue": "inv-",
-    "valueType": "string"
-  },
-  {
-    "settingCategory": "finance_settings",
-    "settingKey": "quote_prefix",
-    "settingValue": "qot-",
     "valueType": "string"
   },
   {

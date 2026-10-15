@@ -1,5 +1,3 @@
-const currency = require('currency.js');
-
 const useMoney = ({ settings }) => {
   const {
     currency_symbol,
@@ -11,26 +9,14 @@ const useMoney = ({ settings }) => {
   } = settings;
 
   function currencyFormat(amount) {
-    return currency(amount).dollars() > 0 || !zero_format
-      ? currency(amount, {
-          separator: thousand_sep,
-          decimal: decimal_sep,
-          symbol: '',
-          precision: cent_precision,
-        }).format()
-      : 0 +
-          currency(amount, {
-            separator: thousand_sep,
-            decimal: decimal_sep,
-            symbol: '',
-            precision: cent_precision,
-          }).format();
+    return new Intl.NumberFormat('en-IN', {
+      minimumFractionDigits: cent_precision ?? 2,
+      maximumFractionDigits: cent_precision ?? 2,
+    }).format(Number(amount) || 0);
   }
 
   function moneyFormatter({ amount = 0 }) {
-    return currency_position === 'before'
-      ? currency_symbol + ' ' + currencyFormat(amount)
-      : currencyFormat(amount) + ' ' + currency_symbol;
+    return '₹ ' + currencyFormat(amount);
   }
 
   function amountFormatter({ amount = 0 }) {
@@ -40,8 +26,8 @@ const useMoney = ({ settings }) => {
   return {
     moneyFormatter,
     amountFormatter,
-    currency_symbol,
-    currency_position,
+    currency_symbol: '₹',
+    currency_position: 'before',
     decimal_sep,
     thousand_sep,
     cent_precision,

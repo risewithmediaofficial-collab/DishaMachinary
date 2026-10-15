@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { generate: uniqueId } = require('shortid');
+const { generate: uniqueId } = require('@/utils/uniqueId');
 
 const updatePassword = async (userModel, req, res) => {
   const UserPassword = mongoose.model(userModel + 'Password');

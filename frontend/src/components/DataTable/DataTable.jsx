@@ -18,8 +18,9 @@ import { selectListItems } from '@/redux/crud/selectors';
 import useLanguage from '@/locale/useLanguage';
 import { dataForTable } from '@/utils/dataStructure';
 import { useMoney, useDate } from '@/settings';
+import { request } from '@/request';
 
-import { generate as uniqueId } from 'shortid';
+import { generate as uniqueId } from '@/utils/uniqueId';
 
 import { useCrudContext } from '@/context/crud';
 
@@ -46,6 +47,16 @@ export default function DataTable({ config, extra = [] }) {
   const translate = useLanguage();
   const { moneyFormatter } = useMoney();
   const { dateFormat } = useDate();
+  const dispatch = useDispatch();
+
+  const updateBooleanField = async (record, fieldName, value) => {
+    await request.update({
+      entity,
+      id: record._id,
+      jsonData: { [fieldName]: value },
+    });
+    dispatch(crud.list({ entity }));
+  };
 
   const items = [
     {
@@ -98,7 +109,16 @@ export default function DataTable({ config, extra = [] }) {
 
   let dispatchColumns = [];
   if (fields) {
-    dispatchColumns = [...dataForTable({ fields, translate, moneyFormatter, dateFormat })];
+    dispatchColumns = [
+      ...dataForTable({
+        fields,
+        translate,
+        moneyFormatter,
+        dateFormat,
+        interactiveBooleanFields: config.interactiveBooleanFields,
+        onBooleanChange: (record, key, value) => updateBooleanField(record, key, value),
+      }),
+    ];
   } else {
     dispatchColumns = [...dataTableColumns];
   }
@@ -108,7 +128,7 @@ export default function DataTable({ config, extra = [] }) {
     {
       title: '',
       key: 'action',
-      fixed: 'right',
+      width: 50,
       render: (_, record) => (
         <Dropdown
           menu={{
@@ -149,8 +169,6 @@ export default function DataTable({ config, extra = [] }) {
   const { result: listResult, isLoading: listIsLoading } = useSelector(selectListItems);
 
   const { pagination, items: dataSource } = listResult;
-
-  const dispatch = useDispatch();
 
   const handelDataTableLoad = useCallback((pagination) => {
     const options = { page: pagination.current || 1, items: pagination.pageSize || 10 };
@@ -207,7 +225,7 @@ export default function DataTable({ config, extra = [] }) {
         pagination={pagination}
         loading={listIsLoading}
         onChange={handelDataTableLoad}
-        scroll={{ x: true }}
+        scroll={{ x: 'max-content' }}
       />
     </>
   );

@@ -1,0 +1,725 @@
+/* ===================================================
+   Disha Machinary - Premium Bill & Thermal Slip Styles
+   =================================================== */
+
+.bill-viewer-container {
+  max-width: 960px;
+  margin: 0 auto 20px;
+}
+
+.bill-control-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bill-format-tabs {
+  display: flex;
+  width: 100%;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.bill-format-tab {
+  flex: 1 1 50%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.bill-format-tab:hover {
+  color: #0f172a;
+}
+
+.bill-format-tab.active {
+  background: #ffffff;
+  color: #1d4ed8;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.bill-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bill-actions .ant-btn {
+  flex: 1 1 180px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 4px 14px;
+  box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .bill-control-bar.a4-toolbar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+  }
+
+  .bill-control-bar.a4-toolbar .bill-format-tabs {
+    width: auto;
+    flex: none;
+  }
+
+  .bill-control-bar.a4-toolbar .bill-format-tab {
+    flex: none;
+    padding: 6px 16px;
+  }
+
+  .bill-control-bar.a4-toolbar .bill-actions {
+    width: auto;
+    flex: none;
+  }
+
+  .bill-control-bar.a4-toolbar .bill-actions .ant-btn {
+    flex: none;
+  }
+}
+
+/* ===================================================
+   A4 Bill Paper View
+   =================================================== */
+.bill-paper-a4 {
+  background: #ffffff;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 36px 40px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.07), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+  font-size: 12.5px;
+  color: #1e293b;
+  line-height: 1.45;
+}
+
+.bill-brand-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #0f172a;
+  margin-bottom: 16px;
+}
+
+.bill-brand-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.bill-emblem {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+  border-radius: 10px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  font-family: Georgia, serif;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.bill-brand-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: #0f172a;
+  text-transform: uppercase;
+}
+
+.bill-brand-tagline {
+  margin: 3px 0 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #2563eb;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.bill-brand-right {
+  text-align: right;
+}
+
+.bill-doc-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.bill-status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: 9999px;
+  margin-top: 5px;
+}
+
+.status-paid { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.status-partially { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.status-unpaid { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+.bill-meta-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.bill-meta-item-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.bill-meta-item-val {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 2px;
+}
+
+.bill-parties-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.bill-party-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #ffffff;
+}
+
+.bill-party-header {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.bill-party-name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.bill-party-line {
+  font-size: 11.5px;
+  color: #334155;
+  margin: 3px 0;
+}
+
+.bill-table-wrapper {
+  margin-bottom: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+table.bill-main-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+
+table.bill-main-table thead tr {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+table.bill-main-table th {
+  padding: 9px 10px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  border: none;
+}
+
+table.bill-main-table th.text-right { text-align: right; }
+table.bill-main-table th.text-center { text-align: center; }
+
+table.bill-main-table tbody td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #1e293b;
+  vertical-align: top;
+}
+
+table.bill-main-table tbody tr:nth-child(even) td {
+  background: #f8fafc;
+}
+
+table.bill-main-table td.text-right { text-align: right; }
+table.bill-main-table td.text-center { text-align: center; }
+
+.bill-item-name {
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 12px;
+}
+
+.bill-item-sub {
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.bill-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bill-bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.bill-words-card {
+  background: #f1f5f9;
+  border-left: 3px solid #2563eb;
+  padding: 9px 12px;
+  border-radius: 6px;
+}
+
+.bill-words-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+}
+
+.bill-words-text {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 3px;
+}
+
+.bill-bank-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #ffffff;
+}
+
+.bill-bank-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.bill-bank-line {
+  font-size: 11px;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.bill-terms-card {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.bill-calc-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bill-calc-table td {
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.bill-calc-table td.lbl {
+  color: #475569;
+  font-weight: 600;
+  text-align: right;
+}
+
+.bill-calc-table td.val {
+  color: #0f172a;
+  font-weight: 700;
+  text-align: right;
+  width: 125px;
+}
+
+.bill-grand-total-row td {
+  background: #0f172a;
+  color: #ffffff !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  padding: 10px 12px !important;
+  border-radius: 6px;
+}
+
+.bill-grand-total-row td.lbl { color: #f8fafc !important; }
+.bill-grand-total-row td.val { color: #ffffff !important; }
+
+.bill-signatory-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.bill-sign-notice {
+  font-size: 10px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.bill-sign-box {
+  text-align: center;
+  width: 210px;
+}
+
+.bill-sign-company {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 40px;
+}
+
+.bill-sign-line {
+  border-top: 1px dashed #64748b;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #475569;
+  padding-top: 5px;
+}
+
+/* ===================================================
+   Thermal Slip 80mm View
+   =================================================== */
+.bill-paper-thermal {
+  background: #ffffff;
+  width: 320px;
+  margin: 0 auto;
+  padding: 16px 14px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Courier New", monospace, sans-serif;
+  font-size: 11px;
+  color: #000000;
+  line-height: 1.35;
+}
+
+.thermal-center { text-align: center; }
+.thermal-right { text-align: right; }
+.thermal-bold { font-weight: 700; }
+
+.thermal-shop-name {
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.thermal-shop-sub {
+  font-size: 9.5px;
+  margin: 1px 0;
+}
+
+.thermal-divider-double {
+  border-top: 1px dashed #000;
+  border-bottom: 1px dashed #000;
+  height: 3px;
+  margin: 6px 0;
+}
+
+.thermal-divider-single {
+  border-top: 1px dashed #000;
+  margin: 5px 0;
+}
+
+.thermal-doc-title {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 3px 0;
+}
+
+.thermal-meta-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  margin: 1px 0;
+}
+
+.thermal-items-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  border-top: 1px dashed #000;
+  border-bottom: 1px dashed #000;
+  padding: 3px 0;
+  margin: 6px 0 4px 0;
+}
+
+.thermal-item-row {
+  margin-bottom: 5px;
+  font-size: 10px;
+}
+
+.thermal-item-name {
+  font-weight: 700;
+}
+
+.thermal-item-calc {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9.5px;
+  margin-top: 1px;
+}
+
+.thermal-item-gst-tag {
+  font-size: 8.5px;
+  color: #333;
+}
+
+.thermal-totals-area {
+  margin-top: 5px;
+  font-size: 10.5px;
+}
+
+.thermal-total-line {
+  display: flex;
+  justify-content: space-between;
+  margin: 2px 0;
+}
+
+.thermal-grand-total {
+  font-size: 13.5px;
+  font-weight: 800;
+  border-top: 1px dashed #000;
+  border-bottom: 1px dashed #000;
+  padding: 5px 0;
+  margin: 5px 0;
+}
+
+.thermal-footer {
+  margin-top: 8px;
+  font-size: 9.5px;
+  line-height: 1.35;
+}
+
+.thermal-barcode {
+  margin-top: 6px;
+  font-family: monospace;
+  letter-spacing: 2px;
+  font-size: 10px;
+}
+
+/* ===================================================
+   Mobile Bill Viewer Responsiveness
+   =================================================== */
+.bill-paper-a4-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+@media (max-width: 768px) {
+  .bill-control-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .bill-format-tabs {
+    width: 100%;
+    display: flex;
+  }
+
+  .bill-format-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .bill-actions {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .bill-actions .ant-btn {
+    width: 100%;
+    height: 38px;
+  }
+
+  .bill-paper-a4 {
+    min-width: 700px;
+    padding: 24px 20px;
+    box-shadow: none;
+  }
+
+  .bill-paper-thermal {
+    margin: 0 auto;
+    max-width: 100%;
+  }
+}
+
+/* ===================================================
+   Print Optimization - Clean Like Bill
+   =================================================== */
+@media print {
+  html, body {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Hide navigation, sidebar, header, admin chrome, buttons */
+  .navigation,
+  .ant-layout-sider,
+  .ant-layout-header,
+  .bill-control-bar,
+  .ant-page-header,
+  .ant-divider,
+  .mobile-sidebar-btn,
+  .ant-modal-header,
+  .ant-modal-footer,
+  .ant-modal-close,
+  .ant-modal-mask,
+  .ant-table-wrapper,
+  .ant-dropdown,
+  .pos-page-header,
+  header,
+  nav,
+  aside,
+  .ant-btn {
+    display: none !important;
+  }
+
+  .ant-layout,
+  .ant-layout-content,
+  .whiteBox,
+  .shadow,
+  .layoutPadding,
+  .ant-modal,
+  .ant-modal-content,
+  .ant-modal-body {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  .bill-viewer-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* A4 Print Layout */
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+
+  .printing-a4 .bill-paper-a4,
+  .bill-paper-a4 {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Thermal 80mm Print Layout */
+  .printing-thermal {
+    page: thermal;
+  }
+  @page thermal {
+    size: 80mm;
+    margin: 0mm;
+  }
+
+  .printing-thermal .bill-paper-thermal {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 3mm 2mm !important;
+    width: 76mm !important;
+    max-width: 76mm !important;
+    margin: 0 auto !important;
+  }
+}
+

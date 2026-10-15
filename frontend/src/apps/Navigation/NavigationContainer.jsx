@@ -6,15 +6,16 @@ import { useAppContext } from '@/context/appContext';
 
 import useLanguage from '@/locale/useLanguage';
 import logoIcon from '@/style/images/logo-icon.svg';
-import logoText from '@/style/images/logo-text.svg';
+import brandLogo from '@/style/images/disha-machinary.svg';
 
 import useResponsive from '@/hooks/useResponsive';
 
 import {
   SettingOutlined,
   CustomerServiceOutlined,
+  AppstoreOutlined,
+  InboxOutlined,
   ContainerOutlined,
-  FileSyncOutlined,
   DashboardOutlined,
   TagOutlined,
   TagsOutlined,
@@ -22,10 +23,9 @@ import {
   CreditCardOutlined,
   MenuOutlined,
   FileOutlined,
-  ShopOutlined,
   FilterOutlined,
-  WalletOutlined,
   ReconciliationOutlined,
+  ShoppingCartOutlined,
 } from '@ant-design/icons';
 
 const { Sider } = Layout;
@@ -36,17 +36,24 @@ export default function Navigation() {
   return isMobile ? <MobileSidebar /> : <Sidebar collapsible={false} />;
 }
 
-function Sidebar({ collapsible, isMobile = false }) {
+function Sidebar({ collapsible, isMobile = false, onItemClick }) {
   let location = useLocation();
 
   const { state: stateApp, appContextAction } = useAppContext();
   const { isNavMenuClose } = stateApp;
   const { navMenu } = appContextAction;
   const [showLogoApp, setLogoApp] = useState(isNavMenuClose);
-  const [currentPath, setCurrentPath] = useState(location.pathname.slice(1));
+  const routeKey = location.pathname.split('/').filter(Boolean)[0] || 'dashboard';
+  const selectedKey = routeKey === 'settings' ? 'generalSettings' : routeKey;
 
   const translate = useLanguage();
   const navigate = useNavigate();
+
+  const handleNavClick = (path) => {
+    if (onItemClick) {
+      onItemClick();
+    }
+  };
 
   const items = [
     {
@@ -55,9 +62,24 @@ function Sidebar({ collapsible, isMobile = false }) {
       label: <Link to={'/'}>{translate('dashboard')}</Link>,
     },
     {
+      key: 'pos',
+      icon: <ShoppingCartOutlined />,
+      label: <Link to={'/pos'}>Billing</Link>,
+    },
+    {
       key: 'customer',
       icon: <CustomerServiceOutlined />,
       label: <Link to={'/customer'}>{translate('customers')}</Link>,
+    },
+    {
+      key: 'product',
+      icon: <AppstoreOutlined />,
+      label: <Link to={'/product'}>Products</Link>,
+    },
+    {
+      key: 'inventory',
+      icon: <InboxOutlined />,
+      label: <Link to={'/inventory'}>Inventory</Link>,
     },
 
     {
@@ -66,26 +88,16 @@ function Sidebar({ collapsible, isMobile = false }) {
       label: <Link to={'/invoice'}>{translate('invoices')}</Link>,
     },
     {
-      key: 'quote',
-      icon: <FileSyncOutlined />,
-      label: <Link to={'/quote'}>{translate('quote')}</Link>,
-    },
-    {
       key: 'payment',
       icon: <CreditCardOutlined />,
       label: <Link to={'/payment'}>{translate('payments')}</Link>,
     },
+    {
+      key: 'expense',
+      icon: <CreditCardOutlined />,
+      label: <Link to={'/expense'}>Expenses</Link>,
+    },
 
-    {
-      key: 'paymentMode',
-      label: <Link to={'/payment/mode'}>{translate('payments_mode')}</Link>,
-      icon: <WalletOutlined />,
-    },
-    {
-      key: 'taxes',
-      label: <Link to={'/taxes'}>{translate('taxes')}</Link>,
-      icon: <ShopOutlined />,
-    },
     {
       key: 'generalSettings',
       label: <Link to={'/settings'}>{translate('settings')}</Link>,
@@ -99,15 +111,6 @@ function Sidebar({ collapsible, isMobile = false }) {
   ];
 
   useEffect(() => {
-    if (location)
-      if (currentPath !== location.pathname) {
-        if (location.pathname === '/') {
-          setCurrentPath('dashboard');
-        } else setCurrentPath(location.pathname.slice(1));
-      }
-  }, [location, currentPath]);
-
-  useEffect(() => {
     if (isNavMenuClose) {
       setLogoApp(isNavMenuClose);
     }
@@ -118,6 +121,7 @@ function Sidebar({ collapsible, isMobile = false }) {
     }, 200);
     return () => clearTimeout(timer);
   }, [isNavMenuClose]);
+
   const onCollapse = () => {
     navMenu.collapse();
   };
@@ -128,50 +132,54 @@ function Sidebar({ collapsible, isMobile = false }) {
       collapsed={collapsible ? isNavMenuClose : collapsible}
       onCollapse={onCollapse}
       className="navigation"
-      width={256}
+      width={isMobile ? 280 : 256}
       style={{
-        overflow: 'auto',
-        height: '100vh',
-
-        position: isMobile ? 'absolute' : 'relative',
-        bottom: '20px',
-        ...(!isMobile && {
-          // border: 'none',
-          ['left']: '20px',
-          top: '20px',
-          // borderRadius: '8px',
-        }),
+        height: isMobile ? '100%' : '100dvh',
+        minHeight: 0,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        position: isMobile ? 'relative' : 'sticky',
+        top: 0,
+        left: 0,
+        width: isMobile ? '100%' : 256,
       }}
       theme={'light'}
     >
       <div
         className="logo"
-        onClick={() => navigate('/')}
+        onClick={() => {
+          navigate('/');
+          if (onItemClick) onItemClick();
+        }}
         style={{
           cursor: 'pointer',
         }}
       >
-        <img src={logoIcon} alt="Logo" style={{ marginLeft: '-5px', height: '40px' }} />
-
-        {!showLogoApp && (
-          <img
-            src={logoText}
-            alt="Logo"
-            style={{
-              marginTop: '3px',
-              marginLeft: '10px',
-              height: '38px',
-            }}
-          />
+        {showLogoApp && !isMobile ? (
+          <img src={logoIcon} alt="Disha Machinary" style={{ marginLeft: '-5px', height: '40px' }} />
+        ) : (
+          <>
+            <img
+              src={brandLogo}
+              alt="Disha Machinary"
+              style={{
+                marginTop: '3px',
+                height: '38px',
+                maxWidth: '220px',
+              }}
+            />
+            <span className="logo-badge">Industrial ERP</span>
+          </>
         )}
       </div>
       <Menu
         items={items}
         mode="inline"
         theme={'light'}
-        selectedKeys={[currentPath]}
+        selectedKeys={[selectedKey]}
+        onClick={handleNavClick}
         style={{
-          width: 256,
+          width: '100%',
         }}
       />
     </Sider>
@@ -179,35 +187,21 @@ function Sidebar({ collapsible, isMobile = false }) {
 }
 
 function MobileSidebar() {
-  const [visible, setVisible] = useState(false);
-  const showDrawer = () => {
-    setVisible(true);
-  };
-  const onClose = () => {
-    setVisible(false);
-  };
+  const { state: stateApp, appContextAction } = useAppContext();
+  const { isMobileMenuOpen } = stateApp;
 
   return (
-    <>
-      <Button
-        type="text"
-        size="large"
-        onClick={showDrawer}
-        className="mobile-sidebar-btn"
-        style={{ ['marginLeft']: 25 }}
-      >
-        <MenuOutlined style={{ fontSize: 18 }} />
-      </Button>
-      <Drawer
-        width={250}
-        // style={{ backgroundColor: 'rgba(255, 255, 255, 1)' }}
-        placement={'left'}
-        closable={false}
-        onClose={onClose}
-        open={visible}
-      >
-        <Sidebar collapsible={false} isMobile={true} />
-      </Drawer>
-    </>
+    <Drawer
+      width={280}
+      placement="left"
+      closable={false}
+      onClose={() => appContextAction.mobileMenu.close()}
+      open={isMobileMenuOpen}
+      bodyStyle={{ padding: 0 }}
+      maskClosable={true}
+    >
+      <Sidebar collapsible={false} isMobile={true} onItemClick={() => appContextAction.mobileMenu.close()} />
+    </Drawer>
   );
 }
+

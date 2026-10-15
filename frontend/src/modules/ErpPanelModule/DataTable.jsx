@@ -1,19 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   EyeOutlined,
   EditOutlined,
   DeleteOutlined,
   FilePdfOutlined,
+  BarcodeOutlined,
+  PrinterOutlined,
+  CreditCardOutlined,
   RedoOutlined,
   PlusOutlined,
   EllipsisOutlined,
   ArrowRightOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons';
-import { Dropdown, Table, Button } from 'antd';
+import { Dropdown, Table, Button, Modal } from 'antd';
 import { PageHeader } from '@ant-design/pro-layout';
 
 import AutoCompleteAsync from '@/components/AutoCompleteAsync';
+import BillViewer from '@/components/BillTemplate';
 import { useSelector, useDispatch } from 'react-redux';
 import useLanguage from '@/locale/useLanguage';
 import { erp } from '@/redux/erp/actions';
@@ -51,6 +55,16 @@ export default function DataTable({ config, extra = [] }) {
   const { erpContextAction } = useErpContext();
   const { modal } = erpContextAction;
 
+  const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [selectedInvoiceForPrint, setSelectedInvoiceForPrint] = useState(null);
+  const [printFormat, setPrintFormat] = useState('a4');
+
+  const handlePrintBill = (record, format = 'a4') => {
+    setSelectedInvoiceForPrint(record);
+    setPrintFormat(format);
+    setPrintModalOpen(true);
+  };
+
   const items = [
     {
       label: translate('Show'),
@@ -62,11 +76,41 @@ export default function DataTable({ config, extra = [] }) {
       key: 'edit',
       icon: <EditOutlined />,
     },
-    {
-      label: translate('Download'),
-      key: 'download',
-      icon: <FilePdfOutlined />,
-    },
+    ...(entity === 'invoice'
+      ? [
+          {
+            label: 'Print A4 Bill',
+            key: 'print_a4',
+            icon: <PrinterOutlined />,
+          },
+          {
+            label: 'Print Thermal (80mm)',
+            key: 'print_thermal',
+            icon: <BarcodeOutlined />,
+          },
+          {
+            label: 'Download A4 Bill',
+            key: 'download_a4',
+            icon: <FilePdfOutlined />,
+          },
+          {
+            label: 'Download Thermal (80mm)',
+            key: 'download_thermal',
+            icon: <BarcodeOutlined />,
+          },
+          {
+            label: 'Record Payment',
+            key: 'recordPayment',
+            icon: <CreditCardOutlined />,
+          },
+        ]
+      : [
+          {
+            label: translate('Download'),
+            key: 'download',
+            icon: <FilePdfOutlined />,
+          },
+        ]),
     ...extra,
     {
       type: 'divider',
@@ -93,6 +137,9 @@ export default function DataTable({ config, extra = [] }) {
   const handleDownload = (record) => {
     window.open(`${DOWNLOAD_BASE_URL}${entity}/${entity}-${record._id}.pdf`, '_blank');
   };
+  const handleDownloadThermal = (record) => {
+    window.open(`${DOWNLOAD_BASE_URL}${entity}/${entity}-thermal-${record._id}.pdf`, '_blank');
+  };
 
   const handleDelete = (record) => {
     dispatch(erp.currentAction({ actionType: 'delete', data: record }));
@@ -109,7 +156,7 @@ export default function DataTable({ config, extra = [] }) {
     {
       title: '',
       key: 'action',
-      fixed: 'right',
+      width: 50,
       render: (_, record) => (
         <Dropdown
           menu={{
@@ -122,8 +169,18 @@ export default function DataTable({ config, extra = [] }) {
                 case 'edit':
                   handleEdit(record);
                   break;
+                case 'print_a4':
+                  handlePrintBill(record, 'a4');
+                  break;
+                case 'print_thermal':
+                  handlePrintBill(record, 'thermal');
+                  break;
                 case 'download':
+                case 'download_a4':
                   handleDownload(record);
+                  break;
+                case 'download_thermal':
+                  handleDownloadThermal(record);
                   break;
                 case 'delete':
                   handleDelete(record);
@@ -208,8 +265,33 @@ export default function DataTable({ config, extra = [] }) {
         pagination={pagination}
         loading={listIsLoading}
         onChange={handelDataTableLoad}
-        scroll={{ x: true }}
+        scroll={{ x: 'max-content' }}
       />
+
+      {entity === 'invoice' && (
+        <Modal
+          title={null}
+          open={printModalOpen}
+          onCancel={() => setPrintModalOpen(false)}
+          footer={null}
+          width={printFormat === 'thermal' ? 520 : 920}
+          destroyOnClose
+          centered
+          style={{ maxWidth: 'calc(100vw - 16px)', top: 12, paddingBottom: 16 }}
+          bodyStyle={{ maxHeight: '86vh', overflowY: 'auto', padding: '14px' }}
+        >
+          {selectedInvoiceForPrint && (
+            <div style={{ padding: '4px 0' }}>
+              <BillViewer
+                invoice={selectedInvoiceForPrint}
+                entity={entity}
+                defaultFormat={printFormat}
+                showToolbar={true}
+              />
+            </div>
+          )}
+        </Modal>
+      )}
     </>
   );
 }

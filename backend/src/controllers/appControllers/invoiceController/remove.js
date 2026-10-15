@@ -4,6 +4,17 @@ const Model = mongoose.model('Invoice');
 const ModelPayment = mongoose.model('Payment');
 
 const remove = async (req, res) => {
+  const invoice = await Model.findOne({ _id: req.params.id, removed: false });
+  if (!invoice) {
+    return res.status(404).json({ success: false, result: null, message: 'Invoice not found' });
+  }
+  if (invoice.stockDeducted || !['draft'].includes(invoice.status) || invoice.credit > 0) {
+    return res.status(409).json({
+      success: false,
+      result: null,
+      message: 'Only unpaid draft invoices can be deleted. Posted invoices require an audited reversal.',
+    });
+  }
   const deletedInvoice = await Model.findOneAndUpdate(
     {
       _id: req.params.id,

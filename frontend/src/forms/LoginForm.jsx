@@ -24,6 +24,7 @@ export default function LoginForm() {
           prefix={<UserOutlined className="site-form-item-icon" />}
           placeholder={'admin@admin.com'}
           type="email"
+          autoComplete="username"
           size="large"
         />
       </Form.Item>
@@ -39,6 +40,7 @@ export default function LoginForm() {
         <Input.Password
           prefix={<LockOutlined className="site-form-item-icon" />}
           placeholder={'admin123'}
+          autoComplete="current-password"
           size="large"
         />
       </Form.Item>
@@ -47,9 +49,6 @@ export default function LoginForm() {
         <Form.Item name="remember" valuePropName="checked" noStyle>
           <Checkbox>{translate('Remember me')}</Checkbox>
         </Form.Item>
-        <a className="login-form-forgot" href="/forgetpassword" style={{ marginLeft: '0px' }}>
-          {translate('Forgot password')}
-        </a>
       </Form.Item>
     </div>
   );

@@ -1,10 +1,11 @@
 import { Tabs, Row, Col } from 'antd';
+import useResponsive from '@/hooks/useResponsive';
 
 const SettingsLayout = ({ children }) => {
   return (
-    <Col className="gutter-row" order={0}>
-      <div className="whiteBox shadow" style={{ minHeight: '480px' }}>
-        <div className="pad40">{children}</div>
+    <Col className="gutter-row" order={0} xs={24} md={17} lg={18}>
+      <div className="whiteBox shadow" style={{ minHeight: '360px', borderRadius: 12 }}>
+        <div style={{ padding: '20px 16px' }}>{children}</div>
       </div>
     </Col>
   );
@@ -17,14 +18,16 @@ const TopCard = ({ pageTitle }) => {
       style={{
         color: '#595959',
         fontSize: 13,
-        height: '70px',
+        height: '60px',
         minHeight: 'auto',
-        marginBottom: '24px',
+        marginBottom: '16px',
+        borderRadius: 12,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
-      <div className="pad20 strong" style={{ textAlign: 'center', justifyContent: 'center' }}>
-        <h2 style={{ color: '#22075e', marginBottom: 0, marginTop: 0 }}>{pageTitle}</h2>
-      </div>
+      <h2 style={{ color: '#0f172a', marginBottom: 0, marginTop: 0, fontSize: 18, fontWeight: 800 }}>{pageTitle}</h2>
     </div>
   );
 };
@@ -40,8 +43,8 @@ const RightMenu = ({ children, pageTitle }) => {
       order={1}
     >
       <TopCard pageTitle={pageTitle} />
-      <div className="whiteBox shadow">
-        <div className="pad25" style={{ width: '100%', paddingBottom: 0 }}>
+      <div className="whiteBox shadow" style={{ borderRadius: 12 }}>
+        <div style={{ width: '100%', padding: '16px 12px' }}>
           {children}
         </div>
       </div>
@@ -50,12 +53,14 @@ const RightMenu = ({ children, pageTitle }) => {
 };
 
 export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
+  const { isMobile } = useResponsive();
+
   const items = content.map((item, index) => {
     return {
       key: item.key ? item.key : index + '_' + item.label.replace(/ /g, '_'),
       label: (
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          {item.icon} <span style={{ paddingRight: 30 }}>{item.label}</span>
+          {item.icon} <span style={{ paddingRight: 16 }}>{item.label}</span>
         </div>
       ),
       children: <SettingsLayout>{item.children}</SettingsLayout>,
@@ -69,14 +74,15 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
   );
 
   return (
-    <Row gutter={[24, 24]} className="tabContent">
+    <div className="tabContent" style={{ width: '100%' }}>
       <Tabs
-        tabPosition="right"
+        tabPosition={isMobile ? 'top' : 'right'}
         defaultActiveKey={defaultActiveKey}
         hideAdd={true}
         items={items}
         renderTabBar={renderTabBar}
       />
-    </Row>
+    </div>
   );
 }
+
