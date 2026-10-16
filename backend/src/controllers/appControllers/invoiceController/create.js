@@ -103,7 +103,9 @@ const create = async (req, res) => {
     {
       new: true,
     }
-  ).exec();
+  )
+    .populate('client')
+    .exec();
   await mongoose.model('AuditLog').create({
     user: req.admin._id,
     action: result.stockDeducted ? 'invoice.post' : 'invoice.create_draft',

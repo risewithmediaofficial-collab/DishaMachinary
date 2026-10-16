@@ -36,18 +36,20 @@ import dayjs from 'dayjs';
 import AutoCompleteAsync from '@/components/AutoCompleteAsync';
 import { request } from '@/request';
 import { useMoney } from '@/settings';
-import { selectFinanceSettings } from '@/redux/settings/selectors';
+import { selectFinanceSettings, selectCompanySettings } from '@/redux/settings/selectors';
 import { useSelector } from 'react-redux';
-import { DOWNLOAD_BASE_URL } from '@/config/serverApiConfig';
+import { printInvoice } from '@/utils/printBill';
 
 export default function Pos() {
   const navigate = useNavigate();
   const { currency_code } = useMoney();
   const { last_invoice_number } = useSelector(selectFinanceSettings);
+  const companySettings = useSelector(selectCompanySettings) || {};
   const [form] = Form.useForm();
   const [customerForm] = Form.useForm();
   const [products, setProducts] = useState([]);
   const [productSearch, setProductSearch] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [cart, setCart] = useState([]);
   const [gstEnabled, setGstEnabled] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -199,6 +201,7 @@ export default function Pos() {
     });
     setCreatingCustomer(false);
     if (!response?.success) return;
+    setSelectedCustomer(response.result);
     form.setFieldsValue({ client: response.result._id });
     customerForm.resetFields();
     setCustomerModalOpen(false);
@@ -207,6 +210,7 @@ export default function Pos() {
 
   const resetBillingState = () => {
     setCart([]);
+    setSelectedCustomer(null);
     form.resetFields();
     setLastCreatedInvoice(null);
     setBillSuccessModalOpen(false);
@@ -249,9 +253,16 @@ export default function Pos() {
     }
 
     const invoice = invoiceResponse.result;
+    const invoiceToPrint = {
+      ...invoice,
+      client:
+        invoice.client && typeof invoice.client === 'object' && invoice.client?.name
+          ? invoice.client
+          : selectedCustomer || { name: 'Walk-in Customer' },
+    };
     setLoading(false);
     message.success(`Bill #${invoice.number}/${invoice.year} created and recorded in payments.`);
-    setLastCreatedInvoice(invoice);
+    setLastCreatedInvoice(invoiceToPrint);
     setBillSuccessModalOpen(true);
   };
 
@@ -589,17 +600,16 @@ export default function Pos() {
               <Button
                 type="primary"
                 size="large"
-                icon={<BarcodeOutlined />}
+                icon={<PrinterOutlined />}
                 style={{
                   background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
-                  height: 44,
-                  fontSize: 14,
+                  height: 48,
+                  fontSize: 15,
+                  fontWeight: 700,
+                  boxShadow: '0 4px 14px rgba(15, 23, 42, 0.25)',
                 }}
                 onClick={() => {
-                  window.open(
-                    `${DOWNLOAD_BASE_URL}invoice/invoice-thermal-${lastCreatedInvoice._id}.pdf`,
-                    '_blank'
-                  );
+                  printInvoice(lastCreatedInvoice, 'thermal', companySettings);
                 }}
               >
                 Print Thermal Slip (80mm)
@@ -607,16 +617,13 @@ export default function Pos() {
 
               <Button
                 size="large"
-                icon={<FilePdfOutlined />}
-                style={{ height: 42, fontSize: 14 }}
+                icon={<PrinterOutlined />}
+                style={{ height: 44, fontSize: 14.5, fontWeight: 600, borderColor: '#cbd5e1' }}
                 onClick={() => {
-                  window.open(
-                    `${DOWNLOAD_BASE_URL}invoice/invoice-${lastCreatedInvoice._id}.pdf`,
-                    '_blank'
-                  );
+                  printInvoice(lastCreatedInvoice, 'a4', companySettings);
                 }}
               >
-                Download / Print A4 Tax Bill
+                Print A4 Tax Invoice
               </Button>
 
               <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>

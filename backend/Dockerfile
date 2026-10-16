@@ -45,8 +45,8 @@ WORKDIR /app
 # Copy dependency manifests
 COPY package*.json ./
 
-# Install production dependencies
-RUN npm ci --omit=dev
+# Install production dependencies and download Chrome browser for Puppeteer PDF rendering
+RUN npm ci --omit=dev && npx puppeteer browsers install chrome
 
 # Copy application source code
 COPY . .
