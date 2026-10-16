@@ -36,6 +36,7 @@ const routerApp = (entity, controller) => {
   router.route(`/${entity}/read/:id`).get(catchErrors(controller['read']));
   router.route(`/${entity}/update/:id`).patch(updatePermission, catchErrors(controller['update']));
   router.route(`/${entity}/delete/:id`).delete(deletePermission, catchErrors(controller['delete']));
+  router.route(`/${entity}/deleteMany`).post(deletePermission, catchErrors(controller['deleteMany']));
   router.route(`/${entity}/search`).get(catchErrors(controller['search']));
   router.route(`/${entity}/list`).get(catchErrors(controller['list']));
   router.route(`/${entity}/listAll`).get(catchErrors(controller['listAll']));

@@ -116,6 +116,20 @@ const request = {
     }
   },
 
+  deleteMany: async ({ entity, ids }) => {
+    try {
+      includeToken();
+      const response = await axios.post(entity + '/deleteMany', { ids });
+      successHandler(response, {
+        notifyOnSuccess: true,
+        notifyOnFailed: true,
+      });
+      return response.data;
+    } catch (error) {
+      return errorHandler(error);
+    }
+  },
+
   filter: async ({ entity, options = {} }) => {
     try {
       includeToken();

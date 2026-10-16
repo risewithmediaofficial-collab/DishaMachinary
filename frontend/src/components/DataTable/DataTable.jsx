@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   EyeOutlined,
@@ -8,7 +8,7 @@ import {
   ArrowRightOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons';
-import { Table, Button, Input, Space, Tooltip } from 'antd';
+import { Table, Button, Input, Space, Tooltip, Popconfirm, message } from 'antd';
 import { PageHeader } from '@ant-design/pro-layout';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -208,6 +208,51 @@ export default function DataTable({ config, extra = [] }) {
     dispatch(crud.list({ entity }));
   };
 
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [batchDeleting, setBatchDeleting] = useState(false);
+
+  const handleBatchDelete = async () => {
+    if (!selectedRowKeys.length) return;
+    setBatchDeleting(true);
+    try {
+      const response = await request.deleteMany({ entity, ids: selectedRowKeys });
+      if (!response?.success) {
+        // Fallback: delete sequentially / in parallel
+        const results = await Promise.allSettled(
+          selectedRowKeys.map((id) => request.delete({ entity, id }))
+        );
+        const successCount = results.filter(
+          (r) => r.status === 'fulfilled' && r.value?.success
+        ).length;
+        if (successCount > 0) {
+          message.success(
+            `Successfully deleted ${successCount} ${successCount === 1 ? 'record' : 'records'}`
+          );
+        } else {
+          message.error('Failed to delete selected records');
+        }
+      }
+      setSelectedRowKeys([]);
+      dispatch(crud.list({ entity }));
+    } catch (err) {
+      message.error(err?.message || 'Failed to delete selected records');
+    } finally {
+      setBatchDeleting(false);
+    }
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (keys) => {
+      setSelectedRowKeys(keys);
+    },
+    selections: [
+      Table.SELECTION_ALL,
+      Table.SELECTION_INVERT,
+      Table.SELECTION_NONE,
+    ],
+  };
+
   useEffect(() => {
     const controller = new AbortController();
     dispatcher();
@@ -241,7 +286,62 @@ export default function DataTable({ config, extra = [] }) {
         }}
       ></PageHeader>
 
+      {selectedRowKeys.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 16px',
+            marginBottom: 14,
+            borderRadius: 8,
+            background: '#fef2f2',
+            border: '1px solid #fecaca',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+          }}
+        >
+          <Space size={12}>
+            <span style={{ fontWeight: 700, color: '#991b1b', fontSize: 13.5 }}>
+              ✓ {selectedRowKeys.length} {selectedRowKeys.length === 1 ? 'record' : 'records'} selected
+            </span>
+            <Button
+              size="small"
+              type="link"
+              onClick={() => setSelectedRowKeys([])}
+              style={{ padding: 0, height: 'auto', color: '#64748b', fontSize: 12.5 }}
+            >
+              Clear Selection
+            </Button>
+          </Space>
+
+          <Popconfirm
+            title={`Delete ${selectedRowKeys.length} selected ${selectedRowKeys.length === 1 ? 'record' : 'records'}?`}
+            description="Are you sure you want to delete these records? This action cannot be undone."
+            onConfirm={handleBatchDelete}
+            okText="Yes, Delete All"
+            cancelText="Cancel"
+            okButtonProps={{ danger: true, loading: batchDeleting }}
+          >
+            <Button
+              type="primary"
+              danger
+              size="middle"
+              icon={<DeleteOutlined />}
+              loading={batchDeleting}
+              style={{
+                fontWeight: 700,
+                borderRadius: 6,
+                boxShadow: '0 2px 6px rgba(220, 38, 38, 0.25)',
+              }}
+            >
+              Delete Selected ({selectedRowKeys.length})
+            </Button>
+          </Popconfirm>
+        </div>
+      )}
+
       <Table
+        rowSelection={rowSelection}
         columns={dataTableColumns}
         rowKey={(item) => item._id}
         dataSource={dataSource}
@@ -250,7 +350,18 @@ export default function DataTable({ config, extra = [] }) {
         onChange={handelDataTableLoad}
         scroll={{ x: 'max-content', y: 'calc(100vh - 290px)' }}
         onRow={(record) => ({
-          onClick: () => handleRead(record),
+          onClick: (e) => {
+            if (
+              e.target.closest('.ant-table-selection-column') ||
+              e.target.closest('.ant-checkbox-wrapper') ||
+              e.target.closest('.ant-checkbox') ||
+              e.target.closest('button') ||
+              e.target.closest('.ant-btn')
+            ) {
+              return;
+            }
+            handleRead(record);
+          },
           style: { cursor: 'pointer' },
         })}
       />

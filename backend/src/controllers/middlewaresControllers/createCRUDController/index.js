@@ -6,6 +6,7 @@ const create = require('./create');
 const read = require('./read');
 const update = require('./update');
 const remove = require('./remove');
+const deleteMany = require('./deleteMany');
 const search = require('./search');
 const filter = require('./filter');
 const summary = require('./summary');
@@ -23,6 +24,7 @@ const createCRUDController = (modelName) => {
     read: (req, res) => read(Model, req, res),
     update: (req, res) => update(Model, req, res),
     delete: (req, res) => remove(Model, req, res),
+    deleteMany: (req, res) => deleteMany(Model, req, res),
     list: (req, res) => paginatedList(Model, req, res),
     listAll: (req, res) => listAll(Model, req, res),
     search: (req, res) => search(Model, req, res),
