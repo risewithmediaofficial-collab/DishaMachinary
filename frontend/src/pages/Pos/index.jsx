@@ -72,7 +72,22 @@ export default function Pos() {
   }, []);
 
   const subTotal = useMemo(
-    () => Number(cart.reduce((sum, line) => sum + line.quantity * line.product.sellingPrice, 0).toFixed(2)),
+    () =>
+      Number(
+        cart
+          .reduce(
+            (sum, line) =>
+              sum +
+              (Number(line.quantity) || 0) *
+                (line.product.sellingPrice !== null &&
+                line.product.sellingPrice !== undefined &&
+                line.product.sellingPrice !== ''
+                  ? Number(line.product.sellingPrice)
+                  : 0),
+            0
+          )
+          .toFixed(2)
+      ),
     [cart]
   );
 
@@ -103,7 +118,15 @@ export default function Pos() {
             cart
               .reduce(
                 (sum, line) =>
-                  sum + (line.quantity * line.product.sellingPrice * (line.product.gstRate || 0)) / 100,
+                  sum +
+                  ((Number(line.quantity) || 0) *
+                    (line.product.sellingPrice !== null &&
+                    line.product.sellingPrice !== undefined &&
+                    line.product.sellingPrice !== ''
+                      ? Number(line.product.sellingPrice)
+                      : 0) *
+                    (line.product.gstRate || 0)) /
+                    100,
                 0
               )
               .toFixed(2)
@@ -152,6 +175,14 @@ export default function Pos() {
       message.error(`${product.name} is out of stock.`);
       return;
     }
+    const initialPrice =
+      product.sellingPrice !== null &&
+      product.sellingPrice !== undefined &&
+      product.sellingPrice !== '' &&
+      Number(product.sellingPrice) > 0
+        ? Number(product.sellingPrice)
+        : null;
+
     setCart((current) => {
       const existing = current.find((line) => line.product._id === product._id);
       if (existing) {
@@ -163,7 +194,16 @@ export default function Pos() {
           line.product._id === product._id ? { ...line, quantity: line.quantity + 1 } : line
         );
       }
-      return [...current, { product, quantity: 1 }];
+      return [
+        ...current,
+        {
+          product: {
+            ...product,
+            sellingPrice: initialPrice,
+          },
+          quantity: 1,
+        },
+      ];
     });
   };
 
@@ -201,13 +241,26 @@ export default function Pos() {
   };
 
   const updateQuantity = (productId, quantity) => {
-    if (!quantity) return;
     setCart((current) =>
-      current.map((line) => (line.product._id === productId ? { ...line, quantity } : line))
+      current.map((line) =>
+        line.product._id === productId
+          ? { ...line, quantity: quantity !== null && quantity !== undefined && quantity !== '' ? quantity : null }
+          : line
+      )
     );
   };
 
   const updatePrice = (productId, price) => {
+    if (price === null || price === undefined || price === '' || Number(price) <= 0) {
+      setCart((current) =>
+        current.map((line) =>
+          line.product._id === productId
+            ? { ...line, product: { ...line.product, sellingPrice: null } }
+            : line
+        )
+      );
+      return;
+    }
     const numPrice = Number(price);
     if (isNaN(numPrice) || numPrice < 0) return;
     setCart((current) =>
@@ -279,7 +332,12 @@ export default function Pos() {
           itemName: product.name,
           description: product.description || '',
           quantity,
-          price: product.sellingPrice,
+          price:
+            product.sellingPrice !== null &&
+            product.sellingPrice !== undefined &&
+            product.sellingPrice !== ''
+              ? Number(product.sellingPrice)
+              : 0,
           gstRate: product.gstRate || 0,
         })),
       },
@@ -406,7 +464,12 @@ export default function Pos() {
                     <InputNumber
                       min={0}
                       precision={2}
-                      value={value}
+                      placeholder=""
+                      value={
+                        value !== null && value !== undefined && value !== '' && Number(value) > 0
+                          ? Number(value)
+                          : null
+                      }
                       onChange={(price) => updatePrice(product._id, price)}
                       style={{ width: 105 }}
                     />
@@ -430,7 +493,7 @@ export default function Pos() {
                           ? Number(product.stockQuantity || 0) - Number(product.reservedQuantity || 0)
                           : undefined
                       }
-                      value={value}
+                      value={value !== null && value !== undefined && value !== '' && Number(value) > 0 ? value : null}
                       onChange={(quantity) => updateQuantity(product._id, quantity)}
                       style={{ width: 68 }}
                     />
@@ -439,11 +502,20 @@ export default function Pos() {
                 {
                   title: 'Line Total',
                   align: 'right',
-                  render: (_, product) => (
-                    <strong style={{ color: '#0f172a' }}>
-                      ₹ {(product.quantity * product.sellingPrice).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                    </strong>
-                  ),
+                  render: (_, product) => {
+                    const priceVal =
+                      product.sellingPrice !== null &&
+                      product.sellingPrice !== undefined &&
+                      product.sellingPrice !== ''
+                        ? Number(product.sellingPrice)
+                        : 0;
+                    const qtyVal = Number(product.quantity) || 0;
+                    return (
+                      <strong style={{ color: '#0f172a' }}>
+                        ₹ {(qtyVal * priceVal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      </strong>
+                    );
+                  },
                 },
                 {
                   title: '',
