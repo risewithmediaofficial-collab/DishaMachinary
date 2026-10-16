@@ -25,7 +25,10 @@ const schema = Joi.object({
   gstEnabled: Joi.boolean().default(false),
   taxRate: Joi.number().min(0).max(100).default(0),
   discount: Joi.number().min(0).default(0),
-  currency: Joi.string().valid('INR').default('INR'),
-});
+  currency: Joi.string().allow('').default('INR'),
+  paidNow: Joi.number().min(0).optional(),
+  paidAmount: Joi.number().min(0).optional(),
+  paymentMethod: Joi.string().allow('').optional(),
+}).unknown(true);
 
 module.exports = schema;

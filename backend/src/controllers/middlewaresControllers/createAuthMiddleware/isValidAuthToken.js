@@ -8,8 +8,11 @@ const isValidAuthToken = async (req, res, next, { userModel, jwtSecret = 'JWT_SE
     const User = mongoose.model(userModel);
 
     // const token = req.cookies[`token_${cloud._id}`];
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Extract the token
+    const authHeader = req.headers['authorization'] || req.headers['token'] || req.headers['x-auth-token'];
+    let token = null;
+    if (authHeader) {
+      token = typeof authHeader === 'string' && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+    }
 
     if (!token)
       return res.status(401).json({
@@ -19,7 +22,17 @@ const isValidAuthToken = async (req, res, next, { userModel, jwtSecret = 'JWT_SE
         jwtExpired: true,
       });
 
-    const verified = jwt.verify(token, process.env[jwtSecret]);
+    let verified;
+    try {
+      verified = jwt.verify(token, process.env[jwtSecret]);
+    } catch (jwtErr) {
+      return res.status(401).json({
+        success: false,
+        result: null,
+        message: 'Token verification failed, authorization denied.',
+        jwtExpired: true,
+      });
+    }
 
     if (!verified)
       return res.status(401).json({
@@ -38,17 +51,17 @@ const isValidAuthToken = async (req, res, next, { userModel, jwtSecret = 'JWT_SE
       return res.status(401).json({
         success: false,
         result: null,
-        message: "User doens't Exist, authorization denied.",
+        message: "User doesn't exist, authorization denied.",
         jwtExpired: true,
       });
 
-    const { loggedSessions } = userPassword;
+    const { loggedSessions } = userPassword || {};
 
-    if (!loggedSessions.includes(token))
+    if (!loggedSessions || !loggedSessions.includes(token))
       return res.status(401).json({
         success: false,
         result: null,
-        message: 'User is already logout try to login, authorization denied.',
+        message: 'Session has ended or expired, please login again.',
         jwtExpired: true,
       });
     else {
@@ -57,7 +70,7 @@ const isValidAuthToken = async (req, res, next, { userModel, jwtSecret = 'JWT_SE
       next();
     }
   } catch (error) {
-    return res.status(500).json({
+    return res.status(401).json({
       success: false,
       result: null,
       message: error.message,

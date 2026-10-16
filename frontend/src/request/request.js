@@ -15,12 +15,15 @@ function findKeyByPrefix(object, prefix) {
 
 function includeToken() {
   axios.defaults.baseURL = API_BASE_URL;
-
   axios.defaults.withCredentials = true;
   const auth = storePersist.get('auth');
 
-  if (auth) {
+  if (auth && auth.current && auth.current.token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${auth.current.token}`;
+    axios.defaults.headers.common['token'] = auth.current.token;
+  } else {
+    delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.common['token'];
   }
 }
 

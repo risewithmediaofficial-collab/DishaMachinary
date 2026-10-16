@@ -56,7 +56,6 @@ const routerApp = (entity, controller) => {
 
   if (entity === 'product') {
     router.route('/product/adjust-stock').post(requirePermission('inventory.adjust'), catchErrors(controller['adjustStock']));
-    router.route('/product/set-all-stock-50').post(catchErrors(controller['setAllStock50']));
     router.route('/product/:id/stock-movements').get(catchErrors(controller['stockMovements']));
   }
 };

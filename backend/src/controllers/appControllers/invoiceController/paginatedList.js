@@ -2,28 +2,34 @@ const mongoose = require('mongoose');
 
 const Model = mongoose.model('Invoice');
 
+const escapeRegex = (str) => String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const paginatedList = async (req, res) => {
-  const page = req.query.page || 1;
+  const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.items) || 10;
   const skip = page * limit - limit;
 
-  const { sortBy = 'enabled', sortValue = -1, filter, equal } = req.query;
+  const { sortBy = 'date', sortValue = -1, filter, equal } = req.query;
 
   const fieldsArray = req.query.fields ? req.query.fields.split(',') : [];
+  const q = req.query.q !== undefined ? String(req.query.q).trim() : '';
 
-  let fields;
-
-  fields = fieldsArray.length === 0 ? {} : { $or: [] };
-
-  for (const field of fieldsArray) {
-    fields.$or.push({ [field]: { $regex: new RegExp(req.query.q, 'i') } });
+  let fields = {};
+  if (fieldsArray.length > 0 && q) {
+    const escaped = escapeRegex(q);
+    fields = {
+      $or: fieldsArray.map((field) => ({
+        [field]: { $regex: new RegExp(escaped, 'i') },
+      })),
+    };
   }
 
-  //  Query the database for a list of all results
+  const filterCondition = filter && equal !== undefined ? { [filter]: equal } : {};
+
+  // Query the database for a list of all results
   const resultsPromise = Model.find({
     removed: false,
-
-    [filter]: equal,
+    ...filterCondition,
     ...fields,
   })
     .skip(skip)
@@ -35,33 +41,25 @@ const paginatedList = async (req, res) => {
   // Counting the total documents
   const countPromise = Model.countDocuments({
     removed: false,
-
-    [filter]: equal,
+    ...filterCondition,
     ...fields,
   });
 
   // Resolving both promises
   const [result, count] = await Promise.all([resultsPromise, countPromise]);
   // Calculating total pages
-  const pages = Math.ceil(count / limit);
+  const pages = Math.ceil(count / limit) || 1;
 
   // Getting Pagination Object
   const pagination = { page, pages, count };
-  if (count > 0) {
-    return res.status(200).json({
-      success: true,
-      result,
-      pagination,
-      message: 'Successfully found all documents',
-    });
-  } else {
-    return res.status(203).json({
-      success: true,
-      result: [],
-      pagination,
-      message: 'Collection is Empty',
-    });
-  }
+
+  return res.status(200).json({
+    success: true,
+    result: result || [],
+    pagination,
+    message: count > 0 ? 'Successfully found all documents' : 'Collection is Empty',
+  });
 };
 
 module.exports = paginatedList;
+

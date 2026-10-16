@@ -19,10 +19,11 @@ function modelController() {
     if (phone) {
       const duplicate = await Model.findOne({ phone, removed: false }).select('_id name phone').lean();
       if (duplicate) {
-        return res.status(409).json({
-          success: false,
+        return res.status(200).json({
+          success: true,
           result: duplicate,
-          message: `A customer with mobile ${phone} already exists`,
+          isExisting: true,
+          message: `Customer "${duplicate.name}" already registered with mobile ${phone}`,
         });
       }
     }

@@ -127,51 +127,5 @@ methods.stockMovements = async (req, res) => {
   return res.status(200).json({ success: true, result });
 };
 
-methods.setAllStock50 = async (req, res) => {
-  try {
-    const products = await Product.find({ removed: false });
-    let count = 0;
-    for (const prod of products) {
-      if (prod.itemType === 'service') continue;
-      const previousStock = Number(prod.stockQuantity || 0);
-      prod.stockQuantity = 50;
-      prod.trackInventory = true;
-      prod.enabled = true;
-      await prod.save();
-      count++;
-
-      if (previousStock !== 50) {
-        try {
-          await StockMovement.create({
-            product: prod._id,
-            productName: prod.name,
-            sku: prod.sku,
-            type: 'adjustment',
-            quantity: Math.abs(50 - previousStock),
-            delta: 50 - previousStock,
-            stockBefore: previousStock,
-            stockAfter: 50,
-            referenceType: 'manual',
-            note: 'All stock set to 50 for POS billing',
-            reason: 'Set 50 stock for billing',
-            createdBy: req.admin?._id || prod.createdBy,
-          });
-        } catch (e) {}
-      }
-    }
-    return res.status(200).json({
-      success: true,
-      result: { updated: count },
-      message: `Successfully set stock to 50 for all ${count} products.`,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      result: null,
-      message: error.message,
-    });
-  }
-};
-
 module.exports = methods;
 

@@ -38,24 +38,31 @@ const errorHandler = (error) => {
     };
   }
 
-  if (response && response.data && response.data.jwtExpired) {
-    const result = window.localStorage.getItem('auth');
-    const jsonFile = window.localStorage.getItem('isLogout');
-    const { isLogout } = (jsonFile && JSON.parse(jsonFile)) || false;
+  if (response && (response.status === 401 || response.data?.jwtExpired)) {
     window.localStorage.removeItem('auth');
     window.localStorage.removeItem('isLogout');
-    if (result || isLogout) {
+    if (window.location.pathname !== '/login' && window.location.pathname !== '/logout') {
       window.location.href = '/logout';
     }
+    return {
+      success: false,
+      result: null,
+      message: response.data?.message || 'Session expired. Please log in again.',
+    };
   }
 
   if (response && response.status) {
     const message = response.data && response.data.message;
-
     const errorText = message || codeMessage[response.status];
-    const { status, error } = response;
+    const { status } = response;
+
+    // Do not show error notifications for successful 2xx status codes (200, 201, 202, 203)
+    if (status >= 200 && status < 300) {
+      return response.data;
+    }
+
     notification.config({
-      duration: 20,
+      duration: 10,
       maxCount: 2,
     });
     notification.error({
@@ -63,11 +70,7 @@ const errorHandler = (error) => {
       description: errorText,
     });
 
-    if (response?.data?.error?.name === 'JsonWebTokenError') {
-      window.localStorage.removeItem('auth');
-      window.localStorage.removeItem('isLogout');
-      window.location.href = '/logout';
-    } else return response.data;
+    return response.data;
   } else {
     notification.config({
       duration: 15,

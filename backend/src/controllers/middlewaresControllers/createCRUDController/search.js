@@ -1,48 +1,29 @@
+const escapeRegex = (str) => String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const search = async (Model, req, res) => {
-  // console.log(req.query.fields)
-  // if (req.query.q === undefined || req.query.q.trim() === '') {
-  //   return res
-  //     .status(202)
-  //     .json({
-  //       success: false,
-  //       result: [],
-  //       message: 'No document found by this request',
-  //     })
-  //     .end();
-  // }
   const fieldsArray = req.query.fields ? req.query.fields.split(',') : ['name'];
+  const q = req.query.q !== undefined ? String(req.query.q).trim() : '';
 
   const fields = { $or: [] };
 
-  for (const field of fieldsArray) {
-    fields.$or.push({ [field]: { $regex: new RegExp(req.query.q, 'i') } });
+  if (q) {
+    const escaped = escapeRegex(q);
+    for (const field of fieldsArray) {
+      fields.$or.push({ [field]: { $regex: new RegExp(escaped, 'i') } });
+    }
   }
-  // console.log(fields)
 
-  let results = await Model.find({
-    ...fields,
-  })
+  const queryCondition = fields.$or.length > 0 ? { ...fields, removed: false } : { removed: false };
 
-    .where('removed', false)
+  const results = await Model.find(queryCondition)
     .limit(20)
     .exec();
 
-  if (results.length >= 1) {
-    return res.status(200).json({
-      success: true,
-      result: results,
-      message: 'Successfully found all documents',
-    });
-  } else {
-    return res
-      .status(202)
-      .json({
-        success: false,
-        result: [],
-        message: 'No document found by this request',
-      })
-      .end();
-  }
+  return res.status(200).json({
+    success: true,
+    result: results || [],
+    message: results && results.length >= 1 ? 'Successfully found all documents' : 'No document found by this request',
+  });
 };
 
 module.exports = search;
