@@ -1,7 +1,4 @@
-// import { generate as uniqueId } from 'shortid';
-// import { SyncOutlined } from '@ant-design/icons';
-import { Divider } from 'antd';
-import { PageHeader } from '@ant-design/pro-layout';
+import { Tag } from 'antd';
 import UpdateSettingForm from './UpdateSettingForm';
 
 export default function UpdateSettingModule({
@@ -11,21 +8,42 @@ export default function UpdateSettingModule({
   uploadSettingKey = null,
 }) {
   return (
-    <>
-      <PageHeader
-        title={config.SETTINGS_TITLE}
-        ghost={false}
-        // extra={[
-        //   <Button key={`${uniqueId()}`} type="primary" disabled icon={<SyncOutlined />}>
-        //     Update
-        //   </Button>,
-        // ]}
+    <div style={{ width: '100%' }}>
+      {/* SECTION HEADER */}
+      <div
         style={{
-          padding: '20px 0px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: 12,
+          paddingBottom: 20,
+          marginBottom: 24,
+          borderBottom: '1px solid #f1f5f9',
         }}
-      ></PageHeader>
+      >
+        <div>
+          <h2
+            style={{
+              fontSize: 20,
+              fontWeight: 800,
+              color: '#0f172a',
+              margin: '0 0 4px 0',
+              letterSpacing: '-0.01em',
+            }}
+          >
+            {config.SETTINGS_TITLE}
+          </h2>
+          <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>
+            Review and configure settings for this section
+          </p>
+        </div>
 
-      <Divider></Divider>
+        <Tag color="blue" style={{ fontWeight: 700, borderRadius: 12, padding: '3px 10px' }}>
+          Config
+        </Tag>
+      </div>
+
       <UpdateSettingForm
         config={config}
         withUpload={withUpload}
@@ -33,6 +51,6 @@ export default function UpdateSettingModule({
       >
         {children}
       </UpdateSettingForm>
-    </>
+    </div>
   );
 }

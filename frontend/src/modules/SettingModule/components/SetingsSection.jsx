@@ -1,26 +1,31 @@
-import { Col, Divider, Row, Typography } from 'antd';
-import { useSelector } from 'react-redux';
-
-const { Title, Text } = Typography;
-
 export default function SetingsSection({ title, description, children }) {
   return (
-    <Row gutter={[24, 24]}>
-      <Col span={24}>
-        <Title level={4}>{title}</Title>
-        <Text type="secondary">{description}</Text>
-      </Col>
+    <div style={{ width: '100%' }}>
+      {(title || description) && (
+        <div style={{ marginBottom: 20 }}>
+          {title && (
+            <h3
+              style={{
+                fontSize: 16,
+                fontWeight: 700,
+                color: '#1e293b',
+                margin: '0 0 4px 0',
+              }}
+            >
+              {title}
+            </h3>
+          )}
+          {description && (
+            <p style={{ margin: 0, color: '#64748b', fontSize: 13 }}>
+              {description}
+            </p>
+          )}
+        </div>
+      )}
 
-      <Col
-        xl={{ span: 18, offset: 2 }}
-        lg={{ span: 24 }}
-        md={{ span: 24 }}
-        sm={{ span: 24 }}
-        xs={{ span: 24 }}
-      >
+      <div style={{ maxWidth: 640 }}>
         {children}
-      </Col>
-      <Divider />
-    </Row>
+      </div>
+    </div>
   );
 }

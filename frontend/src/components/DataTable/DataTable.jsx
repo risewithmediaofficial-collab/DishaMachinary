@@ -4,12 +4,11 @@ import {
   EyeOutlined,
   EditOutlined,
   DeleteOutlined,
-  EllipsisOutlined,
   RedoOutlined,
   ArrowRightOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons';
-import { Dropdown, Table, Button, Input } from 'antd';
+import { Table, Button, Input, Space, Tooltip } from 'antd';
 import { PageHeader } from '@ant-design/pro-layout';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -126,42 +125,66 @@ export default function DataTable({ config, extra = [] }) {
   dataTableColumns = [
     ...dispatchColumns,
     {
-      title: '',
+      title: translate('Action') || 'Action',
       key: 'action',
-      width: 50,
+      fixed: 'right',
+      width: 150,
       render: (_, record) => (
-        <Dropdown
-          menu={{
-            items,
-            onClick: ({ key }) => {
-              switch (key) {
-                case 'read':
-                  handleRead(record);
-                  break;
-                case 'edit':
-                  handleEdit(record);
-                  break;
-
-                case 'delete':
-                  handleDelete(record);
-                  break;
-                case 'updatePassword':
-                  handleUpdatePassword(record);
-                  break;
-
-                default:
-                  break;
-              }
-              // else if (key === '2')handleCloseTask
-            },
-          }}
-          trigger={['click']}
-        >
-          <EllipsisOutlined
-            style={{ cursor: 'pointer', fontSize: '24px' }}
-            onClick={(e) => e.preventDefault()}
-          />
-        </Dropdown>
+        <Space size={6} onClick={(e) => e.stopPropagation()}>
+          <Tooltip title={translate('Show') || 'View Details'}>
+            <Button
+              type="text"
+              size="small"
+              icon={<EyeOutlined style={{ color: '#2563eb' }} />}
+              onClick={() => handleRead(record)}
+              style={{
+                borderRadius: 6,
+                backgroundColor: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                fontWeight: 600,
+                fontSize: 12,
+                color: '#1d4ed8',
+                padding: '2px 8px',
+              }}
+            >
+              View
+            </Button>
+          </Tooltip>
+          <Tooltip title={translate('Edit') || 'Edit Record'}>
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined style={{ color: '#16a34a' }} />}
+              onClick={() => handleEdit(record)}
+              style={{
+                borderRadius: 6,
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                fontWeight: 600,
+                fontSize: 12,
+                color: '#15803d',
+                padding: '2px 8px',
+              }}
+            >
+              Edit
+            </Button>
+          </Tooltip>
+          <Tooltip title={translate('Delete') || 'Delete'}>
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<DeleteOutlined style={{ fontSize: 14 }} />}
+              onClick={() => handleDelete(record)}
+              style={{
+                borderRadius: 6,
+                backgroundColor: '#fef2f2',
+                border: '1px solid #fecaca',
+                padding: '2px 6px',
+              }}
+            />
+          </Tooltip>
+        </Space>
       ),
     },
   ];
@@ -226,6 +249,10 @@ export default function DataTable({ config, extra = [] }) {
         loading={listIsLoading}
         onChange={handelDataTableLoad}
         scroll={{ x: 'max-content' }}
+        onRow={(record) => ({
+          onClick: () => handleRead(record),
+          style: { cursor: 'pointer' },
+        })}
       />
     </>
   );

@@ -13,7 +13,7 @@ import {
   ArrowRightOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons';
-import { Dropdown, Table, Button, Modal } from 'antd';
+import { Table, Button, Modal, Space, Tooltip } from 'antd';
 import { PageHeader } from '@ant-design/pro-layout';
 
 import AutoCompleteAsync from '@/components/AutoCompleteAsync';
@@ -154,53 +154,87 @@ export default function DataTable({ config, extra = [] }) {
   dataTableColumns = [
     ...dataTableColumns,
     {
-      title: '',
+      title: translate('Action') || 'Action',
       key: 'action',
-      width: 50,
+      fixed: 'right',
+      width: entity === 'invoice' ? 220 : 160,
       render: (_, record) => (
-        <Dropdown
-          menu={{
-            items,
-            onClick: ({ key }) => {
-              switch (key) {
-                case 'read':
-                  handleRead(record);
-                  break;
-                case 'edit':
-                  handleEdit(record);
-                  break;
-                case 'print_a4':
-                  handlePrintBill(record, 'a4');
-                  break;
-                case 'print_thermal':
-                  handlePrintBill(record, 'thermal');
-                  break;
-                case 'download':
-                case 'download_a4':
-                  handleDownload(record);
-                  break;
-                case 'download_thermal':
-                  handleDownloadThermal(record);
-                  break;
-                case 'delete':
-                  handleDelete(record);
-                  break;
-                case 'recordPayment':
-                  handleRecordPayment(record);
-                  break;
-                default:
-                  break;
-              }
-              // else if (key === '2')handleCloseTask
-            },
-          }}
-          trigger={['click']}
-        >
-          <EllipsisOutlined
-            style={{ cursor: 'pointer', fontSize: '24px' }}
-            onClick={(e) => e.preventDefault()}
-          />
-        </Dropdown>
+        <Space size={6} onClick={(e) => e.stopPropagation()}>
+          <Tooltip title={translate('Show') || 'View Details'}>
+            <Button
+              type="text"
+              size="small"
+              icon={<EyeOutlined style={{ color: '#2563eb' }} />}
+              onClick={() => handleRead(record)}
+              style={{
+                borderRadius: 6,
+                backgroundColor: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                fontWeight: 600,
+                fontSize: 12,
+                color: '#1d4ed8',
+                padding: '2px 8px',
+              }}
+            >
+              View
+            </Button>
+          </Tooltip>
+          <Tooltip title={translate('Edit') || 'Edit Record'}>
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined style={{ color: '#16a34a' }} />}
+              onClick={() => handleEdit(record)}
+              style={{
+                borderRadius: 6,
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                fontWeight: 600,
+                fontSize: 12,
+                color: '#15803d',
+                padding: '2px 8px',
+              }}
+            >
+              Edit
+            </Button>
+          </Tooltip>
+          {entity === 'invoice' && (
+            <Tooltip title="Print Bill (Thermal 80mm / A4)">
+              <Button
+                type="text"
+                size="small"
+                icon={<PrinterOutlined style={{ color: '#0f172a' }} />}
+                onClick={() => handlePrintBill(record, 'thermal')}
+                style={{
+                  borderRadius: 6,
+                  backgroundColor: '#f8fafc',
+                  border: '1px solid #cbd5e1',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  color: '#0f172a',
+                  padding: '2px 8px',
+                }}
+              >
+                Print
+              </Button>
+            </Tooltip>
+          )}
+          <Tooltip title={translate('Delete') || 'Delete'}>
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<DeleteOutlined style={{ fontSize: 14 }} />}
+              onClick={() => handleDelete(record)}
+              style={{
+                borderRadius: 6,
+                backgroundColor: '#fef2f2',
+                border: '1px solid #fecaca',
+                padding: '2px 6px',
+              }}
+            />
+          </Tooltip>
+        </Space>
       ),
     },
   ];
@@ -266,6 +300,10 @@ export default function DataTable({ config, extra = [] }) {
         loading={listIsLoading}
         onChange={handelDataTableLoad}
         scroll={{ x: 'max-content' }}
+        onRow={(record) => ({
+          onClick: () => handleRead(record),
+          style: { cursor: 'pointer' },
+        })}
       />
 
       {entity === 'invoice' && (

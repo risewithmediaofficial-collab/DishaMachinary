@@ -68,40 +68,50 @@ export default function RecentTable({ ...props }) {
   dataTableColumns = [
     ...dataTableColumns,
     {
-      title: '',
+      title: 'Action',
       key: 'action',
+      align: 'right',
       render: (_, record) => (
-        <Dropdown
-          menu={{
-            items,
-            onClick: ({ key }) => {
-              switch (key) {
-                case 'read':
-                  handleRead(record);
-                  break;
-                case 'edit':
-                  handleEdit(record);
-                  break;
-                case 'download':
-                case 'download_a4':
-                  handleDownload(record);
-                  break;
-                case 'download_thermal':
-                  handleDownloadThermal(record);
-                  break;
-
-                default:
-                  break;
-              }
-            },
-          }}
-          trigger={['click']}
-        >
-          <EllipsisOutlined
-            style={{ cursor: 'pointer', fontSize: '24px' }}
-            onClick={(e) => e.preventDefault()}
-          />
-        </Dropdown>
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }} onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={() => handleRead(record)}
+            style={{
+              padding: '3px 8px',
+              fontSize: 12,
+              fontWeight: 600,
+              borderRadius: 6,
+              background: '#eff6ff',
+              color: '#1d4ed8',
+              border: '1px solid #bfdbfe',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <EyeOutlined style={{ fontSize: 12 }} /> View
+          </button>
+          <button
+            type="button"
+            onClick={() => handleEdit(record)}
+            style={{
+              padding: '3px 8px',
+              fontSize: 12,
+              fontWeight: 600,
+              borderRadius: 6,
+              background: '#f0fdf4',
+              color: '#15803d',
+              border: '1px solid #bbf7d0',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+            }}
+          >
+            <EditOutlined style={{ fontSize: 12 }} /> Edit
+          </button>
+        </div>
       ),
     },
   ];
@@ -122,6 +132,11 @@ export default function RecentTable({ ...props }) {
       dataSource={isSuccess && firstFiveItems()}
       pagination={false}
       loading={isLoading}
+      onRow={(record) => ({
+        onClick: () => handleRead(record),
+        style: { cursor: 'pointer' },
+      })}
     />
   );
 }
+

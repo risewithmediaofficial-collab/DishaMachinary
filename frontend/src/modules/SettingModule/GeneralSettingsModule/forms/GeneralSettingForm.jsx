@@ -11,78 +11,46 @@ export default function GeneralSettingForm() {
   return (
     <div>
       <Form.Item
-        label={translate('Date Format')}
+        label={<span style={{ fontWeight: 600, color: '#334155' }}>{translate('Date Format') || 'Application Date Format'}</span>}
         name="idurar_app_date_format"
         rules={[
           {
             required: true,
+            message: 'Date format is required',
           },
         ]}
       >
         <Select
           showSearch
+          size="large"
+          placeholder="Select default date format..."
           style={{
             width: '100%',
+            borderRadius: 8,
           }}
           options={[
-            { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
-            { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
-            { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY' },
-            { value: 'DD.MM.YYYY', label: 'DD.MM.YYYY' },
-            { value: 'YYYY/MM/DD', label: 'YYYY/MM/DD' },
-            { value: 'YYYY-DD-MM', label: 'YYYY-DD-MM' },
-            { value: 'YYYY.MM.DD', label: 'YYYY.MM.DD' },
-            { value: 'MM/YYYY/DD', label: 'MM/YYYY/DD' },
-            { value: 'MM.DD.YYYY', label: 'MM.DD.YYYY' },
-            { value: 'DD/YYYY/MM', label: 'DD/YYYY/MM' },
-            { value: 'DD-YYYY-MM', label: 'DD-YYYY-MM' },
-            { value: 'DD.YYYY.MM', label: 'DD.YYYY.MM' },
-            { value: 'YYYY/DD/MM', label: 'YYYY/DD/MM' },
-            { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
-            { value: 'MM.DD.YY', label: 'MM.DD.YY' },
-            { value: 'DD-MMM-YY', label: 'DD-MMM-YY' },
-            { value: 'YY/MM/DD', label: 'YY/MM/DD' },
-            { value: 'DD MMM YYYY', label: 'DD MMM YYYY' },
-            { value: 'MMM DD, YYYY', label: 'MMM DD, YYYY' },
-            { value: 'DD-MM-YY', label: 'DD-MM-YY' },
-            { value: 'MM-DD-YY', label: 'MM-DD-YY' },
-            { value: 'YY.MM.DD', label: 'YY.MM.DD' },
-            { value: 'MMM DD YY', label: 'MMM DD YY' },
-            { value: 'DD MMM YY', label: 'DD MMM YY' },
-            { value: 'YYYY/MM/DD', label: 'YYYY/MM/DD' },
-            { value: 'MM.YYYY.DD', label: 'MM.YYYY.DD' },
-            { value: 'YYYY/DD/MM', label: 'YYYY/DD/MM' },
-            { value: 'MM-DD-YYYY', label: 'MM-DD-YYYY' },
-            { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY' },
-            { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
-            { value: 'YY/DD/MM', label: 'YY/DD/MM' },
-            { value: 'MM-DD', label: 'MM-DD' },
-            { value: 'DD-MM', label: 'DD-MM' },
-            { value: 'MM/YY', label: 'MM/YY' },
-            { value: 'YYYY-MMM-DD', label: 'YYYY-MMM-DD' },
-            { value: 'MM/DD', label: 'MM/DD' },
-            { value: 'DD.MM.YY', label: 'DD.MM.YY' },
-            { value: 'MM/YY/DD', label: 'MM/YY/DD' },
-            { value: 'MMMM DD, YYYY', label: 'MMMM DD, YYYY' },
-            { value: 'DD MMMM YYYY', label: 'DD MMMM YYYY' },
-            { value: 'MM-YY-DD', label: 'MM-YY-DD' },
-            { value: 'MMM. DD, YY', label: 'MMM. DD, YY' },
-            { value: 'YYYY MM DD', label: 'YYYY MM DD' },
-            { value: 'YY-MM-DD', label: 'YY-MM-DD' },
+            { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY (e.g. 16/10/2026 - Standard Indian/UK)' },
+            { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY (e.g. 10/16/2026 - US Format)' },
+            { value: 'DD-MM-YYYY', label: 'DD-MM-YYYY (e.g. 16-10-2026)' },
+            { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD (e.g. 2026-10-16 - ISO Format)' },
+            { value: 'DD.MM.YYYY', label: 'DD.MM.YYYY (e.g. 16.10.2026)' },
+            { value: 'DD MMM YYYY', label: 'DD MMM YYYY (e.g. 16 Oct 2026)' },
+            { value: 'MMM DD, YYYY', label: 'MMM DD, YYYY (e.g. Oct 16, 2026)' },
           ]}
         />
       </Form.Item>
       <Form.Item
-        label={translate('email')}
+        label={<span style={{ fontWeight: 600, color: '#334155' }}>{translate('email') || 'Company System Email'}</span>}
         name="idurar_app_company_email"
         rules={[
           {
             required: true,
             type: 'email',
+            message: 'Valid company email is required',
           },
         ]}
       >
-        <Input />
+        <Input size="large" placeholder="e.g. contact@dishamachinary.com" style={{ borderRadius: 8 }} />
       </Form.Item>
     </div>
   );
