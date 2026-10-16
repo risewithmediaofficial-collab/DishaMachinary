@@ -199,12 +199,12 @@ export default function DataTable({ config, extra = [] }) {
             </Button>
           </Tooltip>
           {entity === 'invoice' && (
-            <Tooltip title="Print Bill (Thermal 80mm / A4)">
+            <Tooltip title="Print Bill (A4 / Thermal 80mm)">
               <Button
                 type="text"
                 size="small"
                 icon={<PrinterOutlined style={{ color: '#0f172a' }} />}
-                onClick={() => handlePrintBill(record, 'thermal')}
+                onClick={() => handlePrintBill(record, 'a4')}
                 style={{
                   borderRadius: 6,
                   backgroundColor: '#f8fafc',
@@ -312,11 +312,11 @@ export default function DataTable({ config, extra = [] }) {
           open={printModalOpen}
           onCancel={() => setPrintModalOpen(false)}
           footer={null}
-          width={printFormat === 'thermal' ? 520 : 920}
+          width={printFormat === 'thermal' ? 480 : 920}
           destroyOnClose
           centered
-          style={{ maxWidth: 'calc(100vw - 16px)', top: 12, paddingBottom: 16 }}
-          bodyStyle={{ maxHeight: '86vh', overflowY: 'auto', padding: '14px' }}
+          style={{ maxWidth: 'calc(100vw - 24px)', top: 16, paddingBottom: 16 }}
+          bodyStyle={{ maxHeight: '88vh', overflowY: 'auto', overflowX: 'hidden', padding: '16px' }}
         >
           {selectedInvoiceForPrint && (
             <div style={{ padding: '4px 0' }}>
@@ -324,6 +324,7 @@ export default function DataTable({ config, extra = [] }) {
                 invoice={selectedInvoiceForPrint}
                 entity={entity}
                 defaultFormat={printFormat}
+                onFormatChange={(fmt) => setPrintFormat(fmt)}
                 showToolbar={true}
               />
             </div>

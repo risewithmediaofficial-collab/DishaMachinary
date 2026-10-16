@@ -89,6 +89,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .bill-control-bar.a4-toolbar .bill-format-tabs {
@@ -104,6 +106,9 @@
   .bill-control-bar.a4-toolbar .bill-actions {
     width: auto;
     flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .bill-control-bar.a4-toolbar .bill-actions .ant-btn {
@@ -119,13 +124,14 @@
   width: 100%;
   max-width: 820px;
   margin: 0 auto;
-  padding: 36px 40px;
+  padding: 32px 36px;
   border-radius: 8px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.07), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
   font-size: 12.5px;
   color: #1e293b;
   line-height: 1.45;
+  box-sizing: border-box;
 }
 
 .bill-brand-header {
@@ -135,12 +141,15 @@
   padding-bottom: 16px;
   border-bottom: 2px solid #0f172a;
   margin-bottom: 16px;
+  gap: 16px;
 }
 
 .bill-brand-left {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
+  flex: 1;
 }
 
 .bill-emblem {
@@ -156,11 +165,12 @@
   font-weight: 800;
   font-family: Georgia, serif;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+  flex-shrink: 0;
 }
 
 .bill-brand-title {
   margin: 0;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   letter-spacing: -0.3px;
   color: #0f172a;
@@ -178,14 +188,16 @@
 
 .bill-brand-right {
   text-align: right;
+  flex-shrink: 0;
 }
 
 .bill-doc-title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   color: #0f172a;
   margin: 0;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .bill-status-pill {
@@ -197,6 +209,7 @@
   letter-spacing: 0.5px;
   border-radius: 9999px;
   margin-top: 5px;
+  white-space: nowrap;
 }
 
 .status-paid { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
@@ -205,7 +218,7 @@
 
 .bill-meta-bar {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -220,18 +233,21 @@
   color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  white-space: nowrap;
 }
 
 .bill-meta-item-val {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #0f172a;
   margin-top: 2px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .bill-parties-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 18px;
 }
@@ -241,6 +257,7 @@
   border-radius: 8px;
   padding: 12px 14px;
   background: #ffffff;
+  min-width: 0;
 }
 
 .bill-party-header {
@@ -259,12 +276,17 @@
   font-weight: 800;
   color: #0f172a;
   margin-bottom: 4px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .bill-party-line {
   font-size: 11.5px;
   color: #334155;
   margin: 3px 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
 }
 
 .bill-table-wrapper {

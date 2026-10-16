@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { Button, Tooltip, message } from 'antd';
 import {
@@ -61,8 +61,26 @@ export function numberToWords(num) {
   return resultStr + ' Only';
 }
 
-export default function BillViewer({ invoice, entity = 'invoice', showToolbar = true, defaultFormat = 'a4' }) {
+export default function BillViewer({
+  invoice,
+  entity = 'invoice',
+  showToolbar = true,
+  defaultFormat = 'a4',
+  onFormatChange,
+}) {
   const [activeFormat, setActiveFormat] = useState(defaultFormat); // 'a4' or 'thermal'
+
+  useEffect(() => {
+    setActiveFormat(defaultFormat);
+  }, [defaultFormat]);
+
+  const handleFormatChange = (fmt) => {
+    setActiveFormat(fmt);
+    if (onFormatChange) {
+      onFormatChange(fmt);
+    }
+  };
+
   const { moneyFormatter } = useMoney();
   const companySettings = useSelector(selectCompanySettings) || {};
 
@@ -210,14 +228,14 @@ export default function BillViewer({ invoice, entity = 'invoice', showToolbar = 
             <button
               type="button"
               className={`bill-format-tab ${activeFormat === 'a4' ? 'active' : ''}`}
-              onClick={() => setActiveFormat('a4')}
+              onClick={() => handleFormatChange('a4')}
             >
               <FileTextOutlined /> A4 Tax Invoice
             </button>
             <button
               type="button"
               className={`bill-format-tab ${activeFormat === 'thermal' ? 'active' : ''}`}
-              onClick={() => setActiveFormat('thermal')}
+              onClick={() => handleFormatChange('thermal')}
             >
               <BarcodeOutlined /> 80mm Thermal Slip
             </button>
