@@ -90,10 +90,11 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
       </div>
 
       {/* TWO-COLUMN LAYOUT: NAVIGATION + CONTENT */}
-      <Row gutter={[24, 24]}>
+      <Row gutter={[24, 24]} style={{ alignItems: 'flex-start' }}>
         {/* NAVIGATION SIDEBAR */}
-        <Col xs={24} md={8} lg={7}>
+        <Col xs={24} md={8} lg={7} style={{ position: 'sticky', top: 20, zIndex: 10 }}>
           <div
+            className="settings-sidebar-static"
             style={{
               background: '#ffffff',
               borderRadius: 16,
@@ -216,22 +217,55 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
           </div>
         </Col>
 
-        {/* ACTIVE CONTENT CARD */}
+        {/* ACTIVE CONTENT CARD WITH INLINE SCROLL */}
         <Col xs={24} md={16} lg={17}>
           <div
+            className="settings-content-card"
             style={{
               background: '#ffffff',
               borderRadius: 16,
               border: '1px solid #e2e8f0',
               boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
               padding: '28px 32px',
-              minHeight: 520,
+              minHeight: 480,
+              maxHeight: 'calc(100vh - 190px)',
+              overflowY: 'auto',
+              overflowX: 'hidden',
             }}
           >
             {activeItem?.children}
           </div>
         </Col>
       </Row>
+
+      <style>{`
+        .settings-content-card {
+          scrollbar-width: thin;
+          scrollbar-color: #cbd5e1 transparent;
+        }
+        .settings-content-card::-webkit-scrollbar {
+          width: 6px;
+        }
+        .settings-content-card::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .settings-content-card::-webkit-scrollbar-thumb {
+          background-color: #cbd5e1;
+          border-radius: 9999px;
+        }
+        .settings-content-card::-webkit-scrollbar-thumb:hover {
+          background-color: #94a3b8;
+        }
+        @media (max-width: 767px) {
+          .settings-sidebar-static {
+            position: static !important;
+          }
+          .settings-content-card {
+            max-height: none !important;
+            overflow-y: visible !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
