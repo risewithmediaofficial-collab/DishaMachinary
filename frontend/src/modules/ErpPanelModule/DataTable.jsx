@@ -157,7 +157,7 @@ export default function DataTable({ config, extra = [] }) {
       title: translate('Action') || 'Action',
       key: 'action',
       fixed: 'right',
-      width: entity === 'invoice' ? 220 : 160,
+      width: entity === 'invoice' ? 280 : 160,
       render: (_, record) => (
         <Space size={6} onClick={(e) => e.stopPropagation()}>
           <Tooltip title={translate('Show') || 'View Details'}>
@@ -198,6 +198,27 @@ export default function DataTable({ config, extra = [] }) {
               Edit
             </Button>
           </Tooltip>
+          {entity === 'invoice' && Math.max(0, Number(record.total || 0) - Number(record.credit || 0)) > 0 && (
+            <Tooltip title="Collect Due / Record Payment">
+              <Button
+                type="text"
+                size="small"
+                icon={<CreditCardOutlined style={{ color: '#b45309' }} />}
+                onClick={() => handleRecordPayment(record)}
+                style={{
+                  borderRadius: 6,
+                  backgroundColor: '#fffbeb',
+                  border: '1px solid #fde68a',
+                  fontWeight: 600,
+                  fontSize: 12,
+                  color: '#b45309',
+                  padding: '2px 8px',
+                }}
+              >
+                Pay
+              </Button>
+            </Tooltip>
+          )}
           {entity === 'invoice' && (
             <Tooltip title="Print Bill (A4 / Thermal 80mm)">
               <Button

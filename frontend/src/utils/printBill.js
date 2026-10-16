@@ -269,14 +269,26 @@ export function generateThermalHtml(invoice, companySettings = {}) {
   </div>
 
   ${
-    invoice.paidNow !== undefined || invoice.paidAmount !== undefined
-      ? `
-      <div class="total-line">
-        <span>Paid Amount:</span>
-        <span class="bold">${formatCurrency(invoice.paidNow !== undefined ? invoice.paidNow : invoice.paidAmount)}</span>
-      </div>
-    `
-      : ''
+    (() => {
+      const paidVal =
+        invoice.credit !== undefined
+          ? invoice.credit
+          : invoice.paidNow !== undefined
+          ? invoice.paidNow
+          : invoice.paidAmount;
+      if (paidVal === undefined || paidVal === null) return '';
+      const balanceVal = Math.max(0, Number(invoice.total || 0) - Number(paidVal || 0));
+      return `
+        <div class="total-line">
+          <span>Amount Paid:</span>
+          <span class="bold">${formatCurrency(paidVal)}</span>
+        </div>
+        <div class="total-line ${balanceVal > 0 ? 'bold' : ''}" style="${balanceVal > 0 ? 'color: #b91c1c;' : 'color: #15803d;'}">
+          <span>${balanceVal > 0 ? 'Balance Due:' : 'Status:'}</span>
+          <span>${balanceVal > 0 ? formatCurrency(balanceVal) + ' (PENDING)' : 'PAID IN FULL'}</span>
+        </div>
+      `;
+    })()
   }
 
   <div class="divider-single"></div>
@@ -563,14 +575,26 @@ export function generateA4Html(invoice, companySettings = {}) {
         <span>${formatCurrency(invoice.total)}</span>
       </div>
       ${
-        invoice.paidNow !== undefined || invoice.paidAmount !== undefined
-          ? `
-          <div class="totals-row" style="color: #16a34a; font-weight: bold; margin-top: 4px;">
-            <span>Amount Paid:</span>
-            <span>${formatCurrency(invoice.paidNow !== undefined ? invoice.paidNow : invoice.paidAmount)}</span>
-          </div>
-        `
-          : ''
+        (() => {
+          const paidVal =
+            invoice.credit !== undefined
+              ? invoice.credit
+              : invoice.paidNow !== undefined
+              ? invoice.paidNow
+              : invoice.paidAmount;
+          if (paidVal === undefined || paidVal === null) return '';
+          const balanceVal = Math.max(0, Number(invoice.total || 0) - Number(paidVal || 0));
+          return `
+            <div class="totals-row" style="color: #1e293b; font-weight: 600; margin-top: 4px;">
+              <span>Amount Paid:</span>
+              <span>${formatCurrency(paidVal)}</span>
+            </div>
+            <div class="totals-row" style="${balanceVal > 0 ? 'color: #dc2626; font-weight: 700;' : 'color: #16a34a; font-weight: 700;'}">
+              <span>${balanceVal > 0 ? 'Balance Due:' : 'Payment Status:'}</span>
+              <span>${balanceVal > 0 ? formatCurrency(balanceVal) + ' (PENDING)' : 'PAID IN FULL'}</span>
+            </div>
+          `;
+        })()
       }
     </div>
   </div>

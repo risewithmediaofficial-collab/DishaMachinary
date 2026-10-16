@@ -2,7 +2,11 @@ const mongoose = require('mongoose');
 
 const roundMoney = (amount) => Number((amount + Number.EPSILON).toFixed(2));
 const normalizeState = (state) => String(state || '').trim().toLocaleLowerCase();
-const isIndia = (country) => ['in', 'india'].includes(normalizeState(country));
+const isIndia = (country) => {
+  if (!country) return true;
+  const normalized = normalizeState(country);
+  return !normalized || ['in', 'india', 'ind', 'bharat'].includes(normalized);
+};
 
 const calculateTotals = (items, gstEnabled, supplyType, invoiceDiscount = 0) => {
   let subTotal = 0;
@@ -149,23 +153,18 @@ const prepareInvoice = async ({ items, client, gstEnabled = false, taxRate = 0, 
     const companyValues = Object.fromEntries(
       companySettings.map((setting) => [setting.settingKey, setting.settingValue])
     );
-    sellerState = String(companyValues.company_state || '').trim();
+    sellerState = String(companyValues.company_state || 'Tamil Nadu').trim();
     sellerGstin = String(companyValues.company_gstin || '').trim().toUpperCase();
-    sellerCountry = String(companyValues.company_country || '').trim();
-    buyerState = String(customer?.state || '').trim();
+    sellerCountry = String(companyValues.company_country || 'India').trim();
+    buyerState = String(customer?.state || sellerState || 'Tamil Nadu').trim();
     buyerGstin = String(customer?.gstin || '').trim().toUpperCase();
-    buyerCountry = String(customer?.country || '').trim();
-    const companyState = normalizeState(sellerState);
-    const customerState = normalizeState(customer?.state);
-    if (
-      !isIndia(sellerCountry) ||
-      !isIndia(buyerCountry)
-    ) {
-      throw new Error('Set both company and customer country to India for domestic GST invoices');
-    }
-    if (!companyState || !customerState) {
-      throw new Error('Set the company state and customer state before issuing a GST invoice');
-    }
+    buyerCountry = String(customer?.country || sellerCountry || 'India').trim();
+
+    if (!isIndia(sellerCountry)) sellerCountry = 'India';
+    if (!isIndia(buyerCountry)) buyerCountry = 'India';
+
+    const companyState = normalizeState(sellerState) || 'tamil nadu';
+    const customerState = normalizeState(buyerState) || companyState;
     supplyType = companyState === customerState ? 'intrastate' : 'interstate';
   }
 

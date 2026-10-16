@@ -44,40 +44,74 @@ export default function Invoice() {
     {
       title: translate('Total'),
       dataIndex: 'total',
-      onCell: () => {
-        return {
-          style: {
-            textAlign: 'right',
-            whiteSpace: 'nowrap',
-            direction: 'ltr',
-          },
-        };
-      },
-      render: (total, record) => {
-        return moneyFormatter({ amount: total, currency_code: record.currency });
-      },
+      onCell: () => ({
+        style: {
+          textAlign: 'right',
+          whiteSpace: 'nowrap',
+          direction: 'ltr',
+        },
+      }),
+      render: (total, record) => moneyFormatter({ amount: total, currency_code: record.currency }),
     },
     {
       title: translate('paid'),
       dataIndex: 'credit',
-      onCell: () => {
-        return {
-          style: {
-            textAlign: 'right',
-            whiteSpace: 'nowrap',
-            direction: 'ltr',
-          },
-        };
+      onCell: () => ({
+        style: {
+          textAlign: 'right',
+          whiteSpace: 'nowrap',
+          direction: 'ltr',
+        },
+      }),
+      render: (credit, record) => (
+        <span style={{ fontWeight: 600, color: (credit || 0) > 0 ? '#16a34a' : '#64748b' }}>
+          {moneyFormatter({ amount: credit || 0, currency_code: record.currency })}
+        </span>
+      ),
+    },
+    {
+      title: 'Balance Due',
+      dataIndex: 'balance',
+      onCell: () => ({
+        style: {
+          textAlign: 'right',
+          whiteSpace: 'nowrap',
+          direction: 'ltr',
+        },
+      }),
+      render: (_, record) => {
+        const balance = Math.max(0, Number(record.total || 0) - Number(record.credit || 0));
+        return (
+          <span style={{ fontWeight: 700, color: balance > 0 ? '#dc2626' : '#16a34a' }}>
+            {moneyFormatter({ amount: balance, currency_code: record.currency })}
+          </span>
+        );
       },
-      render: (total, record) => moneyFormatter({ amount: total, currency_code: record.currency }),
     },
     {
       title: translate('Status'),
       dataIndex: 'status',
+      render: (status) => {
+        let color = 'default';
+        if (status === 'posted') color = 'blue';
+        if (status === 'pending') color = 'gold';
+        if (status === 'sent') color = 'cyan';
+        return <Tag color={color}>{(status || 'draft').toUpperCase()}</Tag>;
+      },
     },
     {
       title: translate('Payment'),
       dataIndex: 'paymentStatus',
+      render: (paymentStatus, record) => {
+        const balance = Math.max(0, Number(record.total || 0) - Number(record.credit || 0));
+        if (paymentStatus === 'paid' || balance === 0) {
+          return <Tag color="green" style={{ fontWeight: 600 }}>PAID</Tag>;
+        }
+        if (paymentStatus === 'partially' || (Number(record.credit || 0) > 0 && balance > 0)) {
+          return <Tag color="orange" style={{ fontWeight: 600 }}>PARTIALLY PAID</Tag>;
+        }
+        return <Tag color="red" style={{ fontWeight: 600 }}>UNPAID (PENDING)</Tag>;
+      },
     },
   ];
 

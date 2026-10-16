@@ -57,16 +57,16 @@ const create = async (req, res) => {
 
   // Automatically record bill in payments
   let paidAmount = 0;
-  if (body.paidAmount !== undefined && body.paidAmount !== null && Number(body.paidAmount) >= 0) {
-    paidAmount = Number(body.paidAmount);
-  } else if (body.paidNow !== undefined && body.paidNow !== null && Number(body.paidNow) >= 0) {
-    paidAmount = Number(body.paidNow);
-  } else if (['posted', 'sent'].includes(result.status) || result.paymentStatus === 'paid') {
+  if (body.paidNow !== undefined && body.paidNow !== null && Number(body.paidNow) >= 0) {
+    paidAmount = Math.min(Number(body.paidNow), Number(result.total || 0));
+  } else if (body.paidAmount !== undefined && body.paidAmount !== null && Number(body.paidAmount) >= 0) {
+    paidAmount = Math.min(Number(body.paidAmount), Number(result.total || 0));
+  } else if (result.paymentStatus === 'paid') {
     paidAmount = Number(result.total || 0);
   }
 
   let paymentRecord = null;
-  if (result.status === 'posted' || result.paymentStatus === 'paid' || paidAmount > 0) {
+  if (paidAmount > 0) {
     const Payment = mongoose.model('Payment');
     const paymentNumber = (await Payment.countDocuments({ removed: false })) + 1;
     paymentRecord = await Payment.create({
@@ -87,7 +87,8 @@ const create = async (req, res) => {
     await Payment.updateOne({ _id: paymentRecord._id }, { pdf: paymentPdf });
   }
 
-  const newPaymentStatus = paidAmount >= result.total ? 'paid' : (paidAmount > 0 ? 'partially' : result.paymentStatus);
+  const newPaymentStatus =
+    paidAmount >= result.total ? 'paid' : (paidAmount > 0 ? 'partially' : 'unpaid');
   const updatePayload = {
     pdf: fileId,
     credit: paidAmount,

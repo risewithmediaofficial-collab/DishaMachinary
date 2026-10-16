@@ -53,6 +53,8 @@ export default function Pos() {
   const [cart, setCart] = useState([]);
   const [gstEnabled, setGstEnabled] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [discountType, setDiscountType] = useState('percent');
+  const [discountValue, setDiscountValue] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
@@ -73,7 +75,25 @@ export default function Pos() {
     () => Number(cart.reduce((sum, line) => sum + line.quantity * line.product.sellingPrice, 0).toFixed(2)),
     [cart]
   );
-  const discount = Number(Form.useWatch('discount', form) || 0);
+
+  const safeDiscount = useMemo(() => {
+    if (!subTotal || subTotal <= 0) return 0;
+    const val = Number(discountValue) || 0;
+    if (val <= 0) return 0;
+    if (discountType === 'percent') {
+      const pct = Math.min(Math.max(val, 0), 100);
+      return Number(((subTotal * pct) / 100).toFixed(2));
+    } else {
+      return Number(Math.min(Math.max(val, 0), subTotal).toFixed(2));
+    }
+  }, [subTotal, discountType, discountValue]);
+
+  const discountPercentDisplay = useMemo(() => {
+    if (!subTotal || subTotal <= 0 || safeDiscount <= 0) return 0;
+    if (discountType === 'percent') return Number(discountValue) || 0;
+    return Number(((safeDiscount / subTotal) * 100).toFixed(1));
+  }, [subTotal, safeDiscount, discountType, discountValue]);
+
   const rawTaxTotal = useMemo(
     () =>
       gstEnabled
@@ -89,10 +109,14 @@ export default function Pos() {
         : 0,
     [cart, gstEnabled]
   );
-  const safeDiscount = Math.min(Math.max(discount, 0), subTotal);
   const taxTotal = Number((rawTaxTotal * (subTotal ? (subTotal - safeDiscount) / subTotal : 0)).toFixed(2));
   const total = Math.max(0, Number((subTotal - safeDiscount + taxTotal).toFixed(2)));
-  const paidNow = Number(Form.useWatch('paidNow', form) || 0);
+
+  const paidNowWatch = Form.useWatch('paidNow', form);
+  const hasEnteredPaidNow = paidNowWatch !== undefined && paidNowWatch !== null && paidNowWatch !== '';
+  const actualPaid = hasEnteredPaidNow ? Number(paidNowWatch) : total;
+  const balanceDue = Math.max(0, Number((total - actualPaid).toFixed(2)));
+  const changeReturn = Math.max(0, Number((actualPaid - total).toFixed(2)));
 
   const productOptions = useMemo(() => {
     return products.map((product) => {
@@ -197,7 +221,12 @@ export default function Pos() {
     setCreatingCustomer(true);
     const response = await request.create({
       entity: 'client',
-      jsonData: { name: values.name.trim(), phone: values.phone.trim() },
+      jsonData: {
+        name: values.name.trim(),
+        phone: values.phone.trim(),
+        country: 'India',
+        state: companySettings.company_state || 'Tamil Nadu',
+      },
     });
     setCreatingCustomer(false);
     if (!response?.success) return;
@@ -212,15 +241,22 @@ export default function Pos() {
     setCart([]);
     setSelectedCustomer(null);
     form.resetFields();
+    setDiscountValue(0);
+    setDiscountType('percent');
     setLastCreatedInvoice(null);
     setBillSuccessModalOpen(false);
   };
 
   const checkout = async (values) => {
     if (!cart.length) return message.error('Add at least one product to the bill.');
-    if (values.paidNow > total) return message.error('Payment cannot exceed the bill total.');
     setLoading(true);
     setError('');
+
+    const paid =
+      values.paidNow !== undefined && values.paidNow !== null && values.paidNow !== ''
+        ? Math.max(0, Number(values.paidNow))
+        : total;
+
     const invoiceResponse = await request.create({
       entity: 'invoice',
       jsonData: {
@@ -232,9 +268,9 @@ export default function Pos() {
         expiredDate: dayjs().toISOString(),
         currency: currency_code || 'INR',
         notes: values.notes || '',
-        discount,
+        discount: safeDiscount,
         gstEnabled,
-        paidNow: values.paidNow !== undefined ? values.paidNow : total,
+        paidNow: paid,
         paymentMethod: paymentMethod || 'cash',
         items: cart.map(({ product, quantity }) => ({
           product: product._id,
@@ -259,9 +295,17 @@ export default function Pos() {
         invoice.client && typeof invoice.client === 'object' && invoice.client?.name
           ? invoice.client
           : selectedCustomer || { name: 'Walk-in Customer' },
+      credit: paid,
+      paidNow: paid,
     };
     setLoading(false);
-    message.success(`Bill #${invoice.number}/${invoice.year} created and recorded in payments.`);
+    if (paid >= total) {
+      message.success(`Bill #${invoice.number}/${invoice.year} created and marked as FULLY PAID.`);
+    } else if (paid === 0) {
+      message.success(`Bill #${invoice.number}/${invoice.year} saved as PENDING BILL (₹${total.toLocaleString('en-IN')} Due).`);
+    } else {
+      message.success(`Bill #${invoice.number}/${invoice.year} recorded (₹${paid.toLocaleString('en-IN')} Paid · ₹${(total - paid).toLocaleString('en-IN')} Due).`);
+    }
     setLastCreatedInvoice(invoiceToPrint);
     setBillSuccessModalOpen(true);
   };
@@ -448,18 +492,116 @@ export default function Pos() {
                 </Radio.Group>
               </Form.Item>
 
-              <Row gutter={10}>
-                <Col span={12}>
-                  <Form.Item name="discount" label="Discount (₹)">
-                    <InputNumber min={0} max={subTotal} precision={2} placeholder="0.00" style={{ width: '100%' }} />
-                  </Form.Item>
-                </Col>
-                <Col span={12}>
-                  <Form.Item name="paidNow" label="Paid Now (₹)">
-                    <InputNumber min={0} max={total} precision={2} placeholder="0.00" style={{ width: '100%' }} />
-                  </Form.Item>
-                </Col>
-              </Row>
+              {/* BILL DISCOUNT (% OR ₹) */}
+              <div
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                  marginBottom: 12,
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Bill Discount</span>
+                  <Radio.Group
+                    size="small"
+                    value={discountType}
+                    onChange={(e) => {
+                      const newType = e.target.value;
+                      setDiscountType(newType);
+                      if (discountValue > 0 && subTotal > 0) {
+                        if (newType === 'amount') {
+                          setDiscountValue(Number(((subTotal * discountValue) / 100).toFixed(2)));
+                        } else {
+                          setDiscountValue(Number(((discountValue / subTotal) * 100).toFixed(1)));
+                        }
+                      }
+                    }}
+                    optionType="button"
+                    buttonStyle="solid"
+                  >
+                    <Radio.Button value="percent">% Percent</Radio.Button>
+                    <Radio.Button value="amount">₹ Amount</Radio.Button>
+                  </Radio.Group>
+                </div>
+
+                <InputNumber
+                  min={0}
+                  max={discountType === 'percent' ? 100 : subTotal}
+                  precision={2}
+                  value={discountValue}
+                  onChange={(val) => setDiscountValue(val || 0)}
+                  placeholder={discountType === 'percent' ? 'Discount % (e.g. 5)' : 'Discount ₹ (e.g. 500)'}
+                  prefix={discountType === 'percent' ? '%' : '₹'}
+                  style={{ width: '100%' }}
+                />
+
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: 6,
+                    fontSize: 12,
+                    fontWeight: 500,
+                  }}
+                >
+                  <span style={{ color: '#64748b' }}>
+                    {discountType === 'percent' ? 'Subtracted Less Amount:' : 'Effective Discount:'}
+                  </span>
+                  <span style={{ color: safeDiscount > 0 ? '#b91c1c' : '#64748b', fontWeight: 700 }}>
+                    {discountType === 'percent'
+                      ? `- ₹ ${safeDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                      : `${discountPercentDisplay}% off (- ₹ ${safeDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })})`}
+                  </span>
+                </div>
+              </div>
+
+              {/* PAID NOW & QUICK ACTIONS */}
+              <div
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 8,
+                  padding: '10px 12px',
+                  marginBottom: 12,
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Amount Paid (₹)</span>
+                  <Space size={4}>
+                    <Button
+                      size="small"
+                      type={hasEnteredPaidNow && Number(paidNowWatch) === total ? 'primary' : 'default'}
+                      onClick={() => form.setFieldValue('paidNow', total)}
+                      style={{ fontSize: 11, height: 24, padding: '0 8px', borderRadius: 4 }}
+                    >
+                      Full Paid (₹{total.toLocaleString('en-IN')})
+                    </Button>
+                    <Button
+                      size="small"
+                      danger={hasEnteredPaidNow && Number(paidNowWatch) === 0}
+                      onClick={() => form.setFieldValue('paidNow', 0)}
+                      style={{ fontSize: 11, height: 24, padding: '0 8px', borderRadius: 4 }}
+                    >
+                      Credit / Pending (₹0)
+                    </Button>
+                  </Space>
+                </div>
+
+                <Form.Item name="paidNow" noStyle>
+                  <InputNumber
+                    min={0}
+                    precision={2}
+                    placeholder={`₹ ${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })} (Default: Full Paid)`}
+                    style={{ width: '100%' }}
+                    prefix="₹"
+                  />
+                </Form.Item>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 5 }}>
+                  Leave blank or click "Full Paid" for immediate settlement; enter 0 for pending credit bill.
+                </div>
+              </div>
 
               <Form.Item label="Payment Method">
                 <Select
@@ -491,10 +633,10 @@ export default function Pos() {
                   <Typography.Text type="secondary">Subtotal:</Typography.Text>
                   <strong>₹ {subTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>
                 </div>
-                {discount > 0 && (
+                {safeDiscount > 0 && (
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 13, color: '#b91c1c' }}>
-                    <span>Discount:</span>
-                    <strong>- ₹ {discount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>
+                    <span>Discount ({discountPercentDisplay}%):</span>
+                    <strong>- ₹ {safeDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13 }}>
@@ -510,10 +652,107 @@ export default function Pos() {
                     ₹ {total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </Typography.Title>
                 </div>
+
+                <Divider style={{ margin: '10px 0', borderStyle: 'dashed' }} />
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 13 }}>
+                  <Typography.Text type="secondary">Amount Paid:</Typography.Text>
+                  <strong style={{ color: '#0f172a' }}>
+                    ₹ {actualPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </strong>
+                </div>
+
+                {balanceDue > 0 ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 12px',
+                      background: '#fef2f2',
+                      border: '1px solid #fecaca',
+                      borderRadius: 8,
+                      marginTop: 6,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#991b1b', fontSize: 13 }}>Balance Amount (Due):</div>
+                      <Tag color="red" style={{ fontSize: 11, margin: 0, fontWeight: 700 }}>
+                        PENDING BILL
+                      </Tag>
+                    </div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: '#dc2626' }}>
+                      ₹ {balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                ) : changeReturn > 0 ? (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 12px',
+                      background: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: 8,
+                      marginTop: 6,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#1e40af', fontSize: 13 }}>Change to Return:</div>
+                      <Tag color="blue" style={{ fontSize: 11, margin: 0 }}>
+                        Cash Change
+                      </Tag>
+                    </div>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: '#2563eb' }}>
+                      ₹ {changeReturn.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 12px',
+                      background: '#f0fdf4',
+                      border: '1px solid #bbf7d0',
+                      borderRadius: 8,
+                      marginTop: 6,
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#166534', fontSize: 13 }}>Payment Status:</div>
+                      <Tag color="green" style={{ fontSize: 11, margin: 0, fontWeight: 700 }}>
+                        PAID IN FULL
+                      </Tag>
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#16a34a' }}>
+                      ₹ 0.00 Due
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <Button type="primary" htmlType="submit" size="large" block loading={loading} style={{ height: 44 }}>
-                Issue Bill & Deduct Stock
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                block
+                loading={loading}
+                style={{
+                  height: 46,
+                  fontWeight: 700,
+                  fontSize: 15,
+                  backgroundColor: balanceDue > 0 && actualPaid === 0 ? '#d97706' : '#2563eb',
+                  borderColor: balanceDue > 0 && actualPaid === 0 ? '#b45309' : '#1d4ed8',
+                }}
+              >
+                {balanceDue > 0 && actualPaid === 0
+                  ? `Issue Pending Bill (₹${total.toLocaleString('en-IN')} Due)`
+                  : balanceDue > 0
+                  ? `Issue Bill (₹${actualPaid.toLocaleString('en-IN')} Paid · ₹${balanceDue.toLocaleString('en-IN')} Due)`
+                  : `Issue Bill & Record Full Payment (₹${total.toLocaleString('en-IN')})`}
               </Button>
             </Form>
           </Card>
@@ -579,20 +818,37 @@ export default function Pos() {
                 borderRadius: 10,
                 padding: '12px',
                 margin: '18px 0',
-                display: 'flex',
-                justifyContent: 'space-around',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: 8,
+                textAlign: 'center',
               }}
             >
               <div>
                 <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase' }}>Invoice No</div>
-                <strong style={{ fontSize: 14 }}>#{lastCreatedInvoice.number}/{lastCreatedInvoice.year}</strong>
+                <strong style={{ fontSize: 13 }}>#{lastCreatedInvoice.number}/{lastCreatedInvoice.year}</strong>
               </div>
-              <div style={{ borderRight: '1px solid #cbd5e1' }} />
-              <div>
+              <div style={{ borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0' }}>
                 <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase' }}>Net Total</div>
-                <strong style={{ fontSize: 15, color: '#1d4ed8' }}>
+                <strong style={{ fontSize: 14, color: '#1d4ed8' }}>
                   ₹ {Number(lastCreatedInvoice.total || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </strong>
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase' }}>
+                  {Math.max(0, (lastCreatedInvoice.total || 0) - (lastCreatedInvoice.credit || 0)) > 0
+                    ? 'Balance Due'
+                    : 'Payment Status'}
+                </div>
+                {Math.max(0, (lastCreatedInvoice.total || 0) - (lastCreatedInvoice.credit || 0)) > 0 ? (
+                  <strong style={{ fontSize: 14, color: '#dc2626' }}>
+                    ₹ {Math.max(0, (lastCreatedInvoice.total || 0) - (lastCreatedInvoice.credit || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </strong>
+                ) : (
+                  <Tag color="green" style={{ margin: 0, fontWeight: 700 }}>
+                    PAID
+                  </Tag>
+                )}
               </div>
             </div>
 
