@@ -1,9 +1,10 @@
 FROM node:22-slim
 
-# Install system dependencies required by Puppeteer / Chromium for PDF generation
+# Install system dependencies and Chromium for PDF generation
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     fonts-liberation \
+    chromium \
     libasound2 \
     libatk-bridge2.0-0 \
     libatk1.0-0 \
@@ -40,13 +41,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xdg-utils \
     && rm -rf /var/lib/apt/lists/*
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
 WORKDIR /app
 
 # Copy dependency manifests
 COPY package*.json ./
 
-# Install production dependencies and download Chrome browser for Puppeteer PDF rendering
-RUN npm ci --omit=dev && npx puppeteer browsers install chrome
+# Install production dependencies
+RUN npm ci --omit=dev
 
 # Copy application source code
 COPY . .

@@ -70,33 +70,17 @@ jobs:
             sed -i 's|localhost:27017|mongodb:27017|g' .env 2>/dev/null || true
             sed -i 's|127.0.0.1:27017|mongodb:27017|g' .env 2>/dev/null || true
 
-            # 6. Force remove any conflicting or stale project containers by name and ports
-            echo "🧹 Removing any existing conflicting containers..."
-            docker rm -f disha_machinary_mongodb disha_machinary_backend disha_machinary_frontend 2>/dev/null || true
-
-            for port in 97 5010 27021; do
-              pids=$(docker ps -aq --filter "publish=$port")
-              if [ -n "$pids" ]; then
-                echo "Clearing container on port $port: $pids"
-                docker stop $pids 2>/dev/null || true
-                docker rm -f $pids 2>/dev/null || true
-              fi
-            done
-
-            # Cleanly stop previous project services
-            $DC down --remove-orphans 2>/dev/null || true
-
-            # 7. Rebuild Docker images without cache (forces clean bundle)
+            # 6. Build Docker images first
             echo "🔨 Building Docker images..."
-            $DC build --no-cache
+            $DC build
 
-            # 8. Start containers in detached mode
+            # 7. Start containers in detached mode
             echo "🚀 Starting new containers..."
-            if ! $DC up -d --force-recreate; then
-              echo "⚠️ Startup issue encountered. Checking backend logs:"
-              $DC logs --tail 50 backend 2>/dev/null || true
-              exit 1
-            fi
+            $DC up -d --force-recreate || {
+              echo "⚠️ Startup issue encountered. Clearing port conflicts and retrying..."
+              docker rm -f disha_machinary_frontend disha_machinary_backend 2>/dev/null || true
+              $DC up -d
+            }
 
             # 9. Prune dangling images to conserve VPS disk space
             echo "🧹 Pruning unused images..."
