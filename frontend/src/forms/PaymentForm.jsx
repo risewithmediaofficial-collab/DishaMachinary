@@ -46,7 +46,7 @@ export default function PaymentForm({ maxAmount = null, isUpdateForm = false }) 
           min={0}
           controls={false}
           max={maxAmount}
-          placeholder="0.00"
+          placeholder=""
           addonAfter={money.currency_position === 'after' ? money.currency_symbol : undefined}
           addonBefore={money.currency_position === 'before' ? money.currency_symbol : undefined}
         />

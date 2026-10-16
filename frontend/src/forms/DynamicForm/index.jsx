@@ -299,7 +299,11 @@ function FormElement({ field, feedback, setFeedback }) {
       <Input
         autoComplete="off"
         maxLength={field.maxLength}
-        defaultValue={field.defaultValue === 0 ? undefined : field.defaultValue}
+        defaultValue={
+          field.defaultValue === 0 || field.defaultValue === '0' || field.defaultValue === '0.00'
+            ? undefined
+            : field.defaultValue
+        }
         placeholder={field.placeholder || ''}
       />
     ),
@@ -339,7 +343,7 @@ function FormElement({ field, feedback, setFeedback }) {
         className="moneyInput"
         min={0}
         controls={false}
-        placeholder={field.placeholder || '0.00'}
+        placeholder={field.placeholder || ''}
         addonAfter={money.currency_position === 'after' ? money.currency_symbol : undefined}
         addonBefore={money.currency_position === 'before' ? money.currency_symbol : undefined}
       />
@@ -378,7 +382,11 @@ function FormElement({ field, feedback, setFeedback }) {
       <Form.Item
         label={translate(field.label)}
         name={field.name}
-        initialValue={field.defaultValue === 0 ? undefined : field.defaultValue}
+        initialValue={
+          field.defaultValue === 0 || field.defaultValue === '0' || field.defaultValue === '0.00'
+            ? undefined
+            : field.defaultValue
+        }
         rules={[
           {
             required: field.required || false,

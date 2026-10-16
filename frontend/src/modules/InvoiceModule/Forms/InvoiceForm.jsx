@@ -227,8 +227,8 @@ function LoadInvoiceForm({ subTotal = 0, current = null }) {
       <Divider dashed />
       <div className="invoice-form-footer">
         <div className="invoice-summary">
-          <Form.Item name="discount" label="Bill Discount" initialValue={current?.discount || undefined}>
-            <InputNumber min={0} max={displaySubTotal} precision={2} placeholder="0.00" style={{ width: '100%' }} />
+          <Form.Item name="discount" label="Bill Discount" initialValue={current?.discount ? current.discount : undefined}>
+            <InputNumber min={0} max={displaySubTotal} precision={2} placeholder="Discount" style={{ width: '100%' }} />
           </Form.Item>
           <div className="invoice-summary-line">
             <span>{translate('Sub Total')}</span>

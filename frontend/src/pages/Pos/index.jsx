@@ -54,7 +54,7 @@ export default function Pos() {
   const [gstEnabled, setGstEnabled] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [discountType, setDiscountType] = useState('percent');
-  const [discountValue, setDiscountValue] = useState(0);
+  const [discountValue, setDiscountValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [customerModalOpen, setCustomerModalOpen] = useState(false);
@@ -78,7 +78,7 @@ export default function Pos() {
 
   const safeDiscount = useMemo(() => {
     if (!subTotal || subTotal <= 0) return 0;
-    const val = Number(discountValue) || 0;
+    const val = discountValue !== null && discountValue !== undefined && discountValue !== '' ? Number(discountValue) : 0;
     if (val <= 0) return 0;
     if (discountType === 'percent') {
       const pct = Math.min(Math.max(val, 0), 100);
@@ -90,7 +90,9 @@ export default function Pos() {
 
   const discountPercentDisplay = useMemo(() => {
     if (!subTotal || subTotal <= 0 || safeDiscount <= 0) return 0;
-    if (discountType === 'percent') return Number(discountValue) || 0;
+    if (discountType === 'percent') {
+      return discountValue !== null && discountValue !== undefined && discountValue !== '' ? Number(discountValue) : 0;
+    }
     return Number(((safeDiscount / subTotal) * 100).toFixed(1));
   }, [subTotal, safeDiscount, discountType, discountValue]);
 
@@ -241,7 +243,7 @@ export default function Pos() {
     setCart([]);
     setSelectedCustomer(null);
     form.resetFields();
-    setDiscountValue(0);
+    setDiscountValue(null);
     setDiscountType('percent');
     setLastCreatedInvoice(null);
     setBillSuccessModalOpen(false);
@@ -510,11 +512,15 @@ export default function Pos() {
                     onChange={(e) => {
                       const newType = e.target.value;
                       setDiscountType(newType);
-                      if (discountValue > 0 && subTotal > 0) {
+                      const currentVal =
+                        discountValue !== null && discountValue !== undefined && discountValue !== ''
+                          ? Number(discountValue)
+                          : null;
+                      if (currentVal && currentVal > 0 && subTotal > 0) {
                         if (newType === 'amount') {
-                          setDiscountValue(Number(((subTotal * discountValue) / 100).toFixed(2)));
+                          setDiscountValue(Number(((subTotal * currentVal) / 100).toFixed(2)));
                         } else {
-                          setDiscountValue(Number(((discountValue / subTotal) * 100).toFixed(1)));
+                          setDiscountValue(Number(((currentVal / subTotal) * 100).toFixed(1)));
                         }
                       }
                     }}
@@ -530,9 +536,9 @@ export default function Pos() {
                   min={0}
                   max={discountType === 'percent' ? 100 : subTotal}
                   precision={2}
-                  value={discountValue}
-                  onChange={(val) => setDiscountValue(val || 0)}
-                  placeholder={discountType === 'percent' ? 'Discount % (e.g. 5)' : 'Discount ₹ (e.g. 500)'}
+                  value={discountValue !== null && discountValue !== undefined && discountValue !== '' ? discountValue : null}
+                  onChange={(val) => setDiscountValue(val !== null && val !== undefined && val !== '' ? val : null)}
+                  placeholder={discountType === 'percent' ? 'Discount %' : 'Discount ₹'}
                   prefix={discountType === 'percent' ? '%' : '₹'}
                   style={{ width: '100%' }}
                 />

@@ -13,7 +13,7 @@ export default function MoneyInputFormItem({ updatePrice, value, readOnly = fals
         onChange={updatePrice}
         precision={cent_precision ? cent_precision : 2}
         value={value !== undefined ? amountFormatter({ amount: value, currency_code: currency_code }) : undefined}
-        placeholder="0.00"
+        placeholder=""
         controls={false}
         addonAfter={currency_position === 'after' ? currency_symbol : undefined}
         addonBefore={currency_position === 'before' ? currency_symbol : undefined}

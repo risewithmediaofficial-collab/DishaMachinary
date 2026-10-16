@@ -46,8 +46,8 @@ export default function InventoryForm() {
         ]}
       >
         <InputNumber
-          formatter={(value) => `₹ ${value}`}
-          parser={(value) => value.replace(/₹\s?|(,*)/g, '')}
+          formatter={(value) => (value !== undefined && value !== null && value !== '' ? `₹ ${value}` : '')}
+          parser={(value) => (value ? value.replace(/₹\s?|(,*)/g, '') : '')}
         />
       </Form.Item>
     </>
