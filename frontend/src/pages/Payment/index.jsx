@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { Tag } from 'antd';
 import useLanguage from '@/locale/useLanguage';
 import PaymentDataTableModule from '@/modules/PaymentModule/PaymentDataTableModule';
 
