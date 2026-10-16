@@ -78,7 +78,7 @@ async function autoInitDatabase() {
       console.log('✅ Default settings configured (INR, Asia/Kolkata)');
     }
 
-    // Seed default products if empty
+    // Seed default products if database is empty
     const defaultProductsPath = './src/setup/defaultProducts.json';
     const defaultProductsList = fs.existsSync(defaultProductsPath)
       ? JSON.parse(fs.readFileSync(defaultProductsPath, 'utf-8'))
@@ -99,14 +99,14 @@ async function autoInitDatabase() {
                 createdBy: defaultAdmin._id,
                 itemType: 'product',
                 unit: 'piece',
-                hsnCode: '8479',
-                description: item.name,
-                purchasePrice: item.purchasePrice || 25000,
-                sellingPrice: item.sellingPrice || 35000,
-                wholesalePrice: item.purchasePrice ? item.purchasePrice * 1.15 : 28000,
-                gstRate: item.gstRate || 18,
-                stockQuantity: item.stockQuantity || 50,
-                reorderLevel: 5,
+                hsnCode: '',
+                description: '',
+                purchasePrice: 0,
+                sellingPrice: 0,
+                wholesalePrice: 0,
+                gstRate: 0,
+                stockQuantity: 0,
+                reorderLevel: 0,
                 trackInventory: true,
                 enabled: true,
               },
@@ -115,56 +115,30 @@ async function autoInitDatabase() {
           },
         }))
       );
-      console.log(`✅ Default product catalog populated (${defaultProductsList.length} items with 50 stock)`);
+      console.log(`✅ Default product catalog populated (${defaultProductsList.length} items)`);
     }
 
-    // Ensure ALL existing non-service products in the database have 50 stock for billing
-    const StockMovement = mongoose.model('StockMovement');
-    const adminId = defaultAdmin?._id || new mongoose.Types.ObjectId();
-    const productPriceMap = new Map(defaultProductsList.map((p) => [p.sku, p]));
+    // Only update stock to 50 in LOCAL database - in production database, do not change anything!
+    const isLocalDatabase =
+      process.env.NODE_ENV !== 'production' ||
+      process.env.DATABASE?.includes('127.0.0.1') ||
+      process.env.DATABASE?.includes('localhost');
 
-    const existingProducts = await Product.find({ removed: false });
-    let updatedStockCount = 0;
+    if (isLocalDatabase) {
+      const StockMovement = mongoose.model('StockMovement');
+      const adminId = defaultAdmin?._id || new mongoose.Types.ObjectId();
+      const existingProducts = await Product.find({ removed: false });
 
-    for (const prod of existingProducts) {
-      if (prod.itemType === 'service') continue;
+      for (const prod of existingProducts) {
+        if (prod.itemType === 'service') continue;
+        const previousStock = Number(prod.stockQuantity || 0);
 
-      const previousStock = Number(prod.stockQuantity || 0);
-      let modified = false;
+        if (prod.stockQuantity !== 50) {
+          prod.stockQuantity = 50;
+          prod.trackInventory = true;
+          prod.enabled = true;
+          await prod.save();
 
-      // Always set stock to 50 as requested for billing
-      if (prod.stockQuantity !== 50) {
-        prod.stockQuantity = 50;
-        modified = true;
-      }
-      if (!prod.trackInventory) {
-        prod.trackInventory = true;
-        modified = true;
-      }
-      if (!prod.enabled) {
-        prod.enabled = true;
-        modified = true;
-      }
-
-      const defaultMeta = productPriceMap.get(prod.sku);
-      if ((!prod.sellingPrice || prod.sellingPrice === 0) && defaultMeta?.sellingPrice) {
-        prod.sellingPrice = defaultMeta.sellingPrice;
-        modified = true;
-      }
-      if ((!prod.purchasePrice || prod.purchasePrice === 0) && defaultMeta?.purchasePrice) {
-        prod.purchasePrice = defaultMeta.purchasePrice;
-        modified = true;
-      }
-      if ((!prod.gstRate || prod.gstRate === 0) && (defaultMeta?.gstRate || 18)) {
-        prod.gstRate = defaultMeta?.gstRate || 18;
-        modified = true;
-      }
-
-      if (modified) {
-        await prod.save();
-        updatedStockCount++;
-
-        if (previousStock !== 50) {
           try {
             await StockMovement.create({
               product: prod._id,
@@ -176,8 +150,8 @@ async function autoInitDatabase() {
               stockBefore: previousStock,
               stockAfter: 50,
               referenceType: 'manual',
-              note: 'Initialized to 50 stock for POS billing',
-              reason: 'POS billing stock availability',
+              note: 'Initialized to 50 stock for local billing',
+              reason: 'Local billing stock availability',
               createdBy: adminId,
             });
           } catch (smError) {
@@ -185,10 +159,6 @@ async function autoInitDatabase() {
           }
         }
       }
-    }
-
-    if (updatedStockCount > 0) {
-      console.log(`✅ Ensured stock quantity = 50 for ${updatedStockCount} products for billing`);
     }
   } catch (error) {
     console.error('⚠️ Auto-initialization warning:', error.message);
