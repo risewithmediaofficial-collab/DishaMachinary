@@ -418,70 +418,172 @@ export default function Inventory() {
         ref={adjustmentFormRef}
         style={{
           background: '#ffffff',
-          border: '1px solid #cbd5e1',
-          borderRadius: 14,
-          padding: '20px 24px',
+          border: '1px solid #e2e8f0',
+          borderRadius: 16,
+          padding: '22px 24px',
           marginBottom: 24,
-          boxShadow: '0 4px 12px -2px rgba(15, 23, 42, 0.05)',
+          boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <Tag color="blue" style={{ fontWeight: 800, padding: '2px 8px' }}>QUICK ADJUSTMENT</Tag>
-          <span style={{ fontWeight: 800, fontSize: 15, color: '#0f172a' }}>Record Stock In / Stock Out</span>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 18,
+            flexWrap: 'wrap',
+            gap: 8,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                background: '#eff6ff',
+                color: '#2563eb',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 16,
+                fontWeight: 800,
+              }}
+            >
+              ⚡
+            </div>
+            <div>
+              <span style={{ fontWeight: 800, fontSize: 15, color: '#0f172a' }}>Quick Stock Adjustment</span>
+              <span style={{ fontSize: 12, color: '#64748b', marginLeft: 8 }}>
+                Instantly record warehouse stock in or stock out
+              </span>
+            </div>
+          </div>
+          <Tag color="blue" style={{ fontWeight: 700, borderRadius: 10 }}>Audit Logged</Tag>
         </div>
 
-        <Form form={form} layout="inline" onFinish={submitAdjustment} style={{ gap: '14px 16px', alignItems: 'flex-start' }}>
-          <Form.Item
-            name="productId"
-            label="Product"
-            rules={[{ required: true, message: 'Select product' }]}
-            style={{ margin: 0, minWidth: 320, flex: 1 }}
-          >
-            <Select
-              showSearch
-              placeholder="Search and select product from all catalog items..."
-              value={productId}
-              onChange={(val) => {
-                setProductId(val);
-                form.setFieldsValue({ productId: val });
-              }}
-              filterOption={(input, option) => {
-                const q = (input || '').toLowerCase().trim();
-                return (
-                  (option?.label && option.label.toLowerCase().includes(q)) ||
-                  (option?.sku && option.sku.toLowerCase().includes(q))
-                );
-              }}
-              options={products.map((p) => ({
-                value: p._id,
-                label: `${p.name} · SKU: ${p.sku} (Available: ${Number(p.stockQuantity || 0) - Number(p.reservedQuantity || 0)})`,
-                sku: p.sku,
-              }))}
-            />
-          </Form.Item>
+        <Form form={form} layout="vertical" onFinish={submitAdjustment}>
+          <Row gutter={[14, 12]} align="bottom">
+            {/* PRODUCT SELECTOR */}
+            <Col xs={24} sm={24} md={10} lg={9}>
+              <Form.Item
+                name="productId"
+                label={<span style={{ fontWeight: 700, fontSize: 12.5, color: '#334155' }}>Select Product / Machine</span>}
+                rules={[{ required: true, message: 'Please select a product' }]}
+                style={{ marginBottom: 0 }}
+              >
+                <Select
+                  showSearch
+                  size="large"
+                  placeholder="Search by name, SKU or model..."
+                  value={productId}
+                  onChange={(val) => {
+                    setProductId(val);
+                    form.setFieldsValue({ productId: val });
+                  }}
+                  filterOption={(input, option) => {
+                    const q = (input || '').toLowerCase().trim();
+                    return option?.searchStr && option.searchStr.toLowerCase().includes(q);
+                  }}
+                  options={products.map((p) => {
+                    const avail = Number(p.stockQuantity || 0) - Number(p.reservedQuantity || 0);
+                    return {
+                      value: p._id,
+                      searchStr: `${p.name} ${p.sku} ${p.modelNumber || ''}`,
+                      label: (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontWeight: 600, color: '#0f172a' }}>{p.name}</span>
+                          <span style={{ fontSize: 11, color: '#64748b', whiteSpace: 'nowrap' }}>
+                            <Tag color="blue" style={{ margin: 0, padding: '0 4px', fontSize: 11, borderRadius: 4 }}>
+                              {p.sku}
+                            </Tag>{' '}
+                            Avail: <strong style={{ color: avail > 0 ? '#16a34a' : '#dc2626' }}>{avail}</strong>
+                          </span>
+                        </div>
+                      ),
+                    };
+                  })}
+                  style={{ width: '100%', borderRadius: 8 }}
+                />
+              </Form.Item>
+            </Col>
 
-          <Form.Item name="direction" label="Action" initialValue="in" rules={[{ required: true }]} style={{ margin: 0, width: 145 }}>
-            <Select
-              options={[
-                { value: 'in', label: '📥 Stock In (Add)' },
-                { value: 'out', label: '📤 Stock Out (Deduct)' },
-              ]}
-            />
-          </Form.Item>
+            {/* ACTION TYPE */}
+            <Col xs={24} sm={12} md={4} lg={3}>
+              <Form.Item
+                name="direction"
+                label={<span style={{ fontWeight: 700, fontSize: 12.5, color: '#334155' }}>Action</span>}
+                initialValue="in"
+                rules={[{ required: true }]}
+                style={{ marginBottom: 0 }}
+              >
+                <Select
+                  size="large"
+                  options={[
+                    { value: 'in', label: '📥 Stock In (+)' },
+                    { value: 'out', label: '📤 Stock Out (-)' },
+                  ]}
+                  style={{ width: '100%', borderRadius: 8 }}
+                />
+              </Form.Item>
+            </Col>
 
-          <Form.Item name="quantity" label="Qty" rules={[{ required: true, message: 'Enter quantity' }]} style={{ margin: 0, width: 110 }}>
-            <InputNumber min={1} step={1} placeholder="Quantity" style={{ width: '100%' }} />
-          </Form.Item>
+            {/* QUANTITY */}
+            <Col xs={24} sm={12} md={3} lg={3}>
+              <Form.Item
+                name="quantity"
+                label={<span style={{ fontWeight: 700, fontSize: 12.5, color: '#334155' }}>Quantity</span>}
+                rules={[{ required: true, message: 'Enter quantity' }]}
+                style={{ marginBottom: 0 }}
+              >
+                <InputNumber
+                  size="large"
+                  min={1}
+                  step={1}
+                  placeholder="Units"
+                  style={{ width: '100%', borderRadius: 8 }}
+                />
+              </Form.Item>
+            </Col>
 
-          <Form.Item name="note" label="Reason" style={{ margin: 0, width: 220 }}>
-            <Input maxLength={180} placeholder="e.g. Restock / Return" />
-          </Form.Item>
+            {/* REASON / NOTE */}
+            <Col xs={24} sm={16} md={5} lg={6}>
+              <Form.Item
+                name="note"
+                label={<span style={{ fontWeight: 700, fontSize: 12.5, color: '#334155' }}>Reason / Note</span>}
+                style={{ marginBottom: 0 }}
+              >
+                <Input
+                  size="large"
+                  maxLength={180}
+                  placeholder="e.g. Shipment arrival / Return"
+                  style={{ borderRadius: 8 }}
+                />
+              </Form.Item>
+            </Col>
 
-          <Form.Item style={{ margin: 0 }}>
-            <Button type="primary" htmlType="submit" loading={loading} style={{ fontWeight: 700, borderRadius: 6, height: 36 }}>
-              Record Adjustment
-            </Button>
-          </Form.Item>
+            {/* SUBMIT BUTTON */}
+            <Col xs={24} sm={8} md={2} lg={3}>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  size="large"
+                  loading={loading}
+                  style={{
+                    width: '100%',
+                    fontWeight: 700,
+                    borderRadius: 8,
+                    height: 40,
+                    background: 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%)',
+                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)',
+                  }}
+                >
+                  Adjust
+                </Button>
+              </Form.Item>
+            </Col>
+          </Row>
         </Form>
       </div>
 
@@ -489,9 +591,9 @@ export default function Inventory() {
       <div
         style={{
           background: '#ffffff',
-          borderRadius: 14,
+          borderRadius: 16,
           border: '1px solid #e2e8f0',
-          padding: '20px 24px',
+          padding: '22px 24px',
           boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
           marginBottom: 24,
         }}
@@ -501,28 +603,34 @@ export default function Inventory() {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: 16,
+            marginBottom: 20,
             flexWrap: 'wrap',
-            gap: 12,
+            gap: 16,
           }}
         >
           <div>
-            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: '#0f172a' }}>
-              Current Stock Levels ({filteredProducts.length} of {products.length})
-            </h2>
-            <span style={{ fontSize: 12, color: '#64748b' }}>
-              Displays all machines and spares added to the product catalog
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.01em' }}>
+                Current Stock Levels
+              </h2>
+              <Tag color="blue" style={{ borderRadius: 10, fontWeight: 700, margin: 0 }}>
+                {filteredProducts.length} of {products.length} Products
+              </Tag>
+            </div>
+            <p style={{ margin: '4px 0 0', fontSize: 12.5, color: '#64748b' }}>
+              Real-time on-hand, reserved, and available quantities across the product catalog
+            </p>
           </div>
 
-          <Space size="middle" wrap>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Input
               prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
-              placeholder="Filter by product name, SKU or model..."
+              placeholder="Search product name, SKU or model..."
               value={stockSearch}
               onChange={(e) => setStockSearch(e.target.value)}
               allowClear
-              style={{ width: 280, borderRadius: 8 }}
+              size="middle"
+              style={{ width: 270, borderRadius: 8 }}
             />
 
             <Radio.Group
@@ -531,12 +639,20 @@ export default function Inventory() {
               buttonStyle="solid"
               size="middle"
             >
-              <Radio.Button value="all">All</Radio.Button>
-              <Radio.Button value="in_stock">In Stock ({stockStats.inStock})</Radio.Button>
-              <Radio.Button value="low_stock">Low Stock ({stockStats.lowStock})</Radio.Button>
-              <Radio.Button value="out_of_stock">Out of Stock ({stockStats.outOfStock})</Radio.Button>
+              <Radio.Button value="all" style={{ borderRadius: '8px 0 0 8px' }}>
+                All ({products.length})
+              </Radio.Button>
+              <Radio.Button value="in_stock">
+                In Stock ({stockStats.inStock})
+              </Radio.Button>
+              <Radio.Button value="low_stock">
+                Low Stock ({stockStats.lowStock})
+              </Radio.Button>
+              <Radio.Button value="out_of_stock" style={{ borderRadius: '0 8px 8px 0' }}>
+                Out of Stock ({stockStats.outOfStock})
+              </Radio.Button>
             </Radio.Group>
-          </Space>
+          </div>
         </div>
 
         <Table
