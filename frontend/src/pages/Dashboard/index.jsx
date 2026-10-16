@@ -141,38 +141,38 @@ export default function Dashboard() {
           gap: 16,
           marginBottom: 24,
           padding: '20px 24px',
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          background: '#ffffff',
           borderRadius: 20,
-          boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.3)',
-          color: '#ffffff',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
         }}
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div
               style={{
-                width: 36,
-                height: 36,
+                width: 38,
+                height: 38,
                 borderRadius: 10,
-                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#ffffff',
+                color: '#2563eb',
                 fontSize: 18,
-                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
               }}
             >
               <AppstoreOutlined />
             </div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em' }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>
               Executive Dashboard
             </h1>
             <Tag color="blue" style={{ fontWeight: 700, borderRadius: 12, marginLeft: 4 }}>
               LIVE ERP
             </Tag>
           </div>
-          <p style={{ margin: '6px 0 0', color: '#94a3b8', fontSize: 13 }}>
+          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}>
             Real-time business performance, sales velocity, collections, and warehouse analytics
           </p>
         </div>
@@ -183,7 +183,13 @@ export default function Dashboard() {
             onChange={(val) => setRange(val)}
             disabledDate={(date) => date && date.isAfter(dayjs(), 'day')}
             placeholder={['Start date', 'End date']}
-            style={{ borderRadius: 10, height: 40, border: '1px solid rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.08)', color: '#ffffff' }}
+            style={{
+              borderRadius: 10,
+              height: 40,
+              border: '1px solid #cbd5e1',
+              background: '#ffffff',
+              color: '#0f172a',
+            }}
           />
 
           <Button
@@ -196,7 +202,7 @@ export default function Dashboard() {
               fontWeight: 700,
               background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
               border: 'none',
-              boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)',
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
             }}
           >
             Open POS Billing
@@ -209,9 +215,9 @@ export default function Dashboard() {
               height: 40,
               borderRadius: 10,
               fontWeight: 600,
-              background: 'rgba(255,255,255,0.1)',
-              color: '#ffffff',
-              border: '1px solid rgba(255,255,255,0.2)',
+              background: '#ffffff',
+              color: '#334155',
+              border: '1px solid #cbd5e1',
             }}
           >
             All Bills
@@ -225,9 +231,9 @@ export default function Dashboard() {
                 height: 40,
                 width: 40,
                 borderRadius: 10,
-                background: 'rgba(255,255,255,0.1)',
-                color: '#ffffff',
-                border: '1px solid rgba(255,255,255,0.2)',
+                background: '#ffffff',
+                color: '#334155',
+                border: '1px solid #cbd5e1',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -822,7 +828,7 @@ export default function Dashboard() {
             title="Customer Directory"
             subtitle="Clients & outstanding balances"
             icon={<ShopOutlined />}
-            gradient={['#0f172a', '#334155']}
+            gradient={['#0284c7', '#0369a1']}
             onClick={() => navigate('/customer')}
           />
         </div>

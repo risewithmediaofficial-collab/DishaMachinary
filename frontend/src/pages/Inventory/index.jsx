@@ -328,12 +328,12 @@ export default function Inventory() {
       {/* HEADER BAR */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+          background: '#ffffff',
           borderRadius: 16,
-          padding: '24px 28px',
-          color: '#ffffff',
+          padding: '20px 24px',
+          border: '1px solid #e2e8f0',
           marginBottom: 20,
-          boxShadow: '0 8px 24px -4px rgba(15, 23, 42, 0.2)',
+          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -343,22 +343,37 @@ export default function Inventory() {
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <InboxOutlined style={{ fontSize: 26, color: '#60a5fa' }} />
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#ffffff', letterSpacing: 0.3 }}>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#2563eb',
+                fontSize: 18,
+              }}
+            >
+              <InboxOutlined />
+            </div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>
               Inventory & Warehouse Stock
             </h1>
-            <Tag color="blue" style={{ fontWeight: 700, borderRadius: 12, marginLeft: 6 }}>
+            <Tag color="blue" style={{ fontWeight: 700, borderRadius: 12, marginLeft: 4 }}>
               All {products.length} Products
             </Tag>
           </div>
-          <p style={{ margin: '6px 0 0', color: '#cbd5e1', fontSize: 13 }}>
+          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}>
             Live stock balance, manual restock / deduction, and real-time movement audit trails
           </p>
         </div>
 
         <Button
           icon={<ReloadOutlined />}
-          style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.25)', borderRadius: 8 }}
+          style={{ background: '#ffffff', color: '#334155', border: '1px solid #cbd5e1', borderRadius: 8, fontWeight: 600 }}
           onClick={loadProducts}
           loading={productsLoading}
         >

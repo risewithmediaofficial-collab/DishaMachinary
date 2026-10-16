@@ -35,12 +35,12 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
       {/* TOP HEADER BANNER */}
       <div
         style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)',
+          background: '#ffffff',
           borderRadius: 16,
-          padding: '24px 28px',
-          color: '#ffffff',
+          padding: '20px 24px',
+          border: '1px solid #e2e8f0',
           marginBottom: 24,
-          boxShadow: '0 8px 24px -4px rgba(15, 23, 42, 0.2)',
+          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -50,15 +50,30 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <SettingOutlined style={{ fontSize: 26, color: '#60a5fa' }} />
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#ffffff', letterSpacing: 0.3 }}>
+            <div
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 10,
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#2563eb',
+                fontSize: 18,
+              }}
+            >
+              <SettingOutlined />
+            </div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>
               {pageTitle || 'System Settings & Preferences'}
             </h1>
             <Tag color="blue" style={{ fontWeight: 700, borderRadius: 12, marginLeft: 6 }}>
               Enterprise ERP
             </Tag>
           </div>
-          <p style={{ margin: '6px 0 0', color: '#cbd5e1', fontSize: 13 }}>
+          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}>
             Manage your company profile, currency standards, logo branding, and system configurations
           </p>
         </div>
