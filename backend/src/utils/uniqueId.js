@@ -1,3 +1,10 @@
-const { randomUUID } = require('crypto');
+const crypto = require('crypto');
 
-module.exports = { generate: randomUUID };
+const generate = () => {
+  if (crypto && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return crypto.randomBytes(16).toString('hex');
+};
+
+module.exports = { generate };

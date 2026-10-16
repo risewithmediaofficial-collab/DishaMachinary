@@ -79,43 +79,116 @@ async function autoInitDatabase() {
     }
 
     // Seed default products if empty
+    const defaultProductsPath = './src/setup/defaultProducts.json';
+    const defaultProductsList = fs.existsSync(defaultProductsPath)
+      ? JSON.parse(fs.readFileSync(defaultProductsPath, 'utf-8'))
+      : [];
+
+    const defaultAdmin = await Admin.findOne({ email: 'admin@admin.com' });
     const productCount = await Product.countDocuments({ removed: false });
-    if (productCount === 0) {
-      const defaultProductsPath = './src/setup/defaultProducts.json';
-      if (fs.existsSync(defaultProductsPath)) {
-        const products = JSON.parse(fs.readFileSync(defaultProductsPath, 'utf-8'));
-        const defaultAdmin = await Admin.findOne({ email: 'admin@admin.com' });
-        if (defaultAdmin && products.length > 0) {
-          await Product.bulkWrite(
-            products.map(({ name, sku }) => ({
-              updateOne: {
-                filter: { sku },
-                update: {
-                  $setOnInsert: {
-                    name,
-                    sku,
-                    createdBy: defaultAdmin._id,
-                    itemType: 'product',
-                    unit: 'piece',
-                    hsnCode: '',
-                    description: '',
-                    purchasePrice: 0,
-                    sellingPrice: 0,
-                    wholesalePrice: 0,
-                    gstRate: 0,
-                    stockQuantity: 0,
-                    reorderLevel: 0,
-                    trackInventory: true,
-                    enabled: true,
-                  },
-                },
-                upsert: true,
+
+    if (productCount === 0 && defaultAdmin && defaultProductsList.length > 0) {
+      await Product.bulkWrite(
+        defaultProductsList.map((item) => ({
+          updateOne: {
+            filter: { sku: item.sku },
+            update: {
+              $setOnInsert: {
+                name: item.name,
+                sku: item.sku,
+                createdBy: defaultAdmin._id,
+                itemType: 'product',
+                unit: 'piece',
+                hsnCode: '8479',
+                description: item.name,
+                purchasePrice: item.purchasePrice || 25000,
+                sellingPrice: item.sellingPrice || 35000,
+                wholesalePrice: item.purchasePrice ? item.purchasePrice * 1.15 : 28000,
+                gstRate: item.gstRate || 18,
+                stockQuantity: item.stockQuantity || 50,
+                reorderLevel: 5,
+                trackInventory: true,
+                enabled: true,
               },
-            }))
-          );
-          console.log(`✅ Default product catalog populated (${products.length} items)`);
+            },
+            upsert: true,
+          },
+        }))
+      );
+      console.log(`✅ Default product catalog populated (${defaultProductsList.length} items with 50 stock)`);
+    }
+
+    // Ensure ALL existing non-service products in the database have 50 stock for billing
+    const StockMovement = mongoose.model('StockMovement');
+    const adminId = defaultAdmin?._id || new mongoose.Types.ObjectId();
+    const productPriceMap = new Map(defaultProductsList.map((p) => [p.sku, p]));
+
+    const existingProducts = await Product.find({ removed: false });
+    let updatedStockCount = 0;
+
+    for (const prod of existingProducts) {
+      if (prod.itemType === 'service') continue;
+
+      const previousStock = Number(prod.stockQuantity || 0);
+      let modified = false;
+
+      // Always set stock to 50 as requested for billing
+      if (prod.stockQuantity !== 50) {
+        prod.stockQuantity = 50;
+        modified = true;
+      }
+      if (!prod.trackInventory) {
+        prod.trackInventory = true;
+        modified = true;
+      }
+      if (!prod.enabled) {
+        prod.enabled = true;
+        modified = true;
+      }
+
+      const defaultMeta = productPriceMap.get(prod.sku);
+      if ((!prod.sellingPrice || prod.sellingPrice === 0) && defaultMeta?.sellingPrice) {
+        prod.sellingPrice = defaultMeta.sellingPrice;
+        modified = true;
+      }
+      if ((!prod.purchasePrice || prod.purchasePrice === 0) && defaultMeta?.purchasePrice) {
+        prod.purchasePrice = defaultMeta.purchasePrice;
+        modified = true;
+      }
+      if ((!prod.gstRate || prod.gstRate === 0) && (defaultMeta?.gstRate || 18)) {
+        prod.gstRate = defaultMeta?.gstRate || 18;
+        modified = true;
+      }
+
+      if (modified) {
+        await prod.save();
+        updatedStockCount++;
+
+        if (previousStock !== 50) {
+          try {
+            await StockMovement.create({
+              product: prod._id,
+              productName: prod.name,
+              sku: prod.sku,
+              type: 'adjustment',
+              quantity: Math.abs(50 - previousStock),
+              delta: 50 - previousStock,
+              stockBefore: previousStock,
+              stockAfter: 50,
+              referenceType: 'manual',
+              note: 'Initialized to 50 stock for POS billing',
+              reason: 'POS billing stock availability',
+              createdBy: adminId,
+            });
+          } catch (smError) {
+            // ignore non-critical stock movement logging error
+          }
         }
       }
+    }
+
+    if (updatedStockCount > 0) {
+      console.log(`✅ Ensured stock quantity = 50 for ${updatedStockCount} products for billing`);
     }
   } catch (error) {
     console.error('⚠️ Auto-initialization warning:', error.message);

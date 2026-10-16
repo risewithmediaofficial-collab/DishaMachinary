@@ -31,6 +31,7 @@ import {
   DeleteOutlined,
   ShoppingCartOutlined,
   SearchOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import AutoCompleteAsync from '@/components/AutoCompleteAsync';
@@ -56,12 +57,34 @@ export default function Pos() {
   const [creatingCustomer, setCreatingCustomer] = useState(false);
   const [billSuccessModalOpen, setBillSuccessModalOpen] = useState(false);
   const [lastCreatedInvoice, setLastCreatedInvoice] = useState(null);
+  const [stockUpdating, setStockUpdating] = useState(false);
 
-  useEffect(() => {
+  const loadProducts = () => {
     request.list({ entity: 'product', options: { page: 1, items: 100 } }).then((response) => {
       setProducts(response?.success && Array.isArray(response.result) ? response.result : []);
     });
+  };
+
+  useEffect(() => {
+    loadProducts();
   }, []);
+
+  const setAllStockTo50 = async () => {
+    setStockUpdating(true);
+    try {
+      const response = await request.post({ entity: 'product/set-all-stock-50' });
+      if (response?.success) {
+        message.success(response.message || 'All products stock updated to 50!');
+        loadProducts();
+      } else {
+        message.error(response?.message || 'Could not update stock.');
+      }
+    } catch (e) {
+      message.error('Failed to update stock');
+    } finally {
+      setStockUpdating(false);
+    }
+  };
 
   const subTotal = useMemo(
     () => Number(cart.reduce((sum, line) => sum + line.quantity * line.product.sellingPrice, 0).toFixed(2)),
@@ -115,6 +138,18 @@ export default function Pos() {
     if (!quantity) return;
     setCart((current) =>
       current.map((line) => (line.product._id === productId ? { ...line, quantity } : line))
+    );
+  };
+
+  const updatePrice = (productId, price) => {
+    const numPrice = Number(price);
+    if (isNaN(numPrice) || numPrice < 0) return;
+    setCart((current) =>
+      current.map((line) =>
+        line.product._id === productId
+          ? { ...line, product: { ...line.product, sellingPrice: numPrice } }
+          : line
+      )
     );
   };
 
@@ -200,6 +235,14 @@ export default function Pos() {
         </Col>
         <Col>
           <Space>
+            <Button
+              type="dashed"
+              onClick={setAllStockTo50}
+              loading={stockUpdating}
+              icon={<ReloadOutlined />}
+            >
+              Add 50 Stock (All Products)
+            </Button>
             <Button onClick={() => navigate('/invoice')}>All Invoices</Button>
             {cart.length > 0 && (
               <Button danger onClick={() => setCart([])}>
@@ -264,10 +307,18 @@ export default function Pos() {
                   ),
                 },
                 {
-                  title: 'Price',
+                  title: 'Price (₹)',
                   dataIndex: 'sellingPrice',
                   align: 'right',
-                  render: (value) => `₹ ${Number(value).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+                  render: (value, product) => (
+                    <InputNumber
+                      min={0}
+                      precision={2}
+                      value={value}
+                      onChange={(price) => updatePrice(product._id, price)}
+                      style={{ width: 105 }}
+                    />
+                  ),
                 },
                 {
                   title: 'GST %',

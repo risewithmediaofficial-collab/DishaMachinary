@@ -16,6 +16,36 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function() {
+        if (typeof window !== 'undefined') {
+          if (!window.crypto) {
+            window.crypto = {};
+          }
+          if (typeof window.crypto.randomUUID !== 'function') {
+            window.crypto.randomUUID = function() {
+              if (typeof window.crypto.getRandomValues === 'function') {
+                try {
+                  var buf = new Uint8Array(16);
+                  window.crypto.getRandomValues(buf);
+                  buf[6] = (buf[6] & 0x0f) | 0x40;
+                  buf[8] = (buf[8] & 0x3f) | 0x80;
+                  var hex = Array.prototype.map.call(buf, function(b) {
+                    return ('00' + b.toString(16)).slice(-2);
+                  }).join('');
+                  return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-' + hex.slice(12, 16) + '-' + hex.slice(16, 20) + '-' + hex.slice(20);
+                } catch(e) {}
+              }
+              return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = (Math.random() * 16) | 0;
+                var v = c === 'x' ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+              });
+            };
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
