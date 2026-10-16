@@ -320,7 +320,7 @@ export default function DataTable({ config, extra = [] }) {
         pagination={pagination}
         loading={listIsLoading}
         onChange={handelDataTableLoad}
-        scroll={{ x: 'max-content' }}
+        scroll={{ x: 'max-content', y: 'calc(100vh - 290px)' }}
         onRow={(record) => ({
           onClick: () => handleRead(record),
           style: { cursor: 'pointer' },

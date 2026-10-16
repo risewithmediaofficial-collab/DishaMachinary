@@ -376,7 +376,7 @@ export default function Pos() {
               rowKey={(product) => product._id}
               dataSource={cart.map((line) => ({ ...line.product, quantity: line.quantity }))}
               pagination={false}
-              scroll={{ x: 'max-content' }}
+              scroll={{ x: 'max-content', y: 380 }}
               locale={{
                 emptyText: (
                   <Empty

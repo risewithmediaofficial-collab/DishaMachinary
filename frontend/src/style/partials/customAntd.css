@@ -91,19 +91,36 @@
   border: 1px solid #e2e8f0 !important;
 }
 
-.ant-table-content {
+.ant-table-content,
+.ant-table-body {
   overflow-x: auto;
+  overflow-y: auto;
 }
 
+.ant-table-body::-webkit-scrollbar,
 .ant-table-content::-webkit-scrollbar {
+  width: 6px;
   height: 6px;
 }
+.ant-table-body::-webkit-scrollbar-thumb,
 .ant-table-content::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 3px;
 }
+.ant-table-body::-webkit-scrollbar-thumb:hover,
+.ant-table-content::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+.ant-table-body::-webkit-scrollbar-track,
 .ant-table-content::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f8fafc;
+}
+
+.ant-table-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: #f1f5f9 !important;
 }
 
 .ant-table-thead > tr > th {

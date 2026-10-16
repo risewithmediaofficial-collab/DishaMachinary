@@ -666,7 +666,7 @@ export default function Inventory() {
             pageSizeOptions: ['10', '25', '50', '100', '500'],
             showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} products`,
           }}
-          scroll={{ x: 'max-content' }}
+          scroll={{ x: 'max-content', y: 480 }}
           locale={{ emptyText: 'No products matching search criteria' }}
         />
       </div>
@@ -709,7 +709,7 @@ export default function Inventory() {
           dataSource={movements}
           loading={movementsLoading}
           pagination={{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '25', '50'] }}
-          scroll={{ x: 'max-content' }}
+          scroll={{ x: 'max-content', y: 360 }}
           locale={{
             emptyText: productId
               ? 'No movements recorded yet for this product'
