@@ -47,6 +47,7 @@ export default function Pos() {
   const [form] = Form.useForm();
   const [customerForm] = Form.useForm();
   const [products, setProducts] = useState([]);
+  const [productSearch, setProductSearch] = useState('');
   const [cart, setCart] = useState([]);
   const [gstEnabled, setGstEnabled] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -57,7 +58,7 @@ export default function Pos() {
   const [billSuccessModalOpen, setBillSuccessModalOpen] = useState(false);
   const [lastCreatedInvoice, setLastCreatedInvoice] = useState(null);
   const loadProducts = () => {
-    request.list({ entity: 'product', options: { page: 1, items: 100 } }).then((response) => {
+    request.list({ entity: 'product', options: { page: 1, items: 200 } }).then((response) => {
       setProducts(response?.success && Array.isArray(response.result) ? response.result : []);
     });
   };
@@ -91,8 +92,32 @@ export default function Pos() {
   const total = Math.max(0, Number((subTotal - safeDiscount + taxTotal).toFixed(2)));
   const paidNow = Number(Form.useWatch('paidNow', form) || 0);
 
+  const productOptions = useMemo(() => {
+    return products.map((product) => {
+      const available = Number(product.stockQuantity || 0) - Number(product.reservedQuantity || 0);
+      const labelParts = [
+        product.name,
+        product.sku ? `SKU: ${product.sku}` : null,
+        product.modelNumber ? `Model: ${product.modelNumber}` : null,
+        `₹${Number(product.sellingPrice || 0).toLocaleString('en-IN')}`,
+        `(${available} in stock)`,
+      ].filter(Boolean);
+
+      return {
+        value: product._id,
+        label: labelParts.join(' · '),
+        searchTerms: [product.name, product.sku, product.modelNumber, product.barcode]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase(),
+      };
+    });
+  }, [products]);
+
   const addProduct = (value) => {
-    const product = products.find((item) => item._id === value);
+    const product = products.find(
+      (item) => item._id === value || item.sku === value || item.barcode === value
+    );
     if (!product) return;
     const available = Number(product.stockQuantity || 0) - Number(product.reservedQuantity || 0);
     if (product.trackInventory && available <= 0) {
@@ -112,6 +137,37 @@ export default function Pos() {
       }
       return [...current, { product, quantity: 1 }];
     });
+  };
+
+  const handleSearchChange = (val, option) => {
+    if (option) {
+      setProductSearch('');
+      return;
+    }
+    setProductSearch(val || '');
+  };
+
+  const handleSelectProduct = (productId) => {
+    addProduct(productId);
+    setProductSearch('');
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      const q = (productSearch || '').trim().toLowerCase();
+      if (!q) return;
+
+      const exactMatch = products.find(
+        (p) =>
+          (p.sku && p.sku.toLowerCase() === q) ||
+          (p.barcode && p.barcode.toLowerCase() === q)
+      );
+      if (exactMatch) {
+        e.preventDefault();
+        addProduct(exactMatch._id);
+        setProductSearch('');
+      }
+    }
   };
 
   const updateQuantity = (productId, quantity) => {
@@ -241,17 +297,21 @@ export default function Pos() {
             <AutoComplete
               style={{ width: '100%', marginBottom: 16 }}
               placeholder="Search machine, tool, spare SKU or barcode..."
-              options={products.map((product) => ({
-                value: product._id,
-                label: `${product.name} · SKU: ${product.sku} · ${
-                  product.modelNumber ? 'Model: ' + product.modelNumber : ''
-                } · ₹${Number(product.sellingPrice).toLocaleString('en-IN')} · (${
-                  Number(product.stockQuantity || 0) - Number(product.reservedQuantity || 0)
-                } in stock)`,
-              }))}
-              filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-              onSelect={addProduct}
-              value=""
+              value={productSearch}
+              onChange={handleSearchChange}
+              onSelect={handleSelectProduct}
+              onKeyDown={handleSearchKeyDown}
+              options={productOptions}
+              filterOption={(input, option) => {
+                if (!input) return true;
+                const q = input.trim().toLowerCase();
+                return (
+                  (option?.searchTerms && option.searchTerms.includes(q)) ||
+                  (option?.label && typeof option.label === 'string' && option.label.toLowerCase().includes(q)) ||
+                  false
+                );
+              }}
+              allowClear
             />
 
             <Table
