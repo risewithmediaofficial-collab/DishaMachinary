@@ -139,11 +139,13 @@ export default function Pos() {
     });
   };
 
-  const handleSearchChange = (val, option) => {
-    if (option) {
+  const handleSearchChange = (val) => {
+    // If val is the ID of an existing product (i.e. selected from the dropdown), reset to empty
+    if (products.some((p) => p._id === val)) {
       setProductSearch('');
       return;
     }
+    // When typing in the search box, store and show the typed search query
     setProductSearch(val || '');
   };
 
@@ -304,13 +306,14 @@ export default function Pos() {
               options={productOptions}
               filterOption={(input, option) => {
                 if (!input) return true;
-                const q = input.trim().toLowerCase();
-                return (
-                  (option?.searchTerms && option.searchTerms.includes(q)) ||
-                  (option?.label && typeof option.label === 'string' && option.label.toLowerCase().includes(q)) ||
-                  false
-                );
+                const terms = input.trim().toLowerCase().split(/\s+/).filter(Boolean);
+                if (!terms.length) return true;
+                const searchable = `${option?.searchTerms || ''} ${
+                  typeof option?.label === 'string' ? option.label.toLowerCase() : ''
+                }`;
+                return terms.every((term) => searchable.includes(term));
               }}
+              defaultActiveFirstOption
               allowClear
             />
 
