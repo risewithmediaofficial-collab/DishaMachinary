@@ -197,7 +197,7 @@ function MobileSidebar() {
       closable={false}
       onClose={() => appContextAction.mobileMenu.close()}
       open={isMobileMenuOpen}
-      bodyStyle={{ padding: 0 }}
+      styles={{ body: { padding: 0 } }}
       maskClosable={true}
     >
       <Sidebar collapsible={false} isMobile={true} onItemClick={() => appContextAction.mobileMenu.close()} />
