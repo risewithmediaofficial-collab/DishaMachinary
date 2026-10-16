@@ -87,21 +87,57 @@ export default function Dashboard() {
         return { label: 'This Week', sales: summary?.thisWeek?.sales || 0, bills: summary?.thisWeek?.bills || 0, grossProfit: summary?.thisWeek?.grossProfit || 0, collected: summary?.thisWeek?.collected || 0 };
       case 'thisYear':
         return { label: 'This Year', sales: summary?.thisYear?.sales || 0, bills: summary?.thisYear?.bills || 0, grossProfit: summary?.thisYear?.grossProfit || 0, collected: summary?.thisYear?.collected || 0 };
+      case 'all':
+        return { label: 'All Periods', sales: summary?.thisYear?.sales || 0, bills: summary?.thisYear?.bills || 0, grossProfit: summary?.thisYear?.grossProfit || 0, collected: summary?.thisYear?.collected || 0 };
       case 'thisMonth':
       default:
         return { label: 'This Month', sales: summary?.thisMonth?.sales || 0, bills: summary?.thisMonth?.bills || 0, grossProfit: summary?.thisMonth?.grossProfit || 0, collected: summary?.thisMonth?.collected || 0 };
     }
   }, [summary, activePeriod, range]);
 
-  // Sales comparison periods for the bar chart
+  // All comparison periods data
+  const allPeriodsData = useMemo(() => [
+    { key: 'today', label: 'Today', sales: summary?.today?.sales || 0, bills: summary?.today?.bills || 0 },
+    { key: 'thisWeek', label: 'This Week', sales: summary?.thisWeek?.sales || 0, bills: summary?.thisWeek?.bills || 0 },
+    { key: 'thisMonth', label: 'This Month', sales: summary?.thisMonth?.sales || 0, bills: summary?.thisMonth?.bills || 0 },
+    { key: 'thisYear', label: 'This Year', sales: summary?.thisYear?.sales || 0, bills: summary?.thisYear?.bills || 0 },
+  ], [summary]);
+
+  // Sales comparison periods filtered for the bar chart
   const salesComparison = useMemo(() => {
-    return [
-      { label: 'Today', sales: summary?.today?.sales || 0, bills: summary?.today?.bills || 0 },
-      { label: 'This Week', sales: summary?.thisWeek?.sales || 0, bills: summary?.thisWeek?.bills || 0 },
-      { label: 'This Month', sales: summary?.thisMonth?.sales || 0, bills: summary?.thisMonth?.bills || 0 },
-      { label: 'This Year', sales: summary?.thisYear?.sales || 0, bills: summary?.thisYear?.bills || 0 },
-    ];
-  }, [summary]);
+    if (range && summary?.customRange) {
+      return [
+        {
+          key: 'custom',
+          label: `Custom (${range[0].format('DD/MM')} - ${range[1].format('DD/MM')})`,
+          sales: summary.customRange.sales || 0,
+          bills: summary.customRange.bills || 0,
+        },
+      ];
+    }
+    if (activePeriod === 'all') {
+      return allPeriodsData;
+    }
+    const matched = allPeriodsData.find((p) => p.key === activePeriod);
+    return matched ? [matched] : [allPeriodsData[2]];
+  }, [allPeriodsData, activePeriod, range, summary]);
+
+  const chartTitle = useMemo(() => {
+    if (range) return 'Selected Range Sales Volume';
+    switch (activePeriod) {
+      case 'today':
+        return "Today's Sales Volume";
+      case 'thisWeek':
+        return "This Week's Sales Volume";
+      case 'thisYear':
+        return "This Year's Sales Volume";
+      case 'all':
+        return 'Period Sales Volume Comparison';
+      case 'thisMonth':
+      default:
+        return "This Month's Sales Volume";
+    }
+  }, [activePeriod, range]);
 
   // Financial comparative bar chart data
   const financialFlow = useMemo(() => {
@@ -300,13 +336,17 @@ export default function Dashboard() {
                   { key: 'thisWeek', label: 'Week' },
                   { key: 'thisMonth', label: 'Month' },
                   { key: 'thisYear', label: 'Year' },
+                  { key: 'all', label: 'All' },
                 ].map((p) => {
                   const isSelected = !range && activePeriod === p.key;
                   return (
                     <button
                       key={p.key}
                       type="button"
-                      onClick={() => setActivePeriod(p.key)}
+                      onClick={() => {
+                        setRange(null);
+                        setActivePeriod(p.key);
+                      }}
                       style={{
                         border: 'none',
                         background: isSelected ? '#ffffff' : 'transparent',
@@ -330,9 +370,17 @@ export default function Dashboard() {
             {/* SVG SALES BAR VISUALIZATION GRAPH */}
             <div style={{ marginTop: 20 }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#64748b', marginBottom: 12 }}>
-                Period Sales Volume Comparison
+                {chartTitle}
               </div>
-              <SalesBarChart data={salesComparison} formatter={formatMoney} activeKey={activePeriod} />
+              <SalesBarChart
+                data={salesComparison}
+                formatter={formatMoney}
+                activeKey={activePeriod}
+                onSelectKey={(key) => {
+                  setRange(null);
+                  setActivePeriod(key);
+                }}
+              />
             </div>
           </div>
 
@@ -960,7 +1008,8 @@ export default function Dashboard() {
 /**
  * Modern SVG Sales Bar Chart with Tooltips & Value Labels
  */
-function SalesBarChart({ data, formatter, activeKey }) {
+function SalesBarChart({ data, formatter, activeKey, onSelectKey }) {
+  const isSingle = data.length === 1;
   const maxVal = Math.max(...data.map((d) => d.sales), 1);
   const chartHeight = 160;
 
@@ -976,6 +1025,10 @@ function SalesBarChart({ data, formatter, activeKey }) {
             <stop offset="0%" stopColor="#60a5fa" />
             <stop offset="100%" stopColor="#2563eb" />
           </linearGradient>
+          <linearGradient id="barGradEmpty" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#e2e8f0" />
+            <stop offset="100%" stopColor="#cbd5e1" />
+          </linearGradient>
         </defs>
 
         {/* HORIZONTAL GRID LINES */}
@@ -986,13 +1039,19 @@ function SalesBarChart({ data, formatter, activeKey }) {
         {/* BARS */}
         {data.map((item, index) => {
           const colWidthPct = 100 / data.length;
-          const barWidth = 44;
+          const barWidth = isSingle ? 56 : 44;
           const leftPct = (index + 0.5) * colWidthPct;
           const barHeight = item.sales > 0 ? Math.max((item.sales / maxVal) * (chartHeight - 30), 8) : 4;
           const y = chartHeight - barHeight;
+          const isBarClickable = Boolean(onSelectKey && item.key && !isSingle);
 
           return (
-            <g key={item.label} className="chart-bar-group">
+            <g
+              key={item.label}
+              className="chart-bar-group"
+              onClick={() => isBarClickable && onSelectKey(item.key)}
+              style={{ cursor: isBarClickable ? 'pointer' : 'default' }}
+            >
               {/* BAR RECT */}
               <rect
                 x={`calc(${leftPct}% - ${barWidth / 2}px)`}
@@ -1000,16 +1059,15 @@ function SalesBarChart({ data, formatter, activeKey }) {
                 width={barWidth}
                 height={barHeight}
                 rx={8}
-                fill={item.sales > 0 ? 'url(#barGrad)' : '#e2e8f0'}
+                fill={item.sales > 0 ? 'url(#barGrad)' : 'url(#barGradEmpty)'}
                 style={{
                   transition: 'height 0.4s ease, y 0.4s ease',
-                  cursor: 'pointer',
                   filter: item.sales > 0 ? 'drop-shadow(0 4px 6px rgba(37,99,235,0.2))' : 'none',
                 }}
               />
 
               {/* VALUE LABEL ON TOP */}
-              {item.sales > 0 && (
+              {item.sales > 0 ? (
                 <text
                   x={`${leftPct}%`}
                   y={y - 8}
@@ -1020,6 +1078,17 @@ function SalesBarChart({ data, formatter, activeKey }) {
                 >
                   {formatter(item.sales)}
                 </text>
+              ) : (
+                <text
+                  x={`${leftPct}%`}
+                  y={chartHeight - 8}
+                  textAnchor="middle"
+                  fill="#94a3b8"
+                  fontSize="11"
+                  fontWeight="600"
+                >
+                  {formatter(0)}
+                </text>
               )}
             </g>
           );
@@ -1028,12 +1097,25 @@ function SalesBarChart({ data, formatter, activeKey }) {
 
       {/* LABELS UNDERNEATH */}
       <div style={{ display: 'flex', width: '100%', marginTop: 8 }}>
-        {data.map((item) => (
-          <div key={item.label} style={{ flex: 1, textAlign: 'center' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#334155' }}>{item.label}</div>
-            <div style={{ fontSize: 11, color: '#94a3b8' }}>{item.bills} {item.bills === 1 ? 'bill' : 'bills'}</div>
-          </div>
-        ))}
+        {data.map((item) => {
+          const isLabelClickable = Boolean(onSelectKey && item.key && !isSingle);
+          return (
+            <div
+              key={item.label}
+              onClick={() => isLabelClickable && onSelectKey(item.key)}
+              style={{
+                flex: 1,
+                textAlign: 'center',
+                cursor: isLabelClickable ? 'pointer' : 'default',
+              }}
+            >
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#334155' }}>{item.label}</div>
+              <div style={{ fontSize: 11, color: '#94a3b8' }}>
+                {item.bills} {item.bills === 1 ? 'bill' : 'bills'}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
