@@ -22,28 +22,49 @@ export default function Invoice() {
     {
       title: translate('Number'),
       dataIndex: 'number',
+      width: 100,
+      render: (number) => (
+        <span style={{ fontWeight: 700, color: '#0f172a' }}>
+          #{number}
+        </span>
+      ),
     },
     {
       title: translate('Client'),
       dataIndex: ['client', 'name'],
+      width: 180,
+      ellipsis: true,
+      render: (name) => (
+        <span style={{ fontWeight: 600, color: '#0f172a' }}>
+          {name || 'Walk-in Customer'}
+        </span>
+      ),
     },
     {
       title: translate('Date'),
       dataIndex: 'date',
-      render: (date) => {
-        return dayjs(date).format(dateFormat);
-      },
+      width: 120,
+      render: (date) => (
+        <span style={{ color: '#475569' }}>
+          {dayjs(date).format(dateFormat)}
+        </span>
+      ),
     },
     {
       title: translate('expired Date'),
       dataIndex: 'expiredDate',
-      render: (date) => {
-        return dayjs(date).format(dateFormat);
-      },
+      width: 125,
+      render: (date) => (
+        <span style={{ color: '#475569' }}>
+          {dayjs(date).format(dateFormat)}
+        </span>
+      ),
     },
     {
       title: translate('Total'),
       dataIndex: 'total',
+      width: 130,
+      align: 'right',
       onCell: () => ({
         style: {
           textAlign: 'right',
@@ -51,11 +72,17 @@ export default function Invoice() {
           direction: 'ltr',
         },
       }),
-      render: (total, record) => moneyFormatter({ amount: total, currency_code: record.currency }),
+      render: (total, record) => (
+        <span style={{ fontWeight: 600, color: '#0f172a' }}>
+          {moneyFormatter({ amount: total, currency_code: record.currency })}
+        </span>
+      ),
     },
     {
       title: translate('paid'),
       dataIndex: 'credit',
+      width: 130,
+      align: 'right',
       onCell: () => ({
         style: {
           textAlign: 'right',
@@ -72,6 +99,8 @@ export default function Invoice() {
     {
       title: 'Balance Due',
       dataIndex: 'balance',
+      width: 140,
+      align: 'right',
       onCell: () => ({
         style: {
           textAlign: 'right',
@@ -91,6 +120,8 @@ export default function Invoice() {
     {
       title: translate('Status'),
       dataIndex: 'status',
+      width: 110,
+      align: 'center',
       render: (status) => {
         let color = 'default';
         if (status === 'posted') color = 'blue';
@@ -102,6 +133,8 @@ export default function Invoice() {
     {
       title: translate('Payment'),
       dataIndex: 'paymentStatus',
+      width: 150,
+      align: 'center',
       render: (paymentStatus, record) => {
         const balance = Math.max(0, Number(record.total || 0) - Number(record.credit || 0));
         if (paymentStatus === 'paid' || balance === 0) {

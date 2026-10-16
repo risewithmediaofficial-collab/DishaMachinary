@@ -19,45 +19,54 @@ export default function Payment() {
   const dataTableColumns = [
     {
       title: translate('Number'),
-
       dataIndex: 'number',
+      width: 100,
+      render: (number) => <strong>#{number}</strong>,
     },
     {
       title: translate('Client'),
       dataIndex: ['client', 'name'],
+      width: 180,
+      ellipsis: true,
+      render: (name) => <span style={{ fontWeight: 600 }}>{name || 'Walk-in Customer'}</span>,
     },
     {
       title: translate('Amount'),
       dataIndex: 'amount',
-      onCell: () => {
-        return {
-          style: {
-            textAlign: 'right',
-            whiteSpace: 'nowrap',
-            direction: 'ltr',
-          },
-        };
-      },
-      render: (amount, record) =>
-        moneyFormatter({ amount: amount, currency_code: record.currency }),
+      width: 130,
+      align: 'right',
+      onCell: () => ({
+        style: {
+          textAlign: 'right',
+          whiteSpace: 'nowrap',
+          direction: 'ltr',
+        },
+      }),
+      render: (amount, record) => (
+        <span style={{ fontWeight: 700, color: '#16a34a' }}>
+          {moneyFormatter({ amount: amount, currency_code: record.currency })}
+        </span>
+      ),
     },
     {
       title: translate('Date'),
       dataIndex: 'date',
-      render: (date) => {
-        return dayjs(date).format(dateFormat);
-      },
+      width: 120,
+      render: (date) => dayjs(date).format(dateFormat),
     },
     {
       title: 'Bill No',
       dataIndex: ['invoice', 'number'],
+      width: 120,
       render: (number, record) => `#${number || '-'}/${record?.invoice?.year || ''}`,
     },
     {
       title: translate('Payment Mode'),
+      dataIndex: 'method',
+      width: 140,
       render: (_, record) => {
         const mode = record.method || record?.paymentMode?.name || 'cash';
-        return <span style={{ textTransform: 'uppercase', fontWeight: 600 }}>{mode}</span>;
+        return <Tag color="blue" style={{ textTransform: 'uppercase', fontWeight: 600 }}>{mode}</Tag>;
       },
     },
   ];
