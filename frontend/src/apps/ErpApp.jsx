@@ -62,10 +62,10 @@ export default function ErpCrmApp() {
             <Content
               className={isPosRoute ? 'pos-content' : undefined}
               style={{
-                margin: '10px auto 20px',
+                margin: '8px auto 16px',
                 overflow: 'initial',
                 width: '100%',
-                padding: '0 12px',
+                padding: '0 8px',
                 maxWidth: 'none',
               }}
             >

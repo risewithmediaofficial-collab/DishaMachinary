@@ -37,14 +37,14 @@ export default function SettingsLayout({
   return (
     <Layout className="site-layout">
       <Content
+        className="settings-layout-content"
         style={{
-          padding: '30px 40px',
           margin: '0px auto',
           width: '100%',
           maxWidth: '1100px',
         }}
       >
-        <Row gutter={[24, 24]}>
+        <Row gutter={[16, 16]}>
           <Col
             className="gutter-row"
             xs={{ span: 24 }}
@@ -52,7 +52,7 @@ export default function SettingsLayout({
             md={{ span: 17 }}
             lg={{ span: 18 }}
           >
-            <div className="whiteBox shadow" style={{ minHeight: '480px', maxWidth: '800px' }}>
+            <div className="whiteBox shadow" style={{ minHeight: '380px', maxWidth: '800px', borderRadius: 12 }}>
               <Row className="pad40" gutter={[0, 0]}>
                 <Col span={24}>{children}</Col>
               </Row>
@@ -66,12 +66,22 @@ export default function SettingsLayout({
             lg={{ span: 6 }}
           >
             <TopCard title={topCardTitle} cardContent={topCardContent} />
-            <div className="whiteBox shadow" style={{ minHeight: '280px' }}>
+            <div className="whiteBox shadow" style={{ minHeight: '200px', borderRadius: 12 }}>
               <Row gutter={[0, 0]}>{bottomCardContent}</Row>
             </div>
           </Col>
         </Row>
       </Content>
+      <style>{`
+        .settings-layout-content {
+          padding: 30px 40px;
+        }
+        @media (max-width: 768px) {
+          .settings-layout-content {
+            padding: 8px 6px !important;
+          }
+        }
+      `}</style>
     </Layout>
   );
 }

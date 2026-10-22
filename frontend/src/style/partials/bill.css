@@ -657,6 +657,137 @@ table.bill-main-table td.text-center { text-align: center; }
 }
 
 /* ===================================================
+   Mobile Screen Responsiveness for Bill Viewer & Invoices
+   =================================================== */
+@media screen and (max-width: 768px) {
+  .bill-viewer-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto 16px !important;
+  }
+
+  .bill-control-bar {
+    padding: 10px 10px !important;
+    border-radius: 10px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .bill-format-tab {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .bill-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .bill-actions .ant-btn {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    height: 40px !important;
+  }
+
+  .bill-paper-a4 {
+    padding: 14px 12px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+    max-width: 100% !important;
+    font-size: 11.5px !important;
+  }
+
+  .bill-brand-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding-bottom: 12px !important;
+  }
+
+  .bill-brand-left {
+    gap: 10px !important;
+  }
+
+  .bill-emblem {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 24px !important;
+  }
+
+  .bill-brand-title {
+    font-size: 18px !important;
+  }
+
+  .bill-brand-right {
+    text-align: left !important;
+    border-top: 1px dashed #e2e8f0 !important;
+    padding-top: 8px !important;
+  }
+
+  .bill-doc-title {
+    font-size: 17px !important;
+    text-align: left !important;
+  }
+
+  .bill-meta-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    padding: 8px 10px !important;
+  }
+
+  .bill-parties-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .bill-table-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    border-radius: 6px !important;
+    margin-bottom: 14px !important;
+  }
+
+  table.bill-main-table {
+    min-width: 520px !important;
+    font-size: 11px !important;
+  }
+
+  table.bill-main-table th,
+  table.bill-main-table tbody td {
+    padding: 7px 8px !important;
+  }
+
+  .bill-bottom-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .bill-summary-table {
+    width: 100% !important;
+  }
+
+  .bill-signatures {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 20px !important;
+    margin-top: 20px !important;
+  }
+
+  .bill-signature-box {
+    align-self: flex-start !important;
+    width: 180px !important;
+  }
+
+  .bill-paper-thermal {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 12px 10px !important;
+    border-radius: 8px !important;
+  }
+}
+
+/* ===================================================
    Print Optimization - Clean Like Bill
    =================================================== */
 @media print {

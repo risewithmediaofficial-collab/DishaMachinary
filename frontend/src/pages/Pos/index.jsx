@@ -372,22 +372,22 @@ export default function Pos() {
 
   return (
     <main className="pos-page">
-      <Row className="pos-page-header" justify="space-between" align="middle" style={{ marginBottom: 18 }}>
-        <Col>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <Typography.Title level={3} style={{ margin: 0, fontWeight: 800, color: '#0f172a' }}>
+      <Row className="pos-page-header" justify="space-between" align="middle" gutter={[12, 12]} style={{ marginBottom: 16 }}>
+        <Col xs={24} md={16}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <Typography.Title level={3} style={{ margin: 0, fontWeight: 800, color: '#0f172a', fontSize: '18px' }}>
               POS Billing Counter
             </Typography.Title>
             <Tag color="blue" style={{ fontWeight: 600, borderRadius: 6 }}>
               Disha Machinary
             </Tag>
           </div>
-          <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+          <Typography.Text type="secondary" style={{ fontSize: 12.5, display: 'block', marginTop: 2 }}>
             Search machinery products, configure GST, and print Thermal (80mm) or A4 bills instantly
           </Typography.Text>
         </Col>
-        <Col>
-          <Space>
+        <Col xs={24} md={8}>
+          <Space wrap style={{ width: '100%', justifyContent: 'flex-start' }}>
             <Button onClick={() => navigate('/invoice')}>All Invoices</Button>
             {cart.length > 0 && (
               <Button danger onClick={() => setCart([])}>
@@ -645,9 +645,9 @@ export default function Pos() {
                   marginBottom: 12,
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 6 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>Amount Paid (₹)</span>
-                  <Space size={4}>
+                  <Space size={4} wrap>
                     <Button
                       size="small"
                       type={hasEnteredPaidNow && Number(paidNowWatch) === total ? 'primary' : 'default'}

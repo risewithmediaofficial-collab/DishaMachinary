@@ -298,6 +298,8 @@ export default function DataTable({ config, extra = [] }) {
             background: '#fef2f2',
             border: '1px solid #fecaca',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            flexWrap: 'wrap',
+            gap: 10,
           }}
         >
           <Space size={12}>

@@ -132,7 +132,7 @@ function Sidebar({ collapsible, isMobile = false, onItemClick }) {
       collapsed={collapsible ? isNavMenuClose : collapsible}
       onCollapse={onCollapse}
       className="navigation"
-      width={isMobile ? 280 : 256}
+      width={isMobile ? '100%' : 256}
       style={{
         height: isMobile ? '100%' : '100dvh',
         minHeight: 0,
@@ -190,9 +190,14 @@ function MobileSidebar() {
   const { state: stateApp, appContextAction } = useAppContext();
   const { isMobileMenuOpen } = stateApp;
 
+  const drawerWidth =
+    typeof window !== 'undefined'
+      ? Math.min(280, Math.max(260, window.innerWidth - 44))
+      : 280;
+
   return (
     <Drawer
-      width={280}
+      width={drawerWidth}
       placement="left"
       closable={false}
       onClose={() => appContextAction.mobileMenu.close()}

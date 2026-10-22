@@ -52,25 +52,27 @@ const AdminInfo = ({ config }) => {
           padding: '20px 0px',
         }}
       ></PageHeader>
-      <Row align="middle">
+      <Row align="middle" gutter={[16, 16]}>
         <Col xs={{ span: 24 }} sm={{ span: 7 }} md={{ span: 5 }}>
-          <Avatar
-            className="last left"
-            src={currentAdmin?.photo ? FILE_BASE_URL + currentAdmin?.photo : undefined}
-            size={96}
-            style={{
-              color: '#f56a00',
-              backgroundColor: currentAdmin?.photo ? 'none' : '#fde3cf',
-              boxShadow: 'rgba(150, 190, 238, 0.35) 0px 0px 15px 3px',
-              fontSize: '48px',
-            }}
-            alt={`${currentAdmin?.name}`}
-          >
-            {currentAdmin?.name.charAt(0).toUpperCase()}
-          </Avatar>
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <Avatar
+              className="last"
+              src={currentAdmin?.photo ? FILE_BASE_URL + currentAdmin?.photo : undefined}
+              size={96}
+              style={{
+                color: '#f56a00',
+                backgroundColor: currentAdmin?.photo ? 'none' : '#fde3cf',
+                boxShadow: 'rgba(150, 190, 238, 0.35) 0px 0px 15px 3px',
+                fontSize: '48px',
+              }}
+              alt={`${currentAdmin?.name}`}
+            >
+              {currentAdmin?.name?.charAt(0)?.toUpperCase()}
+            </Avatar>
+          </div>
         </Col>
-        <Col xs={{ span: 24 }} sm={{ span: 18 }}>
-          <Descriptions column={1} size="middle">
+        <Col xs={{ span: 24 }} sm={{ span: 17 }} md={{ span: 19 }}>
+          <Descriptions column={1} size="middle" bordered={false}>
             <Descriptions.Item label={translate('first name')}>
               {currentAdmin?.name}
             </Descriptions.Item>
@@ -83,14 +85,16 @@ const AdminInfo = ({ config }) => {
         </Col>
       </Row>
       <Divider />
-      <Button
-        key={`${uniqueId()}`}
-        icon={<LogoutOutlined />}
-        className="right"
-        onClick={() => navigate('/logout')}
-      >
-        {translate('Logout')}
-      </Button>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          key={`${uniqueId()}`}
+          icon={<LogoutOutlined />}
+          danger
+          onClick={() => navigate('/logout')}
+        >
+          {translate('Logout')}
+        </Button>
+      </div>
     </>
   );
 };

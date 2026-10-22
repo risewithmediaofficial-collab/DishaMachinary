@@ -166,23 +166,9 @@ export default function Dashboard() {
   const marginPct = monthlyRevenue > 0 ? Math.round((monthlyProfit / monthlyRevenue) * 100) : 0;
 
   return (
-    <div style={{ maxWidth: 1440, margin: '0 auto', padding: '16px 20px 48px' }}>
+    <div className="dashboard-page-container">
       {/* ===================== TOP HEADER & CONTROLS ===================== */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 16,
-          marginBottom: 24,
-          padding: '20px 24px',
-          background: '#ffffff',
-          borderRadius: 20,
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
-        }}
-      >
+      <div className="dashboard-header-card">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div
@@ -201,81 +187,53 @@ export default function Dashboard() {
             >
               <AppstoreOutlined />
             </div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>
+            <h1 className="dashboard-page-title">
               Executive Dashboard
             </h1>
             <Tag color="blue" style={{ fontWeight: 700, borderRadius: 12, marginLeft: 4 }}>
               LIVE ERP
             </Tag>
           </div>
-          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}>
+          <p className="dashboard-page-subtitle">
             Real-time business performance, sales velocity, collections, and warehouse analytics
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <div className="dashboard-header-controls">
           <RangePicker
             value={range}
             onChange={(val) => setRange(val)}
             disabledDate={(date) => date && date.isAfter(dayjs(), 'day')}
             placeholder={['Start date', 'End date']}
-            style={{
-              borderRadius: 10,
-              height: 40,
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#0f172a',
-            }}
+            className="dashboard-range-picker"
           />
 
           <Button
             type="primary"
             icon={<ThunderboltOutlined />}
             onClick={() => navigate('/pos')}
-            style={{
-              height: 40,
-              borderRadius: 10,
-              fontWeight: 700,
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-              border: 'none',
-              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
-            }}
+            className="dashboard-btn-pos"
           >
             Open POS Billing
           </Button>
 
-          <Button
-            icon={<FileTextOutlined />}
-            onClick={() => navigate('/invoice')}
-            style={{
-              height: 40,
-              borderRadius: 10,
-              fontWeight: 600,
-              background: '#ffffff',
-              color: '#334155',
-              border: '1px solid #cbd5e1',
-            }}
-          >
-            All Bills
-          </Button>
-
-          <Tooltip title="Refresh Dashboard">
+          <div className="dashboard-btn-row">
             <Button
-              icon={<SyncOutlined spin={loading} />}
-              onClick={loadSummary}
-              style={{
-                height: 40,
-                width: 40,
-                borderRadius: 10,
-                background: '#ffffff',
-                color: '#334155',
-                border: '1px solid #cbd5e1',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            />
-          </Tooltip>
+              icon={<FileTextOutlined />}
+              onClick={() => navigate('/invoice')}
+              className="dashboard-btn-bills"
+            >
+              All Bills
+            </Button>
+
+            <Tooltip title="Refresh Dashboard">
+              <Button
+                icon={<SyncOutlined spin={loading} />}
+                onClick={loadSummary}
+                className="dashboard-btn-refresh"
+              />
+            </Tooltip>
+          </div>
         </div>
       </div>
 
@@ -322,15 +280,7 @@ export default function Dashboard() {
               </div>
 
               {/* PERIOD SWITCHER PILLS */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 4,
-                  background: '#f1f5f9',
-                  padding: 4,
-                  borderRadius: 12,
-                }}
-              >
+              <div className="dashboard-period-switcher">
                 {[
                   { key: 'today', label: 'Today' },
                   { key: 'thisWeek', label: 'Week' },
@@ -347,18 +297,7 @@ export default function Dashboard() {
                         setRange(null);
                         setActivePeriod(p.key);
                       }}
-                      style={{
-                        border: 'none',
-                        background: isSelected ? '#ffffff' : 'transparent',
-                        color: isSelected ? '#1d4ed8' : '#64748b',
-                        fontWeight: isSelected ? 800 : 600,
-                        fontSize: 12,
-                        padding: '6px 14px',
-                        borderRadius: 8,
-                        cursor: 'pointer',
-                        boxShadow: isSelected ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
-                        transition: 'all 0.2s ease',
-                      }}
+                      className={`dashboard-period-pill ${isSelected ? 'active' : ''}`}
                     >
                       {p.label}
                     </button>
@@ -837,13 +776,7 @@ export default function Dashboard() {
         <div style={{ fontSize: 13, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.6, color: '#64748b', marginBottom: 12 }}>
           ⚡ QUICK WORKSPACE ACTIONS
         </div>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 14,
-          }}
-        >
+        <div className="dashboard-quick-actions-grid">
           <QuickActionTile
             title="Point of Sale"
             subtitle="Fast checkout & thermal bill"
@@ -940,6 +873,7 @@ export default function Dashboard() {
               dataSource={summary?.recentPayments || []}
               pagination={false}
               size="small"
+              scroll={{ x: 400 }}
               locale={{ emptyText: <Empty description="No payments recorded yet" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
               columns={[
                 {
@@ -987,6 +921,119 @@ export default function Dashboard() {
 
       {/* INJECT BENTO GRID RESPONSIVE STYLES */}
       <style>{`
+        .dashboard-page-container {
+          max-width: 1440px;
+          margin: 0 auto;
+          padding: 16px 20px 48px;
+        }
+        .dashboard-header-card {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+          margin-bottom: 24px;
+          padding: 20px 24px;
+          background: #ffffff;
+          border-radius: 20px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+        }
+        .dashboard-page-title {
+          margin: 0;
+          font-size: 22px;
+          font-weight: 900;
+          color: #0f172a;
+          letter-spacing: -0.02em;
+        }
+        .dashboard-page-subtitle {
+          margin: 4px 0 0;
+          color: #64748b;
+          fontSize: 13px;
+        }
+        .dashboard-header-controls {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .dashboard-range-picker {
+          border-radius: 10px;
+          height: 40px;
+          border: 1px solid #cbd5e1;
+          background: #ffffff;
+          color: #0f172a;
+        }
+        .dashboard-btn-pos {
+          height: 40px;
+          border-radius: 10px;
+          font-weight: 700;
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+          border: none;
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+        .dashboard-btn-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .dashboard-btn-bills {
+          height: 40px;
+          border-radius: 10px;
+          font-weight: 600;
+          background: #ffffff;
+          color: #334155;
+          border: 1px solid #cbd5e1;
+        }
+        .dashboard-btn-refresh {
+          height: 40px;
+          width: 40px;
+          border-radius: 10px;
+          background: #ffffff;
+          color: #334155;
+          border: 1px solid #cbd5e1;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .dashboard-bento-card {
+          background: #ffffff;
+          border-radius: 20px;
+          border: 1px solid #e2e8f0;
+          padding: 24px;
+          box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+        }
+        .dashboard-period-switcher {
+          display: flex;
+          gap: 4px;
+          background: #f1f5f9;
+          padding: 4px;
+          border-radius: 12px;
+        }
+        .dashboard-period-pill {
+          border: none;
+          background: transparent;
+          color: #64748b;
+          font-weight: 600;
+          font-size: 12px;
+          padding: 6px 14px;
+          border-radius: 8px;
+          cursor: pointer;
+          box-shadow: none;
+          transition: all 0.2s ease;
+        }
+        .dashboard-period-pill.active {
+          background: #ffffff;
+          color: #1d4ed8;
+          font-weight: 800;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+        .dashboard-quick-actions-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 14px;
+        }
+
         @media (min-width: 992px) {
           .bento-hero-span {
             grid-column: span 7 !important;
@@ -996,6 +1043,91 @@ export default function Dashboard() {
           }
           .bento-col-4 {
             grid-column: span 4 !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .dashboard-page-container {
+            padding: 0 0 32px;
+          }
+          .dashboard-header-card {
+            padding: 14px 14px;
+            border-radius: 14px;
+            margin-bottom: 14px;
+          }
+          .dashboard-page-title {
+            font-size: 18px;
+          }
+          .dashboard-page-subtitle {
+            font-size: 12px;
+          }
+          .dashboard-header-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            gap: 10px;
+          }
+          .dashboard-range-picker {
+            width: 100% !important;
+            height: 38px;
+            border-radius: 8px;
+          }
+          .dashboard-btn-pos {
+            width: 100% !important;
+            height: 42px;
+            border-radius: 8px;
+            font-size: 14px;
+          }
+          .dashboard-btn-row {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+          }
+          .dashboard-btn-bills {
+            flex: 1;
+            height: 38px;
+            border-radius: 8px;
+          }
+          .dashboard-btn-refresh {
+            height: 38px;
+            width: 38px;
+            border-radius: 8px;
+            flex-shrink: 0;
+          }
+          .dashboard-bento-card,
+          .bento-hero-span,
+          .bento-profit-span,
+          .bento-col-4 {
+            padding: 14px 12px !important;
+            border-radius: 14px !important;
+          }
+          .dashboard-period-switcher {
+            max-width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 3px;
+            gap: 4px;
+            scrollbar-width: none;
+          }
+          .dashboard-period-switcher::-webkit-scrollbar {
+            display: none;
+          }
+          .dashboard-period-pill {
+            flex: 0 0 auto;
+            padding: 5px 10px;
+            font-size: 11.5px;
+            border-radius: 6px;
+          }
+          .dashboard-quick-actions-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 10px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .dashboard-quick-actions-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
@@ -1292,6 +1424,7 @@ function RecentBills({ moneyFormatter, onRowClick }) {
       dataSource={rows}
       pagination={false}
       size="small"
+      scroll={{ x: 400 }}
       locale={{ emptyText: <Empty description="No bills created yet" image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
       columns={[
         {

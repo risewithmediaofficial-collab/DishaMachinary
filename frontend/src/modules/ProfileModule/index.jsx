@@ -8,17 +8,29 @@ export default function ProfileModule({ config }) {
     <ProfileLayout>
       <Layout className="site-layout">
         <Content
-          className="whiteBox shadow"
+          className="whiteBox shadow profile-module-content"
           style={{
-            padding: '50px 40px',
-            margin: '100px auto',
+            margin: '16px auto',
             width: '100%',
             maxWidth: '1100px',
+            borderRadius: 14,
           }}
         >
           <Profile config={config} />
         </Content>
       </Layout>
+      <style>{`
+        .profile-module-content {
+          padding: 36px 32px;
+        }
+        @media (max-width: 768px) {
+          .profile-module-content {
+            padding: 16px 14px !important;
+            margin: 8px auto !important;
+            border-radius: 12px !important;
+          }
+        }
+      `}</style>
     </ProfileLayout>
   );
 }

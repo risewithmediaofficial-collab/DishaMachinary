@@ -180,12 +180,30 @@
 
 @media only screen and (max-width: 768px) {
   .layoutPadding {
-    padding: 14px 14px;
+    padding: 12px 10px;
   }
 
   .dashboardSpacing {
-    padding: 14px 14px;
-    margin: 12px auto;
+    padding: 12px 10px;
+    margin: 8px auto;
+  }
+
+  .pad40,
+  .pad33,
+  .pad30 {
+    padding: 14px 12px !important;
+  }
+
+  .pad25,
+  .pad20 {
+    padding: 12px 10px !important;
+  }
+
+  .mrg30,
+  .mrg25,
+  .mrg20 {
+    margin: 10px !important;
   }
 }
+
 

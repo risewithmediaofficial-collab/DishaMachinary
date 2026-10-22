@@ -95,11 +95,11 @@ function FixHeaderPanel({ config }) {
   };
 
   return (
-    <Row gutter={8}>
-      <Col className="gutter-row" span={21}>
+    <Row gutter={8} align="middle">
+      <Col className="gutter-row" xs={19} sm={20} md={21}>
         <SearchItem config={config} />
       </Col>
-      <Col className="gutter-row" span={3}>
+      <Col className="gutter-row" xs={5} sm={4} md={3}>
         <Button onClick={addNewItem} block={true} icon={<PlusOutlined />}></Button>
       </Col>
     </Row>

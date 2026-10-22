@@ -324,23 +324,9 @@ export default function Inventory() {
   ];
 
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto', padding: '16px' }}>
+    <div className="inventory-page-wrapper">
       {/* HEADER BAR */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: 16,
-          padding: '20px 24px',
-          border: '1px solid #e2e8f0',
-          marginBottom: 20,
-          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 16,
-        }}
-      >
+      <div className="inventory-header-card">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div
@@ -416,14 +402,7 @@ export default function Inventory() {
       {/* QUICK ADJUSTMENT FORM */}
       <div
         ref={adjustmentFormRef}
-        style={{
-          background: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: 16,
-          padding: '22px 24px',
-          marginBottom: 24,
-          boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
-        }}
+        className="inventory-card-section"
       >
         <div
           style={{
@@ -588,16 +567,7 @@ export default function Inventory() {
       </div>
 
       {/* STOCK LEVELS TABLE */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: 16,
-          border: '1px solid #e2e8f0',
-          padding: '22px 24px',
-          boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
-          marginBottom: 24,
-        }}
-      >
+      <div className="inventory-card-section">
         <div
           style={{
             display: 'flex',
@@ -622,7 +592,7 @@ export default function Inventory() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <div className="inventory-filters-row" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <Input
               prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
               placeholder="Search product name, SKU or model..."
@@ -630,7 +600,7 @@ export default function Inventory() {
               onChange={(e) => setStockSearch(e.target.value)}
               allowClear
               size="middle"
-              style={{ width: 270, borderRadius: 8 }}
+              className="inventory-search-input"
             />
 
             <Radio.Group
@@ -638,6 +608,7 @@ export default function Inventory() {
               onChange={(e) => setStatusFilter(e.target.value)}
               buttonStyle="solid"
               size="middle"
+              className="inventory-radio-group"
             >
               <Radio.Button value="all" style={{ borderRadius: '8px 0 0 8px' }}>
                 All ({products.length})
@@ -672,15 +643,7 @@ export default function Inventory() {
       </div>
 
       {/* STOCK AUDIT HISTORY */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: 14,
-          border: '1px solid #e2e8f0',
-          padding: '20px 24px',
-          boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
-        }}
-      >
+      <div className="inventory-card-section">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <HistoryOutlined style={{ color: '#2563eb', fontSize: 18 }} />

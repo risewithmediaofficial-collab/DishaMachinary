@@ -144,7 +144,7 @@ export default function ReadItem({ config, selectedItem }) {
               marginBottom: 14,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <Button
                 icon={<ArrowLeftOutlined />}
                 onClick={() => navigate('/invoice')}
@@ -152,7 +152,7 @@ export default function ReadItem({ config, selectedItem }) {
               >
                 Invoices
               </Button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>
                   Invoice #{currentErp.number}/{currentErp.year || ''}
                 </span>
@@ -173,7 +173,7 @@ export default function ReadItem({ config, selectedItem }) {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
               <Button
                 loading={mailInProgress}
                 onClick={() => send(currentErp._id)}

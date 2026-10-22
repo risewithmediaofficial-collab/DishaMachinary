@@ -16,7 +16,7 @@ const AuthModule = ({ authContent, AUTH_TITLE, isForRegistre = false }) => {
     <AuthLayout sideContent={<SideContent />}>
       <Content
         style={{
-          padding: isForRegistre ? '40px 30px 30px' : '100px 30px 30px',
+          padding: isForRegistre ? '24px 16px' : 'clamp(24px, 8vw, 80px) 16px',
           maxWidth: '440px',
           margin: '0 auto',
         }}
@@ -28,9 +28,10 @@ const AuthModule = ({ authContent, AUTH_TITLE, isForRegistre = false }) => {
             style={{
               margin: '0px auto 20px',
               display: 'block',
+              maxWidth: '100%',
+              height: 'auto',
             }}
-            height={60}
-            width={300}
+            width={260}
           />
           <div className="space10" />
         </Col>

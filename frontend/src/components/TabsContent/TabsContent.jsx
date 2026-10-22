@@ -31,23 +31,9 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
   };
 
   return (
-    <div style={{ maxWidth: 1360, margin: '0 auto', padding: '16px' }}>
+    <div className="settings-page-wrapper">
       {/* TOP HEADER BANNER */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: 16,
-          padding: '20px 24px',
-          border: '1px solid #e2e8f0',
-          marginBottom: 24,
-          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 16,
-        }}
-      >
+      <div className="settings-header-banner">
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div
@@ -62,18 +48,19 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
                 justifyContent: 'center',
                 color: '#2563eb',
                 fontSize: 18,
+                flexShrink: 0,
               }}
             >
               <SettingOutlined />
             </div>
-            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em' }}>
+            <h1 className="settings-page-title">
               {pageTitle || 'System Settings & Preferences'}
             </h1>
-            <Tag color="blue" style={{ fontWeight: 700, borderRadius: 12, marginLeft: 6 }}>
-              Enterprise ERP
+            <Tag color="blue" style={{ fontWeight: 700, borderRadius: 12, marginLeft: 4 }}>
+              ERP
             </Tag>
           </div>
-          <p style={{ margin: '4px 0 0', color: '#64748b', fontSize: 13 }}>
+          <p className="settings-page-subtitle">
             Manage your company profile, currency standards, logo branding, and system configurations
           </p>
         </div>
@@ -82,37 +69,19 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
           <Tag
             color="success"
             icon={<CheckCircleOutlined />}
-            style={{ padding: '4px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600 }}
+            style={{ padding: '3px 10px', borderRadius: 20, fontSize: 11.5, fontWeight: 600 }}
           >
-            System Online & Synced
+            System Synced
           </Tag>
         </div>
       </div>
 
       {/* TWO-COLUMN LAYOUT: NAVIGATION + CONTENT */}
-      <Row gutter={[24, 24]} style={{ alignItems: 'flex-start' }}>
+      <Row gutter={[20, 20]} style={{ alignItems: 'flex-start' }}>
         {/* NAVIGATION SIDEBAR */}
-        <Col xs={24} md={8} lg={7} style={{ position: 'sticky', top: 20, zIndex: 10 }}>
-          <div
-            className="settings-sidebar-static"
-            style={{
-              background: '#ffffff',
-              borderRadius: 16,
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.05)',
-              overflow: 'hidden',
-            }}
-          >
-            <div
-              style={{
-                padding: '18px 20px',
-                borderBottom: '1px solid #f1f5f9',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                background: '#fafafa',
-              }}
-            >
+        <Col xs={24} md={8} lg={7} className="settings-nav-col">
+          <div className="settings-sidebar-static">
+            <div className="settings-sidebar-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <AppstoreOutlined style={{ color: '#2563eb', fontSize: 16 }} />
                 <span style={{ fontWeight: 800, fontSize: 14, color: '#0f172a', letterSpacing: 0.2 }}>
@@ -124,7 +93,7 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
               </Tag>
             </div>
 
-            <div style={{ padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div className="settings-sidebar-list">
               {content.map((item) => {
                 const isActive = item.key === activeKey;
                 const itemColor = item.color || '#2563eb';
@@ -133,14 +102,8 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
                   <div
                     key={item.key}
                     onClick={() => handleSelectTab(item.key)}
+                    className={`settings-tab-item ${isActive ? 'active' : ''}`}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 14,
-                      padding: '12px 14px',
-                      borderRadius: 12,
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
                       background: isActive ? '#eff6ff' : 'transparent',
                       border: isActive ? `1.5px solid #bfdbfe` : '1.5px solid transparent',
                       boxShadow: isActive ? '0 2px 8px rgba(37, 99, 235, 0.08)' : 'none',
@@ -154,18 +117,10 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
                   >
                     {/* ICON CONTAINER */}
                     <div
+                      className="settings-tab-icon"
                       style={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: 10,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 18,
-                        flexShrink: 0,
                         background: isActive ? itemColor : '#f1f5f9',
                         color: isActive ? '#ffffff' : '#64748b',
-                        transition: 'all 0.2s ease',
                       }}
                     >
                       {item.icon}
@@ -174,26 +129,19 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
                     {/* LABEL & DESCRIPTION */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div
+                        className="settings-tab-label"
                         style={{
                           fontWeight: isActive ? 800 : 600,
-                          fontSize: 14,
                           color: isActive ? '#1d4ed8' : '#1e293b',
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
                         }}
                       >
                         {item.label}
                       </div>
                       {item.description && (
                         <div
+                          className="settings-tab-desc"
                           style={{
-                            fontSize: 11.5,
                             color: isActive ? '#3b82f6' : '#94a3b8',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            marginTop: 2,
                           }}
                         >
                           {item.description}
@@ -203,6 +151,7 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
 
                     {/* RIGHT CHEVRON */}
                     <RightOutlined
+                      className="settings-tab-chevron"
                       style={{
                         fontSize: 12,
                         color: isActive ? '#2563eb' : '#cbd5e1',
@@ -219,27 +168,112 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
 
         {/* ACTIVE CONTENT CARD WITH INLINE SCROLL */}
         <Col xs={24} md={16} lg={17}>
-          <div
-            className="settings-content-card"
-            style={{
-              background: '#ffffff',
-              borderRadius: 16,
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
-              padding: '28px 32px',
-              minHeight: 480,
-              maxHeight: 'calc(100vh - 190px)',
-              overflowY: 'auto',
-              overflowX: 'hidden',
-            }}
-          >
+          <div className="settings-content-card">
             {activeItem?.children}
           </div>
         </Col>
       </Row>
 
       <style>{`
+        .settings-page-wrapper {
+          max-width: 1360px;
+          margin: 0 auto;
+          padding: 16px;
+        }
+        .settings-header-banner {
+          background: #ffffff;
+          border-radius: 16px;
+          padding: 20px 24px;
+          border: 1px solid #e2e8f0;
+          margin-bottom: 24px;
+          box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+        }
+        .settings-page-title {
+          margin: 0;
+          font-size: 22px;
+          font-weight: 900;
+          color: #0f172a;
+          letter-spacing: -0.02em;
+        }
+        .settings-page-subtitle {
+          margin: 4px 0 0;
+          color: #64748b;
+          font-size: 13px;
+        }
+        .settings-nav-col {
+          position: sticky;
+          top: 20px;
+          z-index: 10;
+        }
+        .settings-sidebar-static {
+          background: #ffffff;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
+          overflow: hidden;
+        }
+        .settings-sidebar-header {
+          padding: 18px 20px;
+          border-bottom: 1px solid #f1f5f9;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: #fafafa;
+        }
+        .settings-sidebar-list {
+          padding: 12px 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .settings-tab-item {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 12px 14px;
+          border-radius: 12px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+        .settings-tab-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          flex-shrink: 0;
+          transition: all 0.2s ease;
+        }
+        .settings-tab-label {
+          font-size: 14px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .settings-tab-desc {
+          font-size: 11.5px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-top: 2px;
+        }
         .settings-content-card {
+          background: #ffffff;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+          padding: 28px 32px;
+          min-height: 480px;
+          max-height: calc(100vh - 190px);
+          overflow-y: auto;
+          overflow-x: hidden;
           scrollbar-width: thin;
           scrollbar-color: #cbd5e1 transparent;
         }
@@ -253,16 +287,71 @@ export default function TabsContent({ content, defaultActiveKey, pageTitle }) {
           background-color: #cbd5e1;
           border-radius: 9999px;
         }
-        .settings-content-card::-webkit-scrollbar-thumb:hover {
-          background-color: #94a3b8;
-        }
-        @media (max-width: 767px) {
-          .settings-sidebar-static {
+
+        @media (max-width: 768px) {
+          .settings-page-wrapper {
+            padding: 0 0 24px;
+          }
+          .settings-header-banner {
+            padding: 14px 14px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            gap: 10px;
+          }
+          .settings-page-title {
+            font-size: 18px;
+          }
+          .settings-page-subtitle {
+            font-size: 12px;
+          }
+          .settings-nav-col {
             position: static !important;
+            margin-bottom: 2px;
+          }
+          .settings-sidebar-static {
+            border-radius: 12px !important;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+          }
+          .settings-sidebar-header {
+            display: none !important;
+          }
+          .settings-sidebar-list {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            padding: 8px 8px !important;
+            gap: 8px !important;
+            scrollbar-width: none !important;
+          }
+          .settings-sidebar-list::-webkit-scrollbar {
+            display: none !important;
+          }
+          .settings-tab-item {
+            flex: 0 0 auto !important;
+            padding: 8px 12px !important;
+            gap: 8px !important;
+            border-radius: 10px !important;
+          }
+          .settings-tab-icon {
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 14px !important;
+            border-radius: 7px !important;
+          }
+          .settings-tab-label {
+            font-size: 12.5px !important;
+          }
+          .settings-tab-desc,
+          .settings-tab-chevron {
+            display: none !important;
           }
           .settings-content-card {
+            padding: 16px 14px !important;
+            border-radius: 14px !important;
             max-height: none !important;
             overflow-y: visible !important;
+            min-height: auto !important;
           }
         }
       `}</style>
