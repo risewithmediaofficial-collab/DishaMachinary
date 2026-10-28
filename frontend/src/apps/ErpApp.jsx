@@ -50,7 +50,8 @@ export default function ErpCrmApp() {
               className={isPosRoute ? 'pos-content' : undefined}
               style={{
                 margin: '8px auto 16px',
-                overflow: 'initial',
+                overflowY: 'auto',
+                overflowX: 'hidden',
                 width: '100%',
                 padding: '0 8px',
                 maxWidth: 'none',
@@ -68,6 +69,7 @@ export default function ErpCrmApp() {
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
+              minWidth: 0,
             }}
           >
             <HeaderContent />
@@ -77,11 +79,11 @@ export default function ErpCrmApp() {
                 flex: 1,
                 overflowY: 'auto',
                 overflowX: 'hidden',
-                padding: '16px 32px 24px',
+                padding: isPosRoute ? '12px 20px 32px' : '16px 32px 24px',
                 maxWidth: '100%',
               }}
             >
-              <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+              <div style={{ maxWidth: 1400, margin: '0 auto', width: '100%' }}>
                 <AppRouter />
               </div>
             </Content>
