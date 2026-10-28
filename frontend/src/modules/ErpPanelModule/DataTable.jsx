@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   EyeOutlined,
   EditOutlined,
@@ -180,53 +180,25 @@ export default function DataTable({ config, extra = [] }) {
               View
             </Button>
           </Tooltip>
-          {entity === 'invoice' ? (
-            Boolean(
-              record.stockDeducted ||
-                ['posted', 'sent', 'paid', 'reversed', 'cancelled'].includes(record.status) ||
-                record.paymentStatus === 'paid'
-            ) ? null : (
-              <Tooltip title={translate('Edit') || 'Edit Record'}>
-                <Button
-                  type="text"
-                  size="small"
-                  icon={<EditOutlined style={{ color: '#16a34a' }} />}
-                  onClick={() => handleEdit(record)}
-                  style={{
-                    borderRadius: 6,
-                    backgroundColor: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    fontWeight: 600,
-                    fontSize: 12,
-                    color: '#15803d',
-                    padding: '2px 8px',
-                  }}
-                >
-                  Edit
-                </Button>
-              </Tooltip>
-            )
-          ) : (
-            <Tooltip title={translate('Edit') || 'Edit Record'}>
-              <Button
-                type="text"
-                size="small"
-                icon={<EditOutlined style={{ color: '#16a34a' }} />}
-                onClick={() => handleEdit(record)}
-                style={{
-                  borderRadius: 6,
-                  backgroundColor: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  fontWeight: 600,
-                  fontSize: 12,
-                  color: '#15803d',
-                  padding: '2px 8px',
-                }}
-              >
-                Edit
-              </Button>
-            </Tooltip>
-          )}
+          <Tooltip title={translate('Edit') || 'Edit Record'}>
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined style={{ color: '#16a34a' }} />}
+              onClick={() => handleEdit(record)}
+              style={{
+                borderRadius: 6,
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                fontWeight: 600,
+                fontSize: 12,
+                color: '#15803d',
+                padding: '2px 8px',
+              }}
+            >
+              Edit
+            </Button>
+          </Tooltip>
           {entity === 'invoice' && Math.max(0, Number(record.total || 0) - Number(record.credit || 0)) > 0 && (
             <Tooltip title="Collect Due / Record Payment">
               <Button

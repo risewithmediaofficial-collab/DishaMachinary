@@ -29,15 +29,8 @@ const update = async (req, res) => {
   if (!previousInvoice) {
     return res.status(404).json({ success: false, result: null, message: 'Invoice not found' });
   }
-  if (previousInvoice.stockDeducted || ['posted', 'sent', 'reversed', 'cancelled'].includes(previousInvoice.status)) {
-    return res.status(409).json({
-      success: false,
-      result: null,
-      message: 'Posted invoices are immutable. Reverse or credit the invoice instead.',
-    });
-  }
 
-  const { credit } = previousInvoice;
+  const { credit = 0 } = previousInvoice;
 
   const { items = [], taxRate = 0, discount = 0, gstEnabled = false } = value;
 
@@ -57,52 +50,70 @@ const update = async (req, res) => {
   }
 
   Object.assign(body, invoiceTotals, { taxRate, discount });
+
   const inventoryLinesChanged = (left, right) => {
     const signature = (lines) =>
       lines
         .map((item) => `${String(item.product || '')}:${item.quantity}:${item.price}:${item.gstRate || 0}`)
         .sort();
-    return JSON.stringify(signature(left)) !== JSON.stringify(signature(right));
+    return JSON.stringify(signature(left || [])) !== JSON.stringify(signature(right || []));
   };
-  if (
-    previousInvoice.stockDeducted &&
-    value.status === 'sent' &&
-    (inventoryLinesChanged(previousInvoice.items, invoiceTotals.items) ||
-      previousInvoice.gstEnabled !== gstEnabled)
-  ) {
-    return res.status(400).json({
-      success: false,
-      result: null,
-      message: 'Issued invoice items and tax settings cannot be changed. Cancel it first.',
-    });
-  }
+
   const shouldDeductStock = ['sent', 'posted'].includes(value.status);
-  const stockDirection = previousInvoice.stockDeducted === shouldDeductStock
-    ? 0
-    : shouldDeductStock
-      ? -1
-      : 1;
-  if (stockDirection !== 0) {
+
+  // Manage stock movements during invoice update
+  if (previousInvoice.stockDeducted && shouldDeductStock) {
+    // If lines or quantities changed, revert previous stock and apply new stock
+    if (inventoryLinesChanged(previousInvoice.items, invoiceTotals.items)) {
+      try {
+        await applyInvoiceStock({
+          invoiceId: previousInvoice._id,
+          items: previousInvoice.items,
+          direction: 1, // restore previous stock
+          createdBy: req.admin._id,
+        });
+        await applyInvoiceStock({
+          invoiceId: previousInvoice._id,
+          items: invoiceTotals.items,
+          direction: -1, // deduct new stock
+          createdBy: req.admin._id,
+        });
+      } catch (error) {
+        return res.status(400).json({ success: false, result: null, message: error.message });
+      }
+    }
+  } else if (previousInvoice.stockDeducted && !shouldDeductStock) {
     try {
       await applyInvoiceStock({
         invoiceId: previousInvoice._id,
-        items: previousInvoice.stockDeducted ? previousInvoice.items : invoiceTotals.items,
-        direction: stockDirection,
+        items: previousInvoice.items,
+        direction: 1, // restore stock
+        createdBy: req.admin._id,
+      });
+    } catch (error) {
+      return res.status(400).json({ success: false, result: null, message: error.message });
+    }
+  } else if (!previousInvoice.stockDeducted && shouldDeductStock) {
+    try {
+      await applyInvoiceStock({
+        invoiceId: previousInvoice._id,
+        items: invoiceTotals.items,
+        direction: -1, // deduct stock
         createdBy: req.admin._id,
       });
     } catch (error) {
       return res.status(400).json({ success: false, result: null, message: error.message });
     }
   }
+
   body.stockDeducted = shouldDeductStock;
   body['pdf'] = 'invoice-' + req.params.id + '.pdf';
   if (body.hasOwnProperty('currency')) {
     delete body.currency;
   }
-  // Find document by id and updates with the required fields
 
   let paymentStatus =
-    calculate.sub(invoiceTotals.total, discount) === credit
+    calculate.sub(invoiceTotals.total, discount) <= credit
       ? 'paid'
       : credit > 0
         ? 'partially'
@@ -110,30 +121,10 @@ const update = async (req, res) => {
   body['paymentStatus'] = paymentStatus;
 
   let result;
-  try {
-    result = await Model.findOneAndUpdate({ _id: req.params.id, removed: false }, body, {
-      new: true,
-      runValidators: true,
-    }).exec();
-  } catch (error) {
-    if (stockDirection !== 0) {
-      await applyInvoiceStock({
-        invoiceId: previousInvoice._id,
-        items: previousInvoice.stockDeducted ? previousInvoice.items : invoiceTotals.items,
-        direction: -stockDirection,
-        createdBy: req.admin._id,
-      });
-    }
-    throw error;
-  }
-  if (!result && stockDirection !== 0) {
-    await applyInvoiceStock({
-      invoiceId: previousInvoice._id,
-      items: previousInvoice.stockDeducted ? previousInvoice.items : invoiceTotals.items,
-      direction: -stockDirection,
-      createdBy: req.admin._id,
-    });
-  }
+  result = await Model.findOneAndUpdate({ _id: req.params.id, removed: false }, body, {
+    new: true,
+    runValidators: true,
+  }).exec();
 
   // Ensure posted/paid invoice has a payment record
   if (result && (result.status === 'posted' || result.paymentStatus === 'paid')) {
@@ -163,8 +154,6 @@ const update = async (req, res) => {
       );
     }
   }
-
-  // Returning successfull response
 
   return res.status(200).json({
     success: true,
