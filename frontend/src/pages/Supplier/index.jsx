@@ -1,4 +1,4 @@
-import { Tag } from 'antd';
+import { Tag, Tooltip } from 'antd';
 import CrudModule from '@/modules/CrudModule/CrudModule';
 import DynamicForm from '@/forms/DynamicForm';
 import { fields } from './config';
@@ -25,25 +25,27 @@ export default function Supplier() {
 
   const dataTableColumns = [
     {
-      title: 'Supplier / Ledger',
+      title: 'Supplier Name / Firm',
       dataIndex: 'name',
+      width: 220,
       render: (name, record) => (
         <div>
-          <div style={{ fontWeight: 700, color: '#0f172a' }}>{name}</div>
+          <div style={{ fontWeight: 700, color: '#0f172a', fontSize: 13.5 }}>{name}</div>
           {record.company && (
-            <div style={{ fontSize: 12, color: '#64748b' }}>{record.company}</div>
+            <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>🏢 {record.company}</div>
           )}
         </div>
       ),
     },
     {
-      title: 'Contact',
+      title: 'Contact Details',
       dataIndex: 'phone',
+      width: 170,
       render: (phone, record) => (
         <div>
-          <div style={{ fontWeight: 600, color: '#0284c7' }}>{phone}</div>
+          <div style={{ fontWeight: 600, color: '#0284c7', fontSize: 13 }}>📞 {phone}</div>
           {record.email && (
-            <div style={{ fontSize: 11, color: '#64748b' }}>{record.email}</div>
+            <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>✉️ {record.email}</div>
           )}
         </div>
       ),
@@ -51,36 +53,51 @@ export default function Supplier() {
     {
       title: 'GSTIN',
       dataIndex: 'gstin',
+      width: 160,
       render: (gstin) => (
-        gstin ? <Tag color="blue" style={{ fontFamily: 'monospace' }}>{gstin}</Tag> : <span style={{ color: '#94a3b8' }}>Unregistered</span>
+        gstin ? (
+          <Tag color="blue" style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: 12, padding: '2px 8px' }}>
+            {gstin}
+          </Tag>
+        ) : (
+          <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Unregistered</span>
+        )
       ),
     },
     {
-      title: 'Location',
-      dataIndex: 'city',
-      render: (city, record) => (
-        <span>
-          {[city, record.state].filter(Boolean).join(', ') || 'Tamil Nadu'}
-        </span>
-      ),
+      title: 'Address & City',
+      dataIndex: 'address',
+      width: 240,
+      render: (address, record) => {
+        const fullAddr = [address, record.city, record.state, record.pincode].filter(Boolean).join(', ');
+        return (
+          <Tooltip title={fullAddr}>
+            <div style={{ color: '#334155', fontSize: 12, lineHeight: 1.35 }}>
+              {fullAddr || 'Tamil Nadu'}
+            </div>
+          </Tooltip>
+        );
+      },
     },
     {
       title: 'Opening Balance',
       dataIndex: 'openingBalance',
+      width: 140,
       align: 'right',
       render: (amount) => (
-        <span style={{ fontWeight: 600, color: (amount || 0) > 0 ? '#b91c1c' : '#475569' }}>
+        <span style={{ fontWeight: 700, color: (amount || 0) > 0 ? '#b91c1c' : '#475569', fontSize: 13 }}>
           {moneyFormatter({ amount: amount || 0 })}
         </span>
       ),
     },
     {
-      title: 'Bank Info',
+      title: 'Bank Information',
       dataIndex: 'bankName',
+      width: 200,
       render: (bank, record) => (
         record.bankAccount ? (
           <div style={{ fontSize: 12 }}>
-            <span style={{ fontWeight: 600 }}>{bank || 'Bank'}:</span> {record.bankAccount}
+            <span style={{ fontWeight: 700, color: '#0f172a' }}>{bank || 'Bank'}:</span> {record.bankAccount}
             {record.bankIfsc && <div style={{ fontSize: 11, color: '#64748b' }}>IFSC: {record.bankIfsc}</div>}
           </div>
         ) : (

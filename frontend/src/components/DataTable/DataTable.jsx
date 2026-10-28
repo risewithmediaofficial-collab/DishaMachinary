@@ -107,7 +107,9 @@ export default function DataTable({ config, extra = [] }) {
   }
 
   let dispatchColumns = [];
-  if (fields) {
+  if (dataTableColumns && dataTableColumns.length > 0) {
+    dispatchColumns = [...dataTableColumns];
+  } else if (fields) {
     dispatchColumns = [
       ...dataForTable({
         fields,
@@ -119,7 +121,7 @@ export default function DataTable({ config, extra = [] }) {
       }),
     ];
   } else {
-    dispatchColumns = [...dataTableColumns];
+    dispatchColumns = [...(dataTableColumns || [])];
   }
 
   dataTableColumns = [
@@ -350,7 +352,7 @@ export default function DataTable({ config, extra = [] }) {
         pagination={pagination}
         loading={listIsLoading}
         onChange={handelDataTableLoad}
-        scroll={{ x: 'max-content', y: 'calc(100vh - 290px)' }}
+        scroll={{ x: 'max-content' }}
         onRow={(record) => ({
           onClick: (e) => {
             if (
