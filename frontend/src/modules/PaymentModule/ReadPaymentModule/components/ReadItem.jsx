@@ -98,39 +98,20 @@ export default function ReadItem({ config, selectedItem }) {
   const methodInfo = getMethodInfo(payment.method);
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '16px 20px 48px' }}>
+    <div className="payment-read-container">
       {/* ===================== TOP CONTROLS & BREADCRUMB ===================== */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 14,
-          marginBottom: 20,
-          background: '#ffffff',
-          padding: '16px 20px',
-          borderRadius: 16,
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div className="payment-header-card">
+        <div className="payment-header-left">
           <Button
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/payment')}
-            style={{
-              borderRadius: 8,
-              fontWeight: 600,
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-            }}
+            className="payment-back-btn"
           >
             All Payments
           </Button>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <h1 style={{ margin: 0, fontSize: 18, fontWeight: 900, color: '#0f172a' }}>
+          <div className="payment-title-group">
+            <div className="payment-title-row">
+              <h1 className="payment-title">
                 Payment Receipt #{payment.number}/{payment.year || ''}
               </h1>
               <Tag
@@ -145,20 +126,20 @@ export default function ReadItem({ config, selectedItem }) {
                 {payment.status === 'posted' ? '● POSTED & SETTLED' : '● REVERSED'}
               </Tag>
             </div>
-            <span style={{ fontSize: 12, color: '#64748b' }}>
+            <span className="payment-subtitle">
               Official payment collection receipt & settlement voucher
             </span>
           </div>
         </div>
 
         {/* ACTION BUTTONS */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div className="payment-actions-group">
           <Button
             icon={<FilePdfOutlined />}
             onClick={() =>
               window.open(`${DOWNLOAD_BASE_URL}${entity}/${entity}-${payment._id}.pdf`, '_blank')
             }
-            style={{ borderRadius: 8, fontWeight: 600, border: '1px solid #cbd5e1' }}
+            className="payment-action-btn"
           >
             Download PDF
           </Button>
@@ -166,7 +147,7 @@ export default function ReadItem({ config, selectedItem }) {
             loading={mailInProgress}
             icon={<MailOutlined />}
             onClick={() => send(payment._id)}
-            style={{ borderRadius: 8, fontWeight: 600, border: '1px solid #cbd5e1' }}
+            className="payment-action-btn"
           >
             Send by Email
           </Button>
@@ -177,13 +158,7 @@ export default function ReadItem({ config, selectedItem }) {
               dispatch(erp.currentAction({ actionType: 'update', data: payment }));
               navigate(`/${entity.toLowerCase()}/update/${payment._id}`);
             }}
-            style={{
-              borderRadius: 8,
-              fontWeight: 700,
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-              border: 'none',
-              boxShadow: '0 4px 10px rgba(37, 99, 235, 0.25)',
-            }}
+            className="payment-edit-btn"
           >
             Edit Payment
           </Button>
@@ -191,22 +166,8 @@ export default function ReadItem({ config, selectedItem }) {
       </div>
 
       {/* ===================== HERO PAYMENT BANNER ===================== */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderRadius: 20,
-          border: '1px solid #e2e8f0',
-          padding: '24px 28px',
-          marginBottom: 20,
-          boxShadow: '0 4px 20px -2px rgba(15, 23, 42, 0.05)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 20,
-        }}
-      >
-        <div>
+      <div className="payment-hero-banner">
+        <div className="payment-hero-left">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <div
               style={{
@@ -219,6 +180,7 @@ export default function ReadItem({ config, selectedItem }) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 14,
+                flexShrink: 0,
               }}
             >
               <CheckCircleOutlined />
@@ -237,14 +199,7 @@ export default function ReadItem({ config, selectedItem }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-            <span
-              style={{
-                fontSize: 36,
-                fontWeight: 900,
-                color: '#0f172a',
-                letterSpacing: '-0.02em',
-              }}
-            >
+            <span className="payment-hero-amount">
               {moneyFormatter({ amount: payment.amount || 0, currency_code: payment.currency })}
             </span>
             <span
@@ -261,49 +216,37 @@ export default function ReadItem({ config, selectedItem }) {
             </span>
           </div>
 
-          <div style={{ fontSize: 13, color: '#64748b', fontStyle: 'italic', marginTop: 4 }}>
+          <div style={{ fontSize: 13, color: '#64748b', fontStyle: 'italic', marginTop: 4, wordBreak: 'break-word' }}>
             {numberToWords(payment.amount || 0)}
           </div>
         </div>
 
         {/* QUICK PILL SUMMARY */}
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <div className="payment-hero-badges">
           {/* METHOD BADGE */}
           <div
+            className="payment-badge-pill"
             style={{
               background: methodInfo.badgeBg,
               border: `1px solid ${methodInfo.badgeBorder}`,
               color: methodInfo.badgeColor,
-              padding: '10px 14px',
-              borderRadius: 12,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              fontWeight: 700,
-              fontSize: 13,
             }}
           >
             {methodInfo.icon}
-            {methodInfo.label}
+            <span>{methodInfo.label}</span>
           </div>
 
           {/* DATE BADGE */}
           <div
+            className="payment-badge-pill"
             style={{
               background: '#ffffff',
               border: '1px solid #e2e8f0',
-              padding: '10px 14px',
-              borderRadius: 12,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
               color: '#334155',
-              fontWeight: 600,
-              fontSize: 13,
             }}
           >
             <CalendarOutlined style={{ color: '#2563eb' }} />
-            {dayjs(payment.date || payment.created).format('DD MMM YYYY, hh:mm A')}
+            <span>{dayjs(payment.date || payment.created).format('DD MMM YYYY, hh:mm A')}</span>
           </div>
         </div>
       </div>
@@ -753,21 +696,8 @@ export default function ReadItem({ config, selectedItem }) {
       </div>
 
       {/* ===================== SECTION 3: TRANSACTION AUDIT & LEDGER METADATA ===================== */}
-      <div
-        style={{
-          background: '#ffffff',
-          borderRadius: 20,
-          border: '1px solid #e2e8f0',
-          padding: '20px 24px',
-          boxShadow: '0 4px 16px -2px rgba(15, 23, 42, 0.04)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 16,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+      <div className="payment-audit-card">
+        <div className="payment-audit-items">
           <div>
             <span
               style={{
@@ -845,12 +775,239 @@ export default function ReadItem({ config, selectedItem }) {
       </div>
 
       <style>{`
+        .payment-read-container {
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 16px 20px 48px;
+        }
+        .payment-header-card {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 14px;
+          margin-bottom: 20px;
+          background: #ffffff;
+          padding: 16px 20px;
+          border-radius: 16px;
+          border: 1px solid #e2e8f0;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .payment-header-left {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          flex: 1;
+          min-width: 0;
+        }
+        .payment-back-btn {
+          border-radius: 8px;
+          font-weight: 600;
+          border: 1px solid #cbd5e1;
+          color: #334155;
+          flex-shrink: 0;
+        }
+        .payment-title-group {
+          min-width: 0;
+          flex: 1;
+        }
+        .payment-title-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .payment-title {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 900;
+          color: #0f172a;
+          word-break: break-word;
+        }
+        .payment-subtitle {
+          font-size: 12px;
+          color: #64748b;
+          display: block;
+          margin-top: 2px;
+        }
+        .payment-actions-group {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        .payment-action-btn {
+          border-radius: 8px;
+          font-weight: 600;
+          border: 1px solid #cbd5e1;
+        }
+        .payment-edit-btn {
+          border-radius: 8px;
+          font-weight: 700;
+          background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+          border: none;
+          box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+        .payment-hero-banner {
+          background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+          border-radius: 20px;
+          border: 1px solid #e2e8f0;
+          padding: 24px 28px;
+          margin-bottom: 20px;
+          box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 20px;
+        }
+        .payment-hero-left {
+          min-width: 0;
+          flex: 1;
+        }
+        .payment-hero-amount {
+          font-size: 36px;
+          font-weight: 900;
+          color: #0f172a;
+          letter-spacing: -0.02em;
+          word-break: break-word;
+        }
+        .payment-hero-badges {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .payment-badge-pill {
+          padding: 10px 14px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: 700;
+          font-size: 13px;
+        }
+        .payment-audit-card {
+          background: #ffffff;
+          border-radius: 20px;
+          border: 1px solid #e2e8f0;
+          padding: 20px 24px;
+          box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 16px;
+        }
+        .payment-audit-items {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          flex-wrap: wrap;
+        }
+
         @media (min-width: 769px) {
           .payment-col-left {
             grid-column: span 7 !important;
           }
           .payment-col-right {
             grid-column: span 5 !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .payment-read-container {
+            padding: 12px 10px 36px !important;
+          }
+          .payment-header-card {
+            padding: 14px 12px !important;
+            border-radius: 14px !important;
+            gap: 12px !important;
+          }
+          .payment-header-left {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px !important;
+            width: 100% !important;
+          }
+          .payment-back-btn {
+            align-self: flex-start !important;
+          }
+          .payment-title-group {
+            width: 100% !important;
+          }
+          .payment-title {
+            font-size: 16px !important;
+          }
+          .payment-actions-group {
+            width: 100% !important;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 8px !important;
+          }
+          .payment-action-btn {
+            width: 100% !important;
+            font-size: 12px !important;
+            padding: 0 6px !important;
+          }
+          .payment-edit-btn {
+            grid-column: span 2 !important;
+            width: 100% !important;
+            height: 38px !important;
+            font-size: 13px !important;
+          }
+          .payment-hero-banner {
+            padding: 16px 14px !important;
+            border-radius: 16px !important;
+            gap: 14px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+          .payment-hero-left {
+            width: 100% !important;
+          }
+          .payment-hero-amount {
+            font-size: 26px !important;
+          }
+          .payment-hero-badges {
+            width: 100% !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+          .payment-badge-pill {
+            width: 100% !important;
+            padding: 8px 12px !important;
+            font-size: 12px !important;
+            justify-content: flex-start !important;
+          }
+          .payment-col-left,
+          .payment-col-right {
+            padding: 16px 14px !important;
+            border-radius: 16px !important;
+          }
+          .payment-audit-card {
+            padding: 16px 14px !important;
+            border-radius: 16px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .payment-audit-items {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 12px !important;
+            width: 100% !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .payment-actions-group {
+            grid-template-columns: 1fr !important;
+          }
+          .payment-edit-btn {
+            grid-column: span 1 !important;
+          }
+          .payment-audit-items {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
