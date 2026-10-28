@@ -146,18 +146,153 @@ export default function Pos() {
   const productOptions = useMemo(() => {
     return products.map((product) => {
       const available = Number(product.stockQuantity || 0) - Number(product.reservedQuantity || 0);
-      const labelParts = [
-        product.name,
-        product.sku ? `SKU: ${product.sku}` : null,
-        product.modelNumber ? `Model: ${product.modelNumber}` : null,
-        `₹${Number(product.sellingPrice || 0).toLocaleString('en-IN')}`,
-        `(${available} in stock)`,
-      ].filter(Boolean);
+      const isTracked = product.trackInventory !== false;
+
+      let stockColor = '#15803d';
+      let stockBg = '#f0fdf4';
+      let stockBorder = '#bbf7d0';
+      let stockText = `${available} in stock`;
+
+      if (!isTracked) {
+        stockColor = '#0369a1';
+        stockBg = '#f0f9ff';
+        stockBorder = '#bae6fd';
+        stockText = 'In stock';
+      } else if (available <= 0) {
+        stockColor = '#dc2626';
+        stockBg = '#fef2f2';
+        stockBorder = '#fecaca';
+        stockText = 'Out of stock';
+      } else if (available <= 10) {
+        stockColor = '#d97706';
+        stockBg = '#fffbeb';
+        stockBorder = '#fde68a';
+        stockText = `${available} in stock (Low)`;
+      }
+
+      const formattedPrice = `₹${Number(product.sellingPrice || 0).toLocaleString('en-IN')}`;
 
       return {
         value: product._id,
-        label: labelParts.join(' · '),
-        searchTerms: [product.name, product.sku, product.modelNumber, product.barcode]
+        label: (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '12px',
+              padding: '2px 0',
+              width: '100%',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                minWidth: 0,
+                flex: 1,
+                overflow: 'hidden',
+              }}
+            >
+              <span
+                style={{
+                  fontWeight: 600,
+                  color: '#0f172a',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  fontSize: '13px',
+                }}
+                title={product.name}
+              >
+                {product.name}
+              </span>
+              {product.sku && (
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: '#64748b',
+                    whiteSpace: 'nowrap',
+                    backgroundColor: '#f1f5f9',
+                    padding: '1px 6px',
+                    borderRadius: '4px',
+                    flexShrink: 0,
+                  }}
+                >
+                  SKU: {product.sku}
+                </span>
+              )}
+              {product.modelNumber && (
+                <span
+                  style={{
+                    fontSize: '11px',
+                    color: '#64748b',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                  }}
+                >
+                  Mod: {product.modelNumber}
+                </span>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flexShrink: 0,
+              }}
+            >
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '2px 8px',
+                  borderRadius: '5px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  color: '#1d4ed8',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  lineHeight: '18px',
+                  letterSpacing: '0.2px',
+                }}
+              >
+                {formattedPrice}
+              </span>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '2px 8px',
+                  borderRadius: '5px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  color: stockColor,
+                  backgroundColor: stockBg,
+                  border: `1px solid ${stockBorder}`,
+                  lineHeight: '18px',
+                }}
+              >
+                {stockText}
+              </span>
+            </div>
+          </div>
+        ),
+        searchTerms: [
+          product.name,
+          product.sku,
+          product.modelNumber,
+          product.barcode,
+          formattedPrice,
+          `${Number(product.sellingPrice || 0)}`,
+          stockText,
+          `${available}`,
+          'in stock',
+        ]
           .filter(Boolean)
           .join(' ')
           .toLowerCase(),
