@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -75,14 +75,18 @@ export default function Dashboard() {
       const cr = summary.customRange;
       const sales = cr.sales || 0;
       const netRevenue = cr.netRevenue || sales;
-      const cost = cr.cost || 0;
-      const grossProfit = cr.grossProfit || (netRevenue - cost);
-      const margin = cr.margin !== undefined ? cr.margin : (netRevenue > 0 ? Math.round((grossProfit / netRevenue) * 100) : 0);
+      const taxTotal = cr.taxTotal || Math.max(0, sales - netRevenue);
+      const pendingAmount = cr.pendingAmount || 0;
+      const realizedNet = cr.realizedNet !== undefined ? cr.realizedNet : Math.max(0, netRevenue - pendingAmount);
+      const grossProfit = cr.grossProfit !== undefined ? cr.grossProfit : realizedNet;
+      const margin = cr.margin !== undefined ? cr.margin : (netRevenue > 0 ? Math.round((realizedNet / netRevenue) * 100) : 100);
       return {
         label: `Custom (${range[0].format('DD/MM')} - ${range[1].format('DD/MM')})`,
         sales,
         netRevenue,
-        cost,
+        taxTotal,
+        pendingAmount,
+        realizedNet,
         grossProfit,
         margin,
         bills: cr.bills || 0,
@@ -100,14 +104,18 @@ export default function Dashboard() {
     };
     const sales = periodData.sales || 0;
     const netRevenue = periodData.netRevenue || sales;
-    const cost = periodData.cost || 0;
-    const grossProfit = periodData.grossProfit || (netRevenue - cost);
-    const margin = periodData.margin !== undefined ? periodData.margin : (netRevenue > 0 ? Math.round((grossProfit / netRevenue) * 100) : 0);
+    const taxTotal = periodData.taxTotal || Math.max(0, sales - netRevenue);
+    const pendingAmount = periodData.pendingAmount || 0;
+    const realizedNet = periodData.realizedNet !== undefined ? periodData.realizedNet : Math.max(0, netRevenue - pendingAmount);
+    const grossProfit = periodData.grossProfit !== undefined ? periodData.grossProfit : realizedNet;
+    const margin = periodData.margin !== undefined ? periodData.margin : (netRevenue > 0 ? Math.round((realizedNet / netRevenue) * 100) : 100);
     return {
       label: labelMap[activePeriod] || 'This Month',
       sales,
       netRevenue,
-      cost,
+      taxTotal,
+      pendingAmount,
+      realizedNet,
       grossProfit,
       margin,
       bills: periodData.bills || 0,
@@ -358,11 +366,15 @@ export default function Dashboard() {
           >
             <div style={{ display: 'flex', gap: 20 }}>
               <div>
-                <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Avg. Ticket Value</span>
+                <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Net Sales (Excl. GST)</span>
                 <div style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>
-                  {currentSalesData.bills > 0
-                    ? formatMoney(currentSalesData.sales / currentSalesData.bills)
-                    : formatMoney(0)}
+                  {formatMoney(currentSalesData.netRevenue)}
+                </div>
+              </div>
+              <div>
+                <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Pending Amount</span>
+                <div style={{ fontSize: 14, fontWeight: 800, color: currentSalesData.pendingAmount > 0 ? '#ea580c' : '#16a34a' }}>
+                  {formatMoney(currentSalesData.pendingAmount)}
                 </div>
               </div>
               <div>
@@ -397,7 +409,7 @@ export default function Dashboard() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.8, color: '#10b981' }}>
-                GROSS PROFIT & MARGIN
+                PROFIT MARGIN (SALES EXCL. GST)
               </span>
               <Tag color="green" style={{ borderRadius: 10, fontWeight: 700 }}>
                 {currentSalesData.label}
@@ -409,12 +421,12 @@ export default function Dashboard() {
               <ProfitMarginGauge percentage={currentSalesData.margin} />
 
               <div>
-                <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Estimated Gross Profit</div>
+                <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Realized Sales (Profit)</div>
                 <div style={{ fontSize: 26, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', marginTop: 2 }}>
-                  {formatMoney(currentSalesData.grossProfit)}
+                  {formatMoney(currentSalesData.realizedNet)}
                 </div>
                 <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
-                  Based on machine cost snapshots at billing
+                  Excludes GST & pending credit amounts
                 </div>
               </div>
             </div>
@@ -422,30 +434,36 @@ export default function Dashboard() {
             {/* BREAKDOWN BARS */}
             <div style={{ marginTop: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
-                <span style={{ color: '#64748b' }}>Gross Sales Revenue:</span>
+                <span style={{ color: '#64748b' }}>Gross Sales Billed:</span>
                 <span style={{ fontWeight: 700, color: '#0f172a' }}>{formatMoney(currentSalesData.sales)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
-                <span style={{ color: '#64748b' }}>Net Revenue (Tax Excl.):</span>
-                <span style={{ fontWeight: 700, color: '#0f172a' }}>{formatMoney(currentSalesData.netRevenue)}</span>
+                <span style={{ color: '#64748b' }}>GST / Tax Excluded:</span>
+                <span style={{ fontWeight: 700, color: '#64748b' }}>- {formatMoney(currentSalesData.taxTotal)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
-                <span style={{ color: '#64748b' }}>Cost of Goods (COGS):</span>
-                <span style={{ fontWeight: 700, color: '#ea580c' }}>
-                  {formatMoney(currentSalesData.cost)}
+                <span style={{ color: '#64748b' }}>Pending Amount (Uncollected):</span>
+                <span style={{ fontWeight: 800, color: currentSalesData.pendingAmount > 0 ? '#ea580c' : '#16a34a' }}>
+                  {formatMoney(currentSalesData.pendingAmount)}
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                <span style={{ color: '#64748b' }}>Estimated Margin:</span>
-                <span style={{ fontWeight: 800, color: '#10b981' }}>{currentSalesData.margin}%</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, paddingTop: 6, borderTop: '1px dashed #e2e8f0' }}>
+                <span style={{ color: '#0f172a', fontWeight: 700 }}>Net Realized Profit:</span>
+                <span style={{ fontWeight: 900, color: '#16a34a', fontSize: 13 }}>{formatMoney(currentSalesData.realizedNet)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 4 }}>
+                <span style={{ color: '#64748b' }}>Realization Rate:</span>
+                <span style={{ fontWeight: 800, color: currentSalesData.margin >= 80 ? '#10b981' : '#d97706' }}>
+                  {currentSalesData.margin}%
+                </span>
               </div>
             </div>
           </div>
 
           <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 11, color: '#94a3b8' }}>Real-time Margin Tracking</span>
-            <Tag color={currentSalesData.margin >= 20 ? 'success' : 'warning'} style={{ borderRadius: 8, fontWeight: 700 }}>
-              {currentSalesData.margin >= 20 ? 'Healthy Margin' : 'Normal'}
+            <Tag color={currentSalesData.pendingAmount === 0 ? 'success' : 'warning'} style={{ borderRadius: 8, fontWeight: 700 }}>
+              {currentSalesData.pendingAmount === 0 ? '100% Realized' : 'Pending Dues'}
             </Tag>
           </div>
         </div>

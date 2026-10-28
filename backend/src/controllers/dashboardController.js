@@ -48,40 +48,51 @@ const invoiceTotals = async (from, to) => {
             $subtract: [{ $ifNull: ['$subTotal', 0] }, { $ifNull: ['$discount', 0] }],
           },
         },
-        cost: {
+        taxTotal: {
+          $sum: { $ifNull: ['$taxTotal', 0] },
+        },
+        creditTotal: {
+          $sum: { $ifNull: ['$credit', 0] },
+        },
+        pendingTotal: {
           $sum: {
-            $reduce: {
-              input: { $ifNull: ['$items', []] },
-              initialValue: 0,
-              in: {
-                $add: [
-                  '$$value',
-                  {
-                    $ifNull: [
-                      '$$this.costTotalSnapshot',
-                      { $multiply: [{ $ifNull: ['$$this.costPriceSnapshot', 0] }, { $ifNull: ['$$this.quantity', 0] }] }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
+            $max: [
+              0,
+              {
+                $subtract: [
+                  { $ifNull: ['$total', 0] },
+                  { $ifNull: ['$credit', 0] },
+                ],
+              },
+            ],
+          },
         },
       },
     },
   ]);
 
   const payments = await paymentTotals(from, to);
+  const bills = result?.bills || 0;
   const sales = Number((result?.sales || 0).toFixed(2));
   const netRevenue = Number((result?.netRevenue || 0).toFixed(2));
-  const cost = Number((result?.cost || 0).toFixed(2));
-  const grossProfit = Number((netRevenue - cost).toFixed(2));
-  const margin = netRevenue > 0 ? Number(((grossProfit / netRevenue) * 100).toFixed(1)) : 0;
+  const taxTotal = Number((result?.taxTotal || 0).toFixed(2));
+  const pendingAmount = Number((result?.pendingTotal || 0).toFixed(2));
+
+  // Realized Net Sales: Exclude GST and exclude pending credit amount
+  const paidRatio = sales > 0 ? Math.max(0, Math.min(1, (sales - pendingAmount) / sales)) : 1;
+  const realizedNet = Number((netRevenue * paidRatio).toFixed(2));
+
+  // Today sales as profit margin (excluding GST and pending amount)
+  const grossProfit = realizedNet;
+  const margin = netRevenue > 0 ? Number(((realizedNet / netRevenue) * 100).toFixed(0)) : (sales > 0 ? 0 : 100);
+
   return {
-    bills: result?.bills || 0,
+    bills,
     sales,
     netRevenue,
-    cost,
+    taxTotal,
+    pendingAmount,
+    realizedNet,
     grossProfit,
     margin,
     ...payments,
