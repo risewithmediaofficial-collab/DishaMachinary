@@ -50,7 +50,7 @@ function numberToWords(num) {
     words += inWords(remainder);
   }
   words = words.trim();
-  let resultStr = 'Rupees ' + (words || 'Zero');
+  let resultStr = 'Rupees : ' + (words || 'Zero');
   if (decimalPart > 0) {
     resultStr += ' and ' + inWords(decimalPart).trim() + ' Paise';
   }
@@ -83,24 +83,27 @@ exports.generatePdf = async (
       const selectedLang = settings['idurar_app_language'];
       const translate = useLanguage({ selectedLang });
 
-      // Disha Machinary branding defaults
+      // Disha Machinery branding defaults
       if (!settings.company_name || settings.company_name === 'COMPANY Name') {
-        settings.company_name = 'Disha Machinary';
+        settings.company_name = 'DISHA MACHINERY';
       }
-      if (!settings.company_address || settings.company_address.includes('Your Company Address')) {
-        settings.company_address = 'Plot No. 12, Industrial Estate, Machinery Hub';
+      if (!settings.company_tagline) {
+        settings.company_tagline = '[ All Kinds of Machinery, All Kinds of Welding & Wiring Equipment and foods ]';
       }
-      if (!settings.company_phone || settings.company_phone.includes('345234654')) {
-        settings.company_phone = '+91 98765 43210';
+      if (!settings.company_address || settings.company_address.includes('Your Company Address') || settings.company_address.includes('Plot No. 12')) {
+        settings.company_address = 'Annamalai Complex, New Busstand, Tirupattur Dist - 635601';
+      }
+      if (!settings.company_phone || settings.company_phone.includes('345234654') || settings.company_phone.includes('+91 98765')) {
+        settings.company_phone = '9751117889 / 9626957000 / 04179-2266666 / 294650';
       }
       if (!settings.company_email || settings.company_email.includes('example.com')) {
-        settings.company_email = 'sales@dishamachinary.com';
+        settings.company_email = 'dishamachinery@gmail.com';
       }
       if (!settings.company_website || settings.company_website.includes('example.com')) {
         settings.company_website = 'www.dishamachinary.com';
       }
-      if (!settings.company_gstin) {
-        settings.company_gstin = '33AABCD1234E1Z9';
+      if (!settings.company_gstin || settings.company_gstin === '33AABCD1234E1Z9') {
+        settings.company_gstin = '33GPNPS1888N1ZT';
       }
       if (!settings.company_state) {
         settings.company_state = 'Tamil Nadu';
@@ -108,11 +111,23 @@ exports.generatePdf = async (
       if (!settings.company_country) {
         settings.company_country = 'India';
       }
-      if (!settings.company_reg_number || settings.company_reg_number.includes('00001231421')) {
-        settings.company_reg_number = 'DM/IND/2026/089';
+      if (!settings.company_reg_number || settings.company_reg_number.includes('00001231421') || settings.company_reg_number.includes('DM/IND')) {
+        settings.company_reg_number = 'DM/26-27';
       }
-      if (!settings.company_bank_account || settings.company_bank_account.includes('iban :')) {
-        settings.company_bank_account = 'Bank: HDFC Bank | A/C: 50200012345678 | IFSC: HDFC0001234 | Branch: Industrial Estate';
+      if (!settings.company_bank_name) {
+        settings.company_bank_name = 'FEDERAL BANK';
+      }
+      if (!settings.company_bank_account || settings.company_bank_account.includes('iban :') || settings.company_bank_account.includes('HDFC')) {
+        settings.company_bank_account = '20695500000537';
+      }
+      if (!settings.company_bank_ifsc) {
+        settings.company_bank_ifsc = 'FDRL0002069';
+      }
+      if (!settings.company_bank_branch) {
+        settings.company_bank_branch = 'TIRUPATHUR';
+      }
+      if (!settings.company_upi) {
+        settings.company_upi = '9751117889@federal';
       }
 
       const {
@@ -188,9 +203,9 @@ exports.generatePdf = async (
           landscape: false,
           printBackground: true,
           margin: {
-            top: '8mm',
+            top: '6mm',
             right: '8mm',
-            bottom: '8mm',
+            bottom: '6mm',
             left: '8mm',
           },
         });

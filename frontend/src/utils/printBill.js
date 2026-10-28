@@ -1,4 +1,4 @@
-﻿import dayjs from 'dayjs';
+import dayjs from 'dayjs';
 
 export function numberToWords(num) {
   if (typeof num !== 'number' || isNaN(num) || num <= 0) return 'Zero Rupees Only';
@@ -40,11 +40,20 @@ export function numberToWords(num) {
     words += inWords(remainder);
   }
   words = words.trim();
-  let resultStr = 'Rupees ' + (words || 'Zero');
+  let resultStr = 'Rupees : ' + (words || 'Zero');
   if (decimalPart > 0) {
     resultStr += ' and ' + inWords(decimalPart).trim() + ' Paise';
   }
   return resultStr + ' Only';
+}
+
+export function formatInvoiceNumber(number, year) {
+  if (!number) return '';
+  const yr = Number(year || new Date().getFullYear());
+  const y1 = yr % 100;
+  const y2 = (yr + 1) % 100;
+  const prefix = `${y1 < 10 ? '0' + y1 : y1}-${y2 < 10 ? '0' + y2 : y2}`;
+  return `${prefix}/${number}`;
 }
 
 const formatCurrency = (val) => {
@@ -54,16 +63,18 @@ const formatCurrency = (val) => {
 
 export function generateThermalHtml(invoice, companySettings = {}) {
   const company = {
-    name: companySettings.company_name || 'Disha Machinary',
-    address: companySettings.company_address || 'Plot No. 12, Industrial Estate, Machinery Hub',
-    phone: companySettings.company_phone || '+91 98765 43210',
-    gstin: companySettings.company_gstin || '33AABCD1234E1Z9',
+    name: companySettings.company_name || 'DISHA MACHINERY',
+    address: companySettings.company_address || 'Annamalai Complex, New Busstand, Tirupattur Dist - 635601',
+    phone: companySettings.company_phone || '9751117889 / 9626957000 / 04179-2266666 / 294650',
+    gstin: companySettings.company_gstin || '33GPNPS1888N1ZT',
+    upi: companySettings.company_upi || '9751117889@federal',
   };
 
   const client = invoice.client || {};
   const items = Array.isArray(invoice.items) ? invoice.items : [];
   const dateStr = dayjs(invoice.date || new Date()).format('DD/MM/YYYY hh:mm A');
   const totalQty = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const formattedInvoiceNo = formatInvoiceNumber(invoice.number, invoice.year);
 
   const itemsRows = items
     .map(
@@ -89,7 +100,7 @@ export function generateThermalHtml(invoice, companySettings = {}) {
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Thermal Bill #${invoice.number}/${invoice.year || ''}</title>
+  <title>Thermal Bill ${formattedInvoiceNo}</title>
   <style>
     @page {
       size: 80mm auto;
@@ -99,143 +110,75 @@ export function generateThermalHtml(invoice, companySettings = {}) {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Courier New", monospace, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     }
     body {
-      width: 76mm;
-      max-width: 76mm;
-      margin: 0 auto;
-      padding: 8px 4px 20px 4px;
-      font-size: 11px;
+      width: 80mm;
+      max-width: 80mm;
+      padding: 4mm 3mm;
       color: #000;
       background: #fff;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
+      font-size: 11px;
     }
     .center { text-align: center; }
     .bold { font-weight: 700; }
-    .shop-title {
-      font-size: 16px;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-    .shop-sub {
-      font-size: 9.5px;
-      line-height: 1.3;
-    }
-    .divider-double {
-      border-top: 1px dashed #000;
-      border-bottom: 1px dashed #000;
-      height: 3px;
-      margin: 6px 0;
-    }
-    .divider-single {
-      border-top: 1px dashed #000;
-      margin: 5px 0;
-    }
-    .doc-title {
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-      margin: 2px 0 4px 0;
-    }
-    .meta-line {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10px;
-      margin: 2px 0;
-    }
+    .shop-title { font-size: 14px; font-weight: 900; margin-bottom: 2px; }
+    .shop-sub { font-size: 9.5px; line-height: 1.3; }
+    .divider-double { border-top: 2px dashed #000; margin: 5px 0; }
+    .divider-single { border-top: 1px dashed #000; margin: 4px 0; }
+    .doc-title { font-size: 11.5px; font-weight: 800; letter-spacing: 1px; margin: 2px 0; }
+    .meta-line { display: flex; justify-content: space-between; font-size: 10px; margin: 2px 0; }
     .items-header {
       display: flex;
       justify-content: space-between;
-      font-size: 10.5px;
+      font-size: 10px;
       font-weight: 700;
       border-top: 1px dashed #000;
       border-bottom: 1px dashed #000;
-      padding: 4px 0;
-      margin: 6px 0 4px 0;
+      padding: 3px 0;
+      margin: 4px 0;
     }
-    .item-row {
-      margin-bottom: 5px;
-      font-size: 10.5px;
-    }
-    .item-name {
-      font-weight: 700;
-    }
-    .item-calc {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 1px;
-    }
-    .item-gst {
-      font-size: 9px;
-      color: #333;
-    }
-    .total-line {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10.5px;
-      margin: 2px 0;
-    }
+    .item-row { margin-bottom: 4px; font-size: 10px; }
+    .item-name { font-weight: 700; }
+    .item-calc { display: flex; justify-content: space-between; }
+    .total-line { display: flex; justify-content: space-between; font-size: 10.5px; margin: 2px 0; }
     .grand-total {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 900;
       border-top: 1px dashed #000;
       border-bottom: 1px dashed #000;
       padding: 4px 0;
       margin: 4px 0;
     }
-    .footer {
-      font-size: 9.5px;
-      text-align: center;
-      margin-top: 8px;
-      line-height: 1.4;
-    }
-    .barcode-text {
-      font-weight: 800;
-      letter-spacing: 2px;
-      margin: 4px 0;
-    }
+    .footer { font-size: 9.5px; text-align: center; margin-top: 6px; line-height: 1.35; }
   </style>
 </head>
 <body>
   <div class="center">
     <div class="shop-title">${company.name}</div>
-    <div class="shop-sub">MACHINERY • SPARES • TOOLS</div>
+    <div class="shop-sub">ALL KINDS OF MACHINERY & SPARES</div>
     <div class="shop-sub">${company.address}</div>
-    ${company.phone ? `<div class="shop-sub">Phone: ${company.phone}</div>` : ''}
-    ${company.gstin ? `<div class="shop-sub bold">GSTIN: ${company.gstin}</div>` : ''}
+    <div class="shop-sub">Mob: ${company.phone}</div>
+    <div class="shop-sub bold">GSTIN: ${company.gstin}</div>
   </div>
 
   <div class="divider-double"></div>
 
   <div class="center">
-    <div class="doc-title">${invoice.gstEnabled ? 'TAX INVOICE' : 'CASH / RETAIL RECEIPT'}</div>
+    <div class="doc-title">${invoice.gstEnabled ? 'TAX INVOICE' : 'RETAIL BILL'}</div>
   </div>
 
   <div class="meta-line">
-    <span>Bill No: #${invoice.number}/${invoice.year || ''}</span>
+    <span>Invoice No: ${formattedInvoiceNo}</span>
     <span>${dateStr}</span>
   </div>
   <div class="meta-line">
-    <span>Cust: ${client.name || 'Walk-in Customer'}</span>
+    <span>Customer: ${client.name || 'Walk-in Customer'}</span>
     ${client.phone ? `<span>Ph: ${client.phone}</span>` : ''}
   </div>
-  ${
-    invoice.buyerGstin || client.gstin
-      ? `<div class="meta-line"><span>GSTIN: ${invoice.buyerGstin || client.gstin}</span></div>`
-      : ''
-  }
-  ${
-    invoice.paymentMethod
-      ? `<div class="meta-line"><span>Payment: ${String(invoice.paymentMethod).toUpperCase()}</span></div>`
-      : ''
-  }
 
   <div class="items-header">
-    <span>Item Description</span>
+    <span>Item Particulars</span>
     <span>Amount</span>
   </div>
 
@@ -248,18 +191,11 @@ export function generateThermalHtml(invoice, companySettings = {}) {
     <span>${formatCurrency(invoice.subTotal)}</span>
   </div>
   ${
-    invoice.discount > 0
-      ? `<div class="total-line"><span>Discount:</span><span>- ${formatCurrency(invoice.discount)}</span></div>`
-      : ''
-  }
-  ${
     invoice.gstEnabled
-      ? invoice.supplyType === 'interstate'
-        ? `<div class="total-line"><span>IGST:</span><span>${formatCurrency(invoice.igstTotal || invoice.taxTotal)}</span></div>`
-        : `
-          <div class="total-line"><span>CGST:</span><span>${formatCurrency(invoice.cgstTotal || (invoice.taxTotal || 0) / 2)}</span></div>
-          <div class="total-line"><span>SGST:</span><span>${formatCurrency(invoice.sgstTotal || (invoice.taxTotal || 0) / 2)}</span></div>
-        `
+      ? `
+      <div class="total-line"><span>CGST:</span><span>${formatCurrency(invoice.cgstTotal || (invoice.taxTotal || 0) / 2)}</span></div>
+      <div class="total-line"><span>SGST:</span><span>${formatCurrency(invoice.sgstTotal || (invoice.taxTotal || 0) / 2)}</span></div>
+      `
       : ''
   }
 
@@ -268,42 +204,15 @@ export function generateThermalHtml(invoice, companySettings = {}) {
     <span>${formatCurrency(invoice.total)}</span>
   </div>
 
-  ${
-    (() => {
-      const paidVal =
-        invoice.credit !== undefined
-          ? invoice.credit
-          : invoice.paidNow !== undefined
-          ? invoice.paidNow
-          : invoice.paidAmount;
-      if (paidVal === undefined || paidVal === null) return '';
-      const balanceVal = Math.max(0, Number(invoice.total || 0) - Number(paidVal || 0));
-      return `
-        <div class="total-line">
-          <span>Amount Paid:</span>
-          <span class="bold">${formatCurrency(paidVal)}</span>
-        </div>
-        <div class="total-line ${balanceVal > 0 ? 'bold' : ''}" style="${balanceVal > 0 ? 'color: #b91c1c;' : 'color: #15803d;'}">
-          <span>${balanceVal > 0 ? 'Balance Due:' : 'Status:'}</span>
-          <span>${balanceVal > 0 ? formatCurrency(balanceVal) + ' (PENDING)' : 'PAID IN FULL'}</span>
-        </div>
-      `;
-    })()
-  }
-
   <div class="divider-single"></div>
   <div class="meta-line">
     <span>Total Items: ${items.length}</span>
     <span>Total Qty: ${totalQty}</span>
   </div>
 
-  <div class="divider-double"></div>
-
   <div class="footer">
-    <div class="bold">* THANK YOU FOR VISITING *</div>
-    <div>For inquiries: ${company.phone}</div>
-    <div class="barcode-text">*DM-INV-${invoice.number}-${invoice.year}*</div>
-    <div>*** DISHA MACHINARY ***</div>
+    <div class="bold">Thanks so much for your purchase!</div>
+    <div>See you again soon!</div>
   </div>
 </body>
 </html>
@@ -312,34 +221,72 @@ export function generateThermalHtml(invoice, companySettings = {}) {
 
 export function generateA4Html(invoice, companySettings = {}) {
   const company = {
-    name: companySettings.company_name || 'Disha Machinary',
-    address: companySettings.company_address || 'Plot No. 12, Industrial Estate, Machinery Hub',
+    name: companySettings.company_name || 'DISHA MACHINERY',
+    tagline:
+      companySettings.company_tagline ||
+      '[ All Kinds of Machinery, All Kinds of Welding & Wiring Equipment and foods ]',
+    address:
+      companySettings.company_address ||
+      'Annamalai Complex, New Busstand, Tirupattur Dist - 635601',
     state: companySettings.company_state || 'Tamil Nadu',
     country: companySettings.company_country || 'India',
-    phone: companySettings.company_phone || '+91 98765 43210',
-    email: companySettings.company_email || 'sales@dishamachinary.com',
-    gstin: companySettings.company_gstin || '33AABCD1234E1Z9',
+    phone:
+      companySettings.company_phone ||
+      '9751117889 / 9626957000 / 04179-2266666 / 294650',
+    email: companySettings.company_email || 'dishamachinery@gmail.com',
+    gstin: companySettings.company_gstin || '33GPNPS1888N1ZT',
+    regNo: companySettings.company_reg_number || 'DM/26-27',
+    bankName: companySettings.company_bank_name || 'FEDERAL BANK',
+    bankAccount: companySettings.company_bank_account || '20695500000537',
+    bankIfsc: companySettings.company_bank_ifsc || 'FDRL0002069',
+    bankBranch: companySettings.company_bank_branch || 'TIRUPATHUR',
+    accountName: companySettings.company_name || 'DISHA MACHINERY',
+    upi: companySettings.company_upi || '9751117889@federal',
   };
 
   const client = invoice.client || {};
   const items = Array.isArray(invoice.items) ? invoice.items : [];
   const dateStr = dayjs(invoice.date || new Date()).format('DD/MM/YYYY');
   const amountWords = numberToWords(Number(invoice.total || 0));
+  const formattedInvoiceNo = formatInvoiceNumber(invoice.number, invoice.year);
+  const primaryMobile = (company.phone || '9751117889').split('/')[0].trim();
+  const upiQrString = `upi://pay?pa=${company.upi}&pn=${encodeURIComponent(company.name)}&am=${Number(invoice.total || 0).toFixed(2)}&cu=INR&tn=Bill%20${encodeURIComponent(formattedInvoiceNo)}`;
 
   const itemsTableRows = items
     .map(
       (item, idx) => `
       <tr>
-        <td style="text-align: center;">${idx + 1}</td>
-        <td>
-          <strong>${item.itemName || item.name || 'Product'}</strong>
-          ${item.description ? `<div style="font-size: 10px; color: #555;">${item.description}</div>` : ''}
-        </td>
-        <td style="text-align: center;">${item.hsnCode || '-'}</td>
-        <td style="text-align: center;">${item.quantity || 1}</td>
-        <td style="text-align: right;">${formatCurrency(item.price)}</td>
-        ${invoice.gstEnabled ? `<td style="text-align: center;">${item.gstRate || 0}%</td>` : ''}
-        <td style="text-align: right; font-weight: bold;">${formatCurrency((item.quantity || 1) * (item.price || 0))}</td>
+        <td style="text-align: center; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${idx + 1}</td>
+        <td style="text-align: left; font-weight: bold; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${item.itemName || item.name || 'Product'}</td>
+        <td style="text-align: center; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${item.hsnCode || '-'}</td>
+        <td style="text-align: right; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${Number(item.price || 0).toFixed(2)}</td>
+        <td style="text-align: center; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${item.quantity || 1}</td>
+        <td style="text-align: center; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;"></td>
+        <td style="text-align: center; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${item.gstRate ? Number(item.gstRate).toFixed(2) : '0.00'}</td>
+        <td style="text-align: right; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${item.cgst ? Number(item.cgst).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'intrastate' ? (Number(item.taxAmount || 0) / 2).toFixed(2) : '')}</td>
+        <td style="text-align: right; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${item.sgst ? Number(item.sgst).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'intrastate' ? (Number(item.taxAmount || 0) / 2).toFixed(2) : '')}</td>
+        <td style="text-align: right; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${item.igst ? Number(item.igst).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'interstate' ? Number(item.taxAmount || 0).toFixed(2) : '')}</td>
+        <td style="text-align: right; font-weight: bold; border-left: 1px solid #000; border-right: 1px solid #000; padding: 4px;">${Number(item.taxableValue || item.total || (item.quantity * item.price)).toFixed(2)}</td>
+      </tr>
+    `
+    )
+    .join('');
+
+  const placeholderRows = Array.from({ length: Math.max(0, 6 - items.length) })
+    .map(
+      () => `
+      <tr style="height: 24px;">
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
+        <td style="border-left: 1px solid #000; border-right: 1px solid #000;">&nbsp;</td>
       </tr>
     `
     )
@@ -350,11 +297,11 @@ export function generateA4Html(invoice, companySettings = {}) {
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Invoice #${invoice.number}/${invoice.year || ''}</title>
+  <title>DISHA MACHINERY - Tax Invoice ${formattedInvoiceNo}</title>
   <style>
     @page {
       size: A4 portrait;
-      margin: 10mm 12mm;
+      margin: 6mm 8mm;
     }
     * {
       box-sizing: border-box;
@@ -364,259 +311,263 @@ export function generateA4Html(invoice, companySettings = {}) {
     }
     body {
       padding: 10px;
-      color: #0f172a;
+      color: #000;
       background: #fff;
-      font-size: 11.5px;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .header-table {
-      width: 100%;
-      border-bottom: 2px solid #0f172a;
-      padding-bottom: 12px;
-      margin-bottom: 14px;
-    }
-    .company-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: #0f172a;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .company-sub {
       font-size: 11px;
-      color: #475569;
-      margin-top: 2px;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
-    .invoice-title-block {
-      text-align: right;
+    .disha-tax-invoice {
+      border: 1.5px solid #000;
+      padding: 12px 14px 8px;
     }
-    .invoice-title {
-      font-size: 22px;
-      font-weight: 900;
-      color: #1e3a8a;
-      text-transform: uppercase;
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #000;
+      font-size: 11px;
+    }
+    .brand-section {
+      text-align: center;
+      position: relative;
+      padding: 6px 0 8px;
+    }
+    .brand-name {
+      font-size: 27px;
+      font-weight: 800;
+      color: #2e7d32;
+      font-family: Georgia, "Times New Roman", serif;
+      letter-spacing: 1px;
     }
     .parties-grid {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 1.15fr 1.15fr 1.2fr;
+      border: 1px solid #000;
+      font-size: 10.5px;
+      margin-top: 6px;
     }
-    .party-card {
-      flex: 1;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 10px 12px;
-      background: #f8fafc;
+    .party-box {
+      padding: 6px 8px;
+      border-right: 1px solid #000;
     }
-    .party-heading {
-      font-size: 11px;
+    .party-header {
+      color: #1d4ed8;
       font-weight: 700;
-      text-transform: uppercase;
-      color: #64748b;
-      margin-bottom: 6px;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 3px;
-    }
-    .party-name {
-      font-size: 13px;
-      font-weight: 700;
-      color: #0f172a;
+      text-decoration: underline;
       margin-bottom: 3px;
     }
-    table.items-table {
+    .party-name {
+      font-weight: 800;
+      color: #991b1b;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    .meta-box {
+      padding: 6px 8px;
+      font-size: 10.5px;
+    }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+    table.disha-items-table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 16px;
+      border-left: 1px solid #000;
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+      font-size: 10.5px;
     }
-    table.items-table th {
-      background: #0f172a;
-      color: #fff;
-      padding: 7px 8px;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-    }
-    table.items-table td {
-      border: 1px solid #cbd5e1;
-      padding: 7px 8px;
-      font-size: 11px;
-    }
-    .totals-wrapper {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .totals-left {
-      width: 55%;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 10px 12px;
-      background: #f8fafc;
-    }
-    .totals-right {
-      width: 40%;
-    }
-    .totals-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 4px 0;
-      font-size: 11.5px;
-    }
-    .grand-row {
-      border-top: 2px solid #0f172a;
-      border-bottom: 2px solid #0f172a;
-      padding: 6px 0;
-      font-size: 14px;
-      font-weight: 800;
-      color: #1e3a8a;
-    }
-    .sign-wrapper {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 30px;
-      padding-top: 10px;
-    }
-    .sign-box {
-      text-align: right;
-      width: 200px;
-      border-top: 1px solid #0f172a;
-      padding-top: 6px;
+    table.disha-items-table th {
+      border: 1px solid #000;
+      padding: 5px 4px;
       font-weight: 700;
+      text-align: center;
+      background: #fff;
+    }
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 0.9fr 1.3fr;
+      border-left: 1px solid #000;
+      border-right: 1px solid #000;
+      border-bottom: 1px solid #000;
+      padding: 6px 8px;
+      gap: 8px;
+      font-size: 10.5px;
+    }
+    .total-box {
+      display: flex;
+      justify-content: space-between;
+      border: 1.5px solid #000;
+      padding: 4px 6px;
+      margin: 5px 0 6px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #991b1b;
+    }
+    .footer-banner {
+      text-align: center;
+      color: #1e40af;
+      font-weight: 700;
+      font-size: 11px;
+      margin-top: 8px;
+      padding-top: 4px;
+      border-top: 1px solid #e2e8f0;
     }
   </style>
 </head>
 <body>
-  <table class="header-table">
-    <tr>
-      <td>
-        <div class="company-title">${company.name}</div>
-        <div class="company-sub">Machinery • Tools • Spares • Industrial Solutions</div>
-        <div class="company-sub">${company.address}, ${company.state}, ${company.country}</div>
-        <div class="company-sub">Phone: ${company.phone} | Email: ${company.email}</div>
-        <div class="company-sub"><strong>GSTIN:</strong> ${company.gstin}</div>
-      </td>
-      <td class="invoice-title-block">
-        <div class="invoice-title">${invoice.gstEnabled ? 'TAX INVOICE' : 'RETAIL INVOICE'}</div>
-        <div style="font-size: 12px; font-weight: 700; margin-top: 4px;">Invoice #: ${invoice.number}/${invoice.year || ''}</div>
-        <div style="font-size: 11px; color: #475569;">Date: ${dateStr}</div>
-        ${invoice.paymentMethod ? `<div style="font-size: 11px; color: #475569;">Payment: ${String(invoice.paymentMethod).toUpperCase()}</div>` : ''}
-      </td>
-    </tr>
-  </table>
-
-  <div class="parties-grid">
-    <div class="party-card">
-      <div class="party-heading">Supplier Details</div>
-      <div class="party-name">${company.name}</div>
-      <div>${company.address}</div>
-      <div>${company.state}, ${company.country}</div>
-      <div><strong>GSTIN:</strong> ${company.gstin}</div>
+  <div class="disha-tax-invoice">
+    <div class="top-bar">
+      <div><strong>GSTIN :</strong> ${company.gstin}</div>
+      <div style="font-weight: 800; font-size: 13px;">TAX INVOICE</div>
+      <div style="color: #991b1b; font-weight: 700;"><strong>Mobile :</strong> ${primaryMobile}</div>
     </div>
-    <div class="party-card">
-      <div class="party-heading">Customer / Buyer Details</div>
-      <div class="party-name">${client.name || 'Walk-in Customer'}</div>
-      ${client.address ? `<div>${client.address}</div>` : ''}
-      ${client.phone ? `<div>Phone: ${client.phone}</div>` : ''}
-      ${invoice.buyerGstin || client.gstin ? `<div><strong>GSTIN:</strong> ${invoice.buyerGstin || client.gstin}</div>` : ''}
+
+    <div class="brand-section">
+      <div class="brand-name">${company.name}</div>
+      <div style="font-size: 10.5px; font-weight: 700; color: #1e293b; margin: 2px 0;">${company.tagline}</div>
+      <div style="font-size: 11px; font-weight: 600; color: #1e293b;">${company.address}</div>
+      <div style="font-size: 11px; font-weight: 700; color: #991b1b; margin-top: 2px;"><strong>Mobile :</strong> ${company.phone}</div>
     </div>
-  </div>
 
-  <table class="items-table">
-    <thead>
-      <tr>
-        <th style="width: 35px; text-align: center;">#</th>
-        <th>Description of Goods / Machine</th>
-        <th style="width: 70px; text-align: center;">HSN</th>
-        <th style="width: 45px; text-align: center;">Qty</th>
-        <th style="width: 85px; text-align: right;">Unit Price</th>
-        ${invoice.gstEnabled ? '<th style="width: 55px; text-align: center;">GST %</th>' : ''}
-        <th style="width: 100px; text-align: right;">Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${itemsTableRows}
-    </tbody>
-  </table>
+    <div class="parties-grid">
+      <div class="party-box">
+        <div class="party-header">Billed to</div>
+        <div class="party-name">${client.name || 'HALEEM BASHA'}</div>
+        <div style="font-weight: 700;">${client.address || client.city || 'TIRUPATTUR'}</div>
+        <div style="font-weight: 700;">${client.state || 'TIRUPATTUR'}</div>
+        <div style="display: flex; justify-content: space-between; margin-top: 2px;">
+          <span>GSTIN :</span> <span>${invoice.buyerGstin || client.gstin || ''}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 2px; color: #991b1b; font-weight: 700;">
+          <span>Mobile No :</span> <span>${client.phone || '8122638760'}</span>
+        </div>
+      </div>
 
-  <div class="totals-wrapper">
-    <div class="totals-left">
-      <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Amount in Words:</div>
-      <div style="font-size: 12px; font-weight: 700; color: #0f172a;">${amountWords}</div>
-      ${
-        companySettings.company_bank_account || companySettings.company_upi
-          ? `
-          <div style="margin-top: 8px; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff; font-size: 10px;">
-            <div style="font-weight: 700; text-transform: uppercase; color: #0f172a; margin-bottom: 2px;">Bank & Payment Details</div>
-            ${companySettings.company_bank_account ? `<div>${companySettings.company_bank_account}</div>` : ''}
-            ${companySettings.company_upi ? `<div>UPI: ${companySettings.company_upi}</div>` : ''}
-          </div>
-          `
-          : ''
-      }
-      <div style="margin-top: 10px; font-size: 10.5px; color: #64748b;">
-        <strong>Terms & Conditions:</strong><br />
-        1. Goods once sold are covered under standard manufacturer warranty.<br />
-        2. Subject to local jurisdiction.
+      <div class="party-box">
+        <div class="party-header">Consignee / Shipped to</div>
+        <div class="party-name">${invoice.consigneeName || client.name || 'HALEEM BASHA'}</div>
+        <div style="font-weight: 700;">${invoice.consigneeAddress || client.address || client.city || 'TIRUPATTUR'}</div>
+        <div style="font-weight: 700;">${client.state || 'TIRUPATTUR'}</div>
+        <div style="display: flex; justify-content: space-between; margin-top: 2px;">
+          <span>GSTIN :</span> <span>${invoice.consigneeGstin || invoice.buyerGstin || client.gstin || ''}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 2px; color: #991b1b; font-weight: 700;">
+          <span>Mobile No :</span> <span>${invoice.consigneePhone || client.phone || '8122638760'}</span>
+        </div>
+      </div>
+
+      <div class="meta-box">
+        <div class="meta-row">
+          <span style="font-weight: 600;">Invoice No :</span>
+          <span style="color: #991b1b; font-weight: 800;">${formattedInvoiceNo}</span>
+        </div>
+        <div class="meta-row">
+          <span style="font-weight: 600;">Invoice Date :</span>
+          <span style="font-weight: 700;">${dateStr}</span>
+        </div>
+        <div class="meta-row">
+          <span style="font-weight: 600;">Vehicle No :</span>
+          <span style="font-weight: 700;">${invoice.vehicleNo || ''}</span>
+        </div>
+        <div class="meta-row">
+          <span style="font-weight: 600;">Transport :</span>
+          <span style="font-weight: 700;">${invoice.transport || ''}</span>
+        </div>
       </div>
     </div>
-    <div class="totals-right">
-      <div class="totals-row">
-        <span>Sub Total:</span>
-        <span>${formatCurrency(invoice.subTotal)}</span>
-      </div>
-      ${
-        invoice.discount > 0
-          ? `<div class="totals-row"><span>Discount:</span><span>- ${formatCurrency(invoice.discount)}</span></div>`
-          : ''
-      }
-      ${
-        invoice.gstEnabled
-          ? invoice.supplyType === 'interstate'
-            ? `<div class="totals-row"><span>IGST:</span><span>${formatCurrency(invoice.igstTotal || invoice.taxTotal)}</span></div>`
-            : `
-              <div class="totals-row"><span>CGST:</span><span>${formatCurrency(invoice.cgstTotal || (invoice.taxTotal || 0) / 2)}</span></div>
-              <div class="totals-row"><span>SGST:</span><span>${formatCurrency(invoice.sgstTotal || (invoice.taxTotal || 0) / 2)}</span></div>
-            `
-          : ''
-      }
-      <div class="totals-row grand-row">
-        <span>Grand Total:</span>
-        <span>${formatCurrency(invoice.total)}</span>
-      </div>
-      ${
-        (() => {
-          const paidVal =
-            invoice.credit !== undefined
-              ? invoice.credit
-              : invoice.paidNow !== undefined
-              ? invoice.paidNow
-              : invoice.paidAmount;
-          if (paidVal === undefined || paidVal === null) return '';
-          const balanceVal = Math.max(0, Number(invoice.total || 0) - Number(paidVal || 0));
-          return `
-            <div class="totals-row" style="color: #1e293b; font-weight: 600; margin-top: 4px;">
-              <span>Amount Paid:</span>
-              <span>${formatCurrency(paidVal)}</span>
-            </div>
-            <div class="totals-row" style="${balanceVal > 0 ? 'color: #dc2626; font-weight: 700;' : 'color: #16a34a; font-weight: 700;'}">
-              <span>${balanceVal > 0 ? 'Balance Due:' : 'Payment Status:'}</span>
-              <span>${balanceVal > 0 ? formatCurrency(balanceVal) + ' (PENDING)' : 'PAID IN FULL'}</span>
-            </div>
-          `;
-        })()
-      }
-    </div>
-  </div>
 
-  <div class="sign-wrapper">
-    <div style="font-size: 10.5px; color: #64748b; max-width: 60%;">
-      This is a computer-generated tax invoice for Disha Machinary.
+    <table class="disha-items-table">
+      <thead>
+        <tr>
+          <th style="width: 4%;" rowspan="2">No</th>
+          <th style="width: 28%;" rowspan="2">Particulars</th>
+          <th style="width: 9%;" rowspan="2">Hsn Code</th>
+          <th style="width: 10%;" rowspan="2">Rate</th>
+          <th style="width: 12%;" colspan="2">Qty</th>
+          <th style="width: 7%;" rowspan="2">GST %</th>
+          <th style="width: 8%;" rowspan="2">CGST</th>
+          <th style="width: 8%;" rowspan="2">SGST</th>
+          <th style="width: 8%;" rowspan="2">IGST</th>
+          <th style="width: 12%;" rowspan="2">Amount</th>
+        </tr>
+        <tr>
+          <th style="width: 6%; font-size: 9.5px; padding: 2px;">Qty/wet</th>
+          <th style="width: 6%; font-size: 9.5px; padding: 2px;">Nos/lth</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${itemsTableRows}
+        ${placeholderRows}
+      </tbody>
+    </table>
+
+    <div class="bottom-grid">
+      <div>
+        <div style="color: #991b1b; font-weight: 700; text-decoration: underline; margin-bottom: 3px;">Bank Details</div>
+        <div style="color: #1e40af; font-weight: 700; margin-bottom: 2px;"><strong>A/C NAME :</strong> ${company.accountName}</div>
+        <div style="display: flex; justify-content: space-between; color: #1e40af; font-weight: 700; margin-bottom: 2px;">
+          <span><strong>A/C NO :</strong> ${company.bankAccount}</span>
+          <span><strong>IFSC :</strong> ${company.bankIfsc}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: #1e40af; font-weight: 700; margin-bottom: 2px;">
+          <span><strong>BANK :</strong> ${company.bankName}</span>
+          <span><strong>BRANCH :</strong> ${company.bankBranch}</span>
+        </div>
+        <div style="margin-top: 6px; padding-top: 4px; border-top: 1px solid #000; font-weight: 700;">
+          ${amountWords}
+        </div>
+        <div style="margin-top: 4px; font-size: 9.5px; font-weight: 600;">
+          1. Goods Once sold Cannot be taken back
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px dashed #000; border-right: 1px dashed #000;">
+        <img
+          src="https://api.qrserver.com/v1/create-qr-code/?size=105x105&data=${encodeURIComponent(upiQrString)}"
+          alt="UPI QR"
+          style="width: 95px; height: 95px;"
+        />
+        <div style="font-size: 8.5px; font-weight: 700; margin-top: 3px; color: #1e40af;">Scan & Pay via UPI</div>
+      </div>
+
+      <div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>Freight</span>
+          <span>${invoice.freight ? Number(invoice.freight).toFixed(2) : ''}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>CGST :</span>
+          <span>${invoice.cgstTotal ? Number(invoice.cgstTotal).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'intrastate' ? (Number(invoice.taxTotal || 0) / 2).toFixed(2) : '')}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>SGST :</span>
+          <span>${invoice.sgstTotal ? Number(invoice.sgstTotal).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'intrastate' ? (Number(invoice.taxTotal || 0) / 2).toFixed(2) : '')}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+          <span>IGST :</span>
+          <span>${invoice.igstTotal ? Number(invoice.igstTotal).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'interstate' ? Number(invoice.taxTotal || 0).toFixed(2) : '')}</span>
+        </div>
+
+        <div class="total-box">
+          <span>TOTAL :</span>
+          <span>${Number(invoice.total || 0).toFixed(2)}</span>
+        </div>
+
+        <div style="text-align: right; margin-top: 6px;">
+          <div style="font-size: 10px; font-weight: 700;">For ${company.name}</div>
+          <div style="height: 28px;"></div>
+          <div style="font-size: 9.5px; font-weight: 600;">Authorized Signatory</div>
+        </div>
+      </div>
     </div>
-    <div class="sign-box">
-      For ${company.name}<br /><br /><br />
-      Authorized Signatory
+
+    <div class="footer-banner">
+      Thanks so much for your purchase! You made our day, so we hope you have a great one yourself. See you again soon!
     </div>
   </div>
 </body>
@@ -624,7 +575,7 @@ export function generateA4Html(invoice, companySettings = {}) {
   `;
 }
 
-export function printInvoice(invoice, format = 'thermal', companySettings = {}) {
+export function printInvoice(invoice, format = 'a4', companySettings = {}) {
   if (!invoice) return;
 
   const isThermal = format === 'thermal';
@@ -644,7 +595,6 @@ export function printInvoice(invoice, format = 'thermal', companySettings = {}) 
   doc.write(htmlContent);
   doc.close();
 
-  // Give brief moment for CSS to render then open print dialogue box
   setTimeout(() => {
     try {
       printIframe.contentWindow.focus();

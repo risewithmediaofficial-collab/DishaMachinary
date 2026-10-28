@@ -7,6 +7,13 @@ const StockMovement = mongoose.model('StockMovement');
 const methods = createCRUDController('Product');
 
 methods.create = async (req, res) => {
+  if (!req.body.supplier) {
+    return res.status(400).json({
+      success: false,
+      result: null,
+      message: 'Supplier is required. Products cannot be added to inventory without an assigned supplier.',
+    });
+  }
   const openingStock = Number(req.body.openingStock || 0);
   if (!Number.isFinite(openingStock) || openingStock < 0) {
     return res.status(400).json({ success: false, result: null, message: 'Invalid opening stock' });
@@ -50,6 +57,13 @@ methods.create = async (req, res) => {
 };
 
 methods.update = async (req, res) => {
+  if (Object.hasOwn(req.body, 'supplier') && !req.body.supplier) {
+    return res.status(400).json({
+      success: false,
+      result: null,
+      message: 'Supplier is required. Products cannot exist in inventory without an assigned supplier.',
+    });
+  }
   if (Object.hasOwn(req.body, 'stockQuantity') || Object.hasOwn(req.body, 'openingStock')) {
     return res.status(400).json({
       success: false,
@@ -176,4 +190,3 @@ methods.stockMovements = async (req, res) => {
 };
 
 module.exports = methods;
-

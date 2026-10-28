@@ -16,6 +16,12 @@ const productSchema = new mongoose.Schema(
       trim: true,
       required: true,
     },
+    supplier: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Supplier',
+      required: true,
+      autopopulate: true,
+    },
     sku: {
       type: String,
       trim: true,
@@ -131,7 +137,9 @@ const productSchema = new mongoose.Schema(
   { versionKey: false }
 );
 
+productSchema.plugin(require('mongoose-autopopulate'));
 productSchema.index({ name: 1 });
+productSchema.index({ supplier: 1 });
 productSchema.index({ modelNumber: 1 });
 productSchema.index({ barcode: 1 }, { unique: true, sparse: true });
 productSchema.index({ 'variants.sku': 1 }, { sparse: true });

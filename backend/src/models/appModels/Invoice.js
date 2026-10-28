@@ -50,11 +50,6 @@ const invoiceSchema = new mongoose.Schema({
   },
   items: [
     {
-      // product: {
-      //   type: mongoose.Schema.ObjectId,
-      //   ref: 'Product',
-      //   // required: true,
-      // },
       itemName: {
         type: String,
         required: true,
@@ -74,22 +69,6 @@ const invoiceSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
-      // discount: {
-      //   type: Number,
-      //   default: 0,
-      // },
-      // taxRate: {
-      //   type: Number,
-      //   default: 0,
-      // },
-      // subTotal: {
-      //   type: Number,
-      //   default: 0,
-      // },
-      // taxTotal: {
-      //   type: Number,
-      //   default: 0,
-      // },
       total: {
         type: Number,
         required: true,
@@ -136,6 +115,13 @@ const invoiceSchema = new mongoose.Schema({
   cgstTotal: { type: Number, default: 0 },
   sgstTotal: { type: Number, default: 0 },
   igstTotal: { type: Number, default: 0 },
+  freight: { type: Number, default: 0 },
+  vehicleNo: { type: String, default: '' },
+  transport: { type: String, default: '' },
+  consigneeName: { type: String, default: '' },
+  consigneeAddress: { type: String, default: '' },
+  consigneeGstin: { type: String, default: '' },
+  consigneePhone: { type: String, default: '' },
   total: {
     type: Number,
     default: 0,

@@ -1,5 +1,17 @@
 export const fields = {
   name: { type: 'string', required: true, maxLength: 120 },
+  supplier: {
+    type: 'async',
+    label: 'Supplier (Mandatory for Inventory)',
+    entity: 'supplier',
+    displayLabels: ['name', 'company'],
+    outputValue: '_id',
+    required: true,
+    placeholder: 'Select Supplier (Required for inventory)',
+    withRedirect: true,
+    urlToRedirect: '/supplier',
+    redirectLabel: '+ Add New Supplier',
+  },
   sku: { type: 'string', required: true, maxLength: 40 },
   category: { type: 'string', maxLength: 80 },
   subcategory: { type: 'string', maxLength: 80 },

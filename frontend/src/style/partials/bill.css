@@ -876,3 +876,350 @@ table.bill-main-table td.text-center { text-align: center; }
   }
 }
 
+
+
+/* ===================================================
+   Exact Disha Machinery Physical Bill Replica Styles
+   =================================================== */
+.disha-tax-invoice {
+  border: 1.5px solid #000 !important;
+  padding: 12px 14px 8px !important;
+  background: #fff !important;
+  color: #000 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+  box-sizing: border-box !important;
+}
+
+.disha-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #000;
+  margin-bottom: 8px;
+}
+
+.disha-top-gstin {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.disha-top-title {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.disha-top-mobile {
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.disha-brand-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.disha-emblem-wrap {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.disha-emblem-circle {
+  width: 48px;
+  height: 48px;
+  border: 2px solid #b45309;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b45309;
+  font-family: Georgia, serif;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.disha-brand-info {
+  text-align: center;
+}
+
+.disha-brand-name {
+  margin: 0;
+  font-size: 27px;
+  font-weight: 800;
+  color: #2e7d32;
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: 1px;
+}
+
+.disha-brand-tagline {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 2px 0;
+}
+
+.disha-brand-address {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.disha-brand-phones {
+  font-size: 11px;
+  font-weight: 700;
+  color: #991b1b;
+  margin-top: 2px;
+}
+
+.disha-parties-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1.15fr 1.2fr;
+  border: 1px solid #000;
+  margin-bottom: 0px;
+}
+
+.disha-party-box {
+  padding: 6px 8px;
+  border-right: 1px solid #000;
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.disha-party-header {
+  color: #1d4ed8;
+  font-weight: 700;
+  text-decoration: underline;
+  margin-bottom: 3px;
+  font-size: 11px;
+}
+
+.disha-party-name {
+  font-weight: 800;
+  color: #991b1b;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.disha-party-addr {
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #000;
+}
+
+.disha-party-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.disha-phone-row {
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.disha-meta-box {
+  padding: 6px 8px;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.disha-meta-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.disha-meta-lbl {
+  font-weight: 600;
+  color: #000;
+}
+
+.disha-meta-val {
+  font-weight: 700;
+  color: #000;
+}
+
+.disha-inv-no-val {
+  color: #991b1b;
+  font-weight: 800;
+  font-size: 11.5px;
+}
+
+.disha-table-container {
+  margin-bottom: 0px;
+}
+
+table.disha-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  border-bottom: 1px solid #000;
+  font-size: 10.5px;
+}
+
+table.disha-items-table th {
+  border: 1px solid #000;
+  padding: 5px 4px;
+  font-weight: 700;
+  text-align: center;
+  color: #000;
+  background: #fff;
+}
+
+table.disha-items-table td {
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  border-top: none;
+  border-bottom: none;
+  padding: 4px 5px;
+  color: #000;
+  vertical-align: top;
+}
+
+table.disha-items-table tr.disha-placeholder-row td {
+  height: 24px;
+}
+
+.disha-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 0.9fr 1.3fr;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+  border-bottom: 1px solid #000;
+  padding: 6px 8px;
+  gap: 8px;
+}
+
+.disha-bottom-left {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.disha-bank-header {
+  color: #991b1b;
+  font-weight: 700;
+  text-decoration: underline;
+  margin-bottom: 3px;
+  font-size: 10.5px;
+}
+
+.disha-bank-line {
+  color: #1e40af;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.disha-bank-split {
+  display: flex;
+  justify-content: space-between;
+  color: #1e40af;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.disha-words-box {
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px solid #000;
+  font-weight: 700;
+  color: #000;
+}
+
+.disha-terms-line {
+  margin-top: 4px;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #000;
+}
+
+.disha-bottom-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px dashed #000;
+  border-right: 1px dashed #000;
+  padding: 0 6px;
+}
+
+.disha-qr-img {
+  width: 95px;
+  height: 95px;
+}
+
+.disha-qr-text {
+  font-size: 8.5px;
+  font-weight: 700;
+  margin-top: 3px;
+  color: #1e40af;
+}
+
+.disha-bottom-right {
+  font-size: 10.5px;
+}
+
+.disha-calc-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.disha-calc-row .lbl {
+  font-weight: 600;
+}
+
+.disha-calc-row .val {
+  font-weight: 700;
+  text-align: right;
+}
+
+.disha-total-box {
+  display: flex;
+  justify-content: space-between;
+  border: 1.5px solid #000;
+  padding: 4px 6px;
+  margin: 5px 0 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #991b1b;
+}
+
+.disha-sign-block {
+  text-align: right;
+  margin-top: 6px;
+}
+
+.disha-for-name {
+  font-size: 10px;
+  font-weight: 700;
+  color: #000;
+}
+
+.disha-sign-placeholder {
+  height: 32px;
+}
+
+.disha-sign-lbl {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #000;
+}
+
+.disha-footer-banner {
+  text-align: center;
+  color: #1e40af;
+  font-weight: 700;
+  font-size: 11px;
+  margin-top: 8px;
+  padding-top: 4px;
+  border-top: 1px solid #e2e8f0;
+}

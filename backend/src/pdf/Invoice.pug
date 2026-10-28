@@ -1,13 +1,13 @@
-﻿doctype html
+doctype html
 html
   head
     meta(charset="utf-8")
     meta(name="viewport" content="width=device-width, initial-scale=1")
-    title #{settings.company_name || 'Disha Machinary'} - Invoice ##{model.number}/#{model.year || ''}
+    title #{settings.company_name || 'DISHA MACHINERY'} - Tax Invoice #{model.number}
     style.
       @page {
         size: A4 portrait;
-        margin: 8mm 8mm 8mm 8mm;
+        margin: 6mm 8mm;
       }
       * {
         box-sizing: border-box;
@@ -17,465 +17,350 @@ html
       body {
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
         font-size: 11px;
-        color: #1e293b;
+        color: #000;
         background: #ffffff;
-        line-height: 1.45;
+        line-height: 1.35;
       }
-      .invoice-box {
-        max-width: 100%;
-        margin: 0 auto;
-        padding: 10px 14px;
+      .bill-outer {
+        border: 1.5px solid #000;
+        padding: 10px 12px 6px;
       }
-      .brand-header {
+      .top-bar {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
-        padding-bottom: 14px;
-        border-bottom: 2px solid #0f172a;
-        margin-bottom: 14px;
-      }
-      .brand-left {
-        display: flex;
         align-items: center;
-        gap: 12px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #000;
+        font-size: 11px;
       }
-      .brand-emblem {
-        width: 48px;
-        height: 48px;
-        background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
-        border-radius: 8px;
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      .top-gstin { font-weight: 700; }
+      .top-title { font-weight: 800; font-size: 13px; letter-spacing: 0.5px; }
+      .top-mobile { color: #991b1b; font-weight: 700; }
+      .brand-section {
+        text-align: center;
+        padding: 6px 0 8px;
+        position: relative;
+      }
+      .brand-name {
         font-size: 26px;
         font-weight: 800;
-        font-family: Georgia, serif;
-        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.15);
-      }
-      .brand-info h1 {
+        color: #2e7d32;
+        font-family: Georgia, "Times New Roman", serif;
+        letter-spacing: 1px;
         margin: 0;
-        font-size: 22px;
-        font-weight: 800;
-        letter-spacing: -0.3px;
-        color: #0f172a;
-        text-transform: uppercase;
       }
-      .brand-info .tagline {
-        margin: 2px 0 0;
-        font-size: 10px;
-        font-weight: 600;
-        color: #2563eb;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-      }
-      .brand-right {
-        text-align: right;
-      }
-      .invoice-title {
-        font-size: 20px;
-        font-weight: 800;
-        color: #0f172a;
-        margin: 0;
-        letter-spacing: 0.5px;
-      }
-      .invoice-badge {
-        display: inline-block;
-        padding: 3px 8px;
-        font-size: 9px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-radius: 4px;
-        margin-top: 4px;
-      }
-      .badge-paid { background: #dcfce7; color: #15803d; }
-      .badge-partially { background: #fef3c7; color: #b45309; }
-      .badge-unpaid { background: #fee2e2; color: #b91c1c; }
-
-      .meta-grid {
-        display: flex;
-        justify-content: space-between;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 10px 14px;
-        margin-bottom: 14px;
-      }
-      .meta-col {
-        flex: 1;
-      }
-      .meta-label {
-        font-size: 9.5px;
-        font-weight: 600;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-      }
-      .meta-val {
-        font-size: 12px;
-        font-weight: 700;
-        color: #0f172a;
-        margin-top: 2px;
-      }
-
-      .parties-grid {
-        display: flex;
-        gap: 14px;
-        margin-bottom: 14px;
-      }
-      .party-card {
-        flex: 1;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 10px 12px;
-        background: #ffffff;
-      }
-      .party-title {
+      .brand-tagline {
         font-size: 10px;
         font-weight: 700;
-        color: #2563eb;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin: 0 0 6px 0;
-        padding-bottom: 4px;
-        border-bottom: 1px dashed #e2e8f0;
-      }
-      .party-name {
-        font-size: 12.5px;
-        font-weight: 800;
-        color: #0f172a;
-        margin-bottom: 4px;
-      }
-      .party-detail {
-        font-size: 10.5px;
-        color: #334155;
+        color: #1e293b;
         margin: 2px 0;
       }
-      .party-detail strong {
-        color: #0f172a;
+      .brand-address {
+        font-size: 11px;
+        font-weight: 600;
+        color: #1e293b;
       }
-
-      .table-container {
-        margin-bottom: 14px;
+      .brand-phones {
+        font-size: 11px;
+        font-weight: 700;
+        color: #991b1b;
+        margin-top: 2px;
       }
+      .parties-grid {
+        display: flex;
+        border: 1px solid #000;
+        font-size: 10.5px;
+        margin-top: 6px;
+      }
+      .party-box {
+        flex: 1.1;
+        padding: 6px 8px;
+        border-right: 1px solid #000;
+      }
+      .party-header {
+        color: #1d4ed8;
+        font-weight: 700;
+        text-decoration: underline;
+        margin-bottom: 3px;
+      }
+      .party-name {
+        font-weight: 800;
+        color: #991b1b;
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      .party-addr {
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #000;
+      }
+      .party-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2px;
+      }
+      .party-mobile {
+        color: #991b1b;
+        font-weight: 700;
+      }
+      .meta-box {
+        flex: 1.1;
+        padding: 6px 8px;
+      }
+      .meta-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2px;
+      }
+      .meta-lbl { font-weight: 600; }
+      .meta-val { font-weight: 700; }
+      .inv-no { color: #991b1b; font-weight: 800; }
       table.bill-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 10.5px;
-      }
-      table.bill-table thead tr {
-        background: #0f172a;
-        color: #ffffff;
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+        font-size: 10px;
       }
       table.bill-table th {
-        padding: 7px 8px;
-        text-align: left;
+        border: 1px solid #000;
+        padding: 5px 3px;
         font-weight: 700;
-        font-size: 10px;
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
-        border: 1px solid #0f172a;
+        text-align: center;
+        background: #fff;
       }
-      table.bill-table th.right { text-align: right; }
-      table.bill-table th.center { text-align: center; }
-      table.bill-table tbody td {
-        padding: 7px 8px;
-        border: 1px solid #e2e8f0;
-        color: #1e293b;
+      table.bill-table td {
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+        padding: 4px;
         vertical-align: top;
       }
-      table.bill-table tbody tr:nth-child(even) td {
-        background: #f8fafc;
-      }
-      table.bill-table td.right { text-align: right; }
-      table.bill-table td.center { text-align: center; }
-      .item-name {
-        font-weight: 700;
-        color: #0f172a;
-      }
-      .item-sub {
-        font-size: 9.5px;
-        color: #64748b;
-        margin-top: 2px;
-      }
-
-      .summary-section {
+      .right { text-align: right; }
+      .center { text-align: center; }
+      .bottom-grid {
         display: flex;
-        gap: 14px;
-        margin-bottom: 12px;
-      }
-      .summary-left {
-        flex: 1.3;
-        display: flex;
-        flex-direction: column;
+        border-left: 1px solid #000;
+        border-right: 1px solid #000;
+        border-bottom: 1px solid #000;
+        padding: 6px 8px;
         gap: 8px;
+        font-size: 10px;
       }
-      .words-box {
-        background: #f1f5f9;
-        border-left: 3px solid #2563eb;
-        padding: 7px 10px;
-        border-radius: 4px;
-      }
-      .words-label {
-        font-size: 9px;
+      .bottom-left { flex: 1.4; }
+      .bank-header {
+        color: #991b1b;
         font-weight: 700;
-        color: #475569;
-        text-transform: uppercase;
+        text-decoration: underline;
+        margin-bottom: 3px;
       }
-      .words-val {
-        font-size: 10.5px;
+      .bank-row {
+        color: #1e40af;
         font-weight: 700;
-        color: #0f172a;
-        margin-top: 2px;
+        margin-bottom: 2px;
       }
-      .bank-box {
-        border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        padding: 8px 10px;
-        background: #ffffff;
-      }
-      .bank-title {
-        font-size: 9.5px;
-        font-weight: 700;
-        color: #0f172a;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-      }
-      .bank-text {
-        font-size: 9.5px;
-        color: #334155;
-        line-height: 1.4;
-      }
-      .terms-box {
-        font-size: 9px;
-        color: #64748b;
-        line-height: 1.4;
-      }
-      .terms-box strong { color: #334155; }
-
-      .summary-right {
-        flex: 1;
-      }
-      .calc-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .calc-table td {
-        padding: 4px 6px;
-        font-size: 10.5px;
-      }
-      .calc-table td.lbl {
-        color: #475569;
-        font-weight: 600;
-        text-align: right;
-      }
-      .calc-table td.val {
-        color: #0f172a;
-        font-weight: 700;
-        text-align: right;
-        width: 110px;
-      }
-      .total-row td {
-        background: #0f172a;
-        color: #ffffff !important;
-        font-size: 13px !important;
-        font-weight: 800 !important;
-        padding: 8px 10px !important;
-        border-radius: 4px;
-      }
-      .total-row td.lbl { color: #f8fafc !important; }
-      .total-row td.val { color: #ffffff !important; }
-
-      .signatory-row {
+      .bank-split {
         display: flex;
         justify-content: space-between;
-        align-items: flex-end;
-        margin-top: 18px;
-        padding-top: 14px;
-        border-top: 1px solid #cbd5e1;
-      }
-      .sign-notice {
-        font-size: 9px;
-        color: #94a3b8;
-        font-style: italic;
-      }
-      .sign-box {
-        text-align: center;
-        width: 200px;
-      }
-      .sign-company {
-        font-size: 10px;
+        color: #1e40af;
         font-weight: 700;
-        color: #0f172a;
-        margin-bottom: 35px;
+        margin-bottom: 2px;
       }
-      .sign-line {
-        border-top: 1px dashed #64748b;
+      .words-line {
+        margin-top: 6px;
+        padding-top: 4px;
+        border-top: 1px solid #000;
+        font-weight: 700;
+      }
+      .terms-line {
+        margin-top: 4px;
         font-size: 9.5px;
         font-weight: 600;
-        color: #475569;
-        padding-top: 4px;
       }
-
+      .bottom-center {
+        flex: 0.8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-left: 1px dashed #000;
+        border-right: 1px dashed #000;
+      }
+      .qr-img { width: 90px; height: 90px; }
+      .bottom-right { flex: 1.3; }
+      .calc-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2px;
+      }
+      .total-box {
+        display: flex;
+        justify-content: space-between;
+        border: 1.5px solid #000;
+        padding: 3px 6px;
+        margin: 5px 0 6px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #991b1b;
+      }
+      .footer-banner {
+        text-align: center;
+        color: #1e40af;
+        font-weight: 700;
+        font-size: 10.5px;
+        margin-top: 6px;
+        padding-top: 4px;
+        border-top: 1px solid #e2e8f0;
+      }
   body
-    .invoice-box
-      header.brand-header
-        .brand-left
-          .brand-emblem D
-          .brand-info
-            h1 #{settings.company_name || 'Disha Machinary'}
-            p.tagline Machinery • Tools • Spares • Industrial Engineering
-        .brand-right
-          h2.invoice-title #{model.gstEnabled ? 'TAX INVOICE' : 'RETAIL BILL'}
-          - var payStatus = model.paymentStatus || 'unpaid'
-          span(class='invoice-badge badge-' + payStatus) #{payStatus.toUpperCase()}
+    - var yr = model.year || new Date().getFullYear();
+    - var y1 = yr % 100;
+    - var y2 = (yr + 1) % 100;
+    - var pfx = (y1 < 10 ? '0' + y1 : y1) + '-' + (y2 < 10 ? '0' + y2 : y2);
+    - var invNo = pfx + '/' + model.number;
+    - var client = model.client || {};
+    - var items = model.items || [];
+    - var dateFormatted = moment(model.date).format('DD/MM/YYYY');
+    - var upiId = settings.company_upi || '9751117889@federal';
+    - var upiUrl = 'upi://pay?pa=' + upiId + '&pn=' + encodeURIComponent(settings.company_name || 'DISHA MACHINERY') + '&am=' + Number(model.total || 0).toFixed(2) + '&cu=INR';
+    - var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=' + encodeURIComponent(upiUrl);
 
-      .meta-grid
-        .meta-col
-          .meta-label Invoice Number
-          .meta-val ##{model.number}/#{model.year || ''}
-        .meta-col
-          .meta-label Invoice Date
-          .meta-val #{moment(model.date).format('DD MMM YYYY')}
-        .meta-col
-          .meta-label Due Date
-          .meta-val #{moment(model.expiredDate || model.date).format('DD MMM YYYY')}
-        .meta-col
-          .meta-label Place of Supply
-          .meta-val #{model.buyerState || settings.company_state || 'Tamil Nadu'} (#{model.supplyType === 'interstate' ? 'Inter-state' : 'Intra-state'})
+    .bill-outer
+      .top-bar
+        .top-gstin <strong>GSTIN :</strong> #{settings.company_gstin || '33GPNPS1888N1ZT'}
+        .top-title TAX INVOICE
+        .top-mobile <strong>Mobile :</strong> 9751117889
+
+      .brand-section
+        h1.brand-name #{settings.company_name || 'DISHA MACHINERY'}
+        .brand-tagline #{settings.company_tagline || '[ All Kinds of Machinery, All Kinds of Welding & Wiring Equipment and foods ]'}
+        .brand-address #{settings.company_address || 'Annamalai Complex, New Busstand, Tirupattur Dist - 635601'}
+        .brand-phones <strong>Mobile :</strong> #{settings.company_phone || '9626957000/04179-2266666/294650'}
 
       .parties-grid
-        .party-card
-          h3.party-title Billed By (Supplier)
-          .party-name #{settings.company_name || 'Disha Machinary'}
-          p.party-detail #{settings.company_address || 'Plot No. 12, Industrial Estate, Machinery Hub'}
-          p.party-detail #{settings.company_state || 'Tamil Nadu'}, #{settings.company_country || 'India'}
-          if settings.company_gstin
-            p.party-detail <strong>GSTIN:</strong> #{settings.company_gstin}
-          if settings.company_phone
-            p.party-detail <strong>Phone:</strong> #{settings.company_phone}
-          if settings.company_email
-            p.party-detail <strong>Email:</strong> #{settings.company_email}
-          if settings.company_reg_number
-            p.party-detail <strong>Reg No:</strong> #{settings.company_reg_number}
+        .party-box
+          .party-header Billed to
+          .party-name #{client.name || 'HALEEM BASHA'}
+          .party-addr #{client.address || 'TIRUPATTUR'}
+          .party-addr #{client.state || 'TIRUPATTUR'}
+          .party-row
+            span GSTIN :
+            span #{model.buyerGstin || client.gstin || ''}
+          .party-row.party-mobile
+            span Mobile No :
+            span #{client.phone || '8122638760'}
 
-        .party-card
-          h3.party-title Billed To (Customer)
-          .party-name #{model.client ? (model.client.name || 'Valued Customer') : 'Valued Customer'}
-          if model.client && model.client.businessName
-            p.party-detail <strong>M/s:</strong> #{model.client.businessName}
-          if model.client && model.client.address
-            p.party-detail #{model.client.address}
-          if model.client && model.client.phone
-            p.party-detail <strong>Phone:</strong> #{model.client.phone}
-          if model.client && model.client.email
-            p.party-detail <strong>Email:</strong> #{model.client.email}
-          if model.buyerGstin || (model.client && model.client.gstin)
-            p.party-detail <strong>GSTIN:</strong> #{model.buyerGstin || model.client.gstin}
-          if model.buyerState || (model.client && model.client.state)
-            p.party-detail <strong>State:</strong> #{model.buyerState || model.client.state}
+        .party-box
+          .party-header Consignee / Shipped to
+          .party-name #{model.consigneeName || client.name || 'HALEEM BASHA'}
+          .party-addr #{model.consigneeAddress || client.address || 'TIRUPATTUR'}
+          .party-addr #{client.state || 'TIRUPATTUR'}
+          .party-row
+            span GSTIN :
+            span #{model.consigneeGstin || model.buyerGstin || client.gstin || ''}
+          .party-row.party-mobile
+            span Mobile No :
+            span #{model.consigneePhone || client.phone || '8122638760'}
 
-      .table-container
-        table.bill-table
-          thead
+        .meta-box
+          .meta-row
+            span.meta-lbl Invoice No :
+            span.meta-val.inv-no #{invNo}
+          .meta-row
+            span.meta-lbl Invoice Date :
+            span.meta-val #{dateFormatted}
+          .meta-row
+            span.meta-lbl Vehicle No :
+            span.meta-val #{model.vehicleNo || ''}
+          .meta-row
+            span.meta-lbl Transport :
+            span.meta-val #{model.transport || ''}
+
+      table.bill-table
+        thead
+          tr
+            th(style="width: 4%;" rowspan="2") No
+            th(style="width: 28%;" rowspan="2") Particulars
+            th(style="width: 9%;" rowspan="2") Hsn Code
+            th(style="width: 10%;" rowspan="2") Rate
+            th(style="width: 12%;" colspan="2") Qty
+            th(style="width: 7%;" rowspan="2") GST %
+            th(style="width: 8%;" rowspan="2") CGST
+            th(style="width: 8%;" rowspan="2") SGST
+            th(style="width: 8%;" rowspan="2") IGST
+            th(style="width: 12%;" rowspan="2") Amount
+          tr
+            th(style="width: 6%; font-size: 8.5px;") Qty/wet
+            th(style="width: 6%; font-size: 8.5px;") Nos/lth
+        tbody
+          each item, idx in items
             tr
-              th.center(style="width: 28px;") #
-              th Machine / Item Details
-              th.center(style="width: 65px;") HSN/SAC
-              th.center(style="width: 45px;") Qty
-              th.right(style="width: 75px;") Rate
-              th.right(style="width: 80px;") Taxable
-              if model.gstEnabled
-                th.center(style="width: 50px;") GST %
-                if model.supplyType === 'intrastate'
-                  th.right(style="width: 65px;") CGST
-                  th.right(style="width: 65px;") SGST
-                else
-                  th.right(style="width: 75px;") IGST
-              th.right(style="width: 85px;") Total
-          tbody
-            each item, idx in (model.items || [])
-              tr
-                td.center #{idx + 1}
-                td
-                  .item-name #{item.itemName}
-                  if item.sku || item.description
-                    .item-sub #{item.sku ? 'SKU: ' + item.sku : ''} #{item.description ? '· ' + item.description : ''}
-                td.center #{item.hsnCode || '-'}
-                td.center #{item.quantity}
-                td.right #{moneyFormatter({ amount: item.price, currency_code: model.currency })}
-                td.right #{moneyFormatter({ amount: item.taxableValue || item.total, currency_code: model.currency })}
-                if model.gstEnabled
-                  td.center #{item.gstRate || 0}%
-                  if model.supplyType === 'intrastate'
-                    td.right #{moneyFormatter({ amount: item.cgst || 0, currency_code: model.currency })}
-                    td.right #{moneyFormatter({ amount: item.sgst || 0, currency_code: model.currency })}
-                  else
-                    td.right #{moneyFormatter({ amount: item.igst || 0, currency_code: model.currency })}
-                td.right(style="font-weight: 700;") #{moneyFormatter({ amount: item.lineTotal || item.total, currency_code: model.currency })}
+              td.center #{idx + 1}
+              td(style="font-weight: 700;") #{item.itemName}
+              td.center #{item.hsnCode || '-'}
+              td.right #{Number(item.price || 0).toFixed(2)}
+              td.center #{item.quantity}
+              td.center
+              td.center #{item.gstRate ? Number(item.gstRate).toFixed(2) : '0.00'}
+              td.right #{item.cgst ? Number(item.cgst).toFixed(2) : (model.gstEnabled && model.supplyType === 'intrastate' ? (Number(item.taxAmount || 0) / 2).toFixed(2) : '')}
+              td.right #{item.sgst ? Number(item.sgst).toFixed(2) : (model.gstEnabled && model.supplyType === 'intrastate' ? (Number(item.taxAmount || 0) / 2).toFixed(2) : '')}
+              td.right #{item.igst ? Number(item.igst).toFixed(2) : (model.gstEnabled && model.supplyType === 'interstate' ? Number(item.taxAmount || 0).toFixed(2) : '')}
+              td.right(style="font-weight: 700;") #{Number(item.taxableValue || item.total || (item.quantity * item.price)).toFixed(2)}
 
-      .summary-section
-        .summary-left
-          .words-box
-            .words-label Amount in Words:
-            .words-val #{typeof numberToWords === 'function' ? numberToWords(model.total) : ('Rupees ' + (model.total || 0) + ' Only')}
+          - var phCount = Math.max(0, 5 - items.length);
+          - for (var i = 0; i < phCount; i++)
+            tr(style="height: 22px;")
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
+              td &nbsp;
 
-          if settings.company_bank_account || settings.company_upi
-            .bank-box
-              .bank-title Bank & Payment Details
-              if settings.company_bank_account
-                .bank-text #{settings.company_bank_account}
-              if settings.company_upi
-                .bank-text UPI: #{settings.company_upi} (GPay / PhonePe / Paytm accepted)
+      .bottom-grid
+        .bottom-left
+          .bank-header Bank Details
+          .bank-row <strong>A/C NAME :</strong> #{settings.company_name || 'DISHA MACHINERY'}
+          .bank-split
+            span <strong>A/C NO :</strong> #{settings.company_bank_account || '20695500000537'}
+            span <strong>IFSC :</strong> #{settings.company_bank_ifsc || 'FDRL0002069'}
+          .bank-split
+            span <strong>BANK :</strong> #{settings.company_bank_name || 'FEDERAL BANK'}
+            span <strong>BRANCH :</strong> #{settings.company_bank_branch || 'TIRUPATHUR'}
+          .words-line #{typeof numberToWords === 'function' ? numberToWords(model.total) : ('Rupees ' + (model.total || 0) + ' Only')}
+          .terms-line 1. Goods Once sold Cannot be taken back
 
-          .terms-box
-            strong Terms & Conditions:
-            div 1. Warranty as per manufacturer terms. Physical & electrical damages not covered.
-            div 2. Goods once sold will not be accepted back without authorized inspection.
-            div 3. Subject to local state jurisdiction.
+        .bottom-center
+          img.qr-img(src=qrUrl alt="UPI QR")
+          div(style="font-size: 8px; font-weight: 700; color: #1e40af; margin-top: 2px;") Scan & Pay via UPI
 
-        .summary-right
-          table.calc-table
-            tr
-              td.lbl Sub Total:
-              td.val #{moneyFormatter({ amount: model.subTotal, currency_code: model.currency })}
-            if model.discount && model.discount > 0
-              tr
-                td.lbl Discount:
-                td.val - #{moneyFormatter({ amount: model.discount, currency_code: model.currency })}
-            if model.gstEnabled
-              if model.supplyType === 'intrastate'
-                tr
-                  td.lbl CGST:
-                  td.val #{moneyFormatter({ amount: model.cgstTotal, currency_code: model.currency })}
-                tr
-                  td.lbl SGST:
-                  td.val #{moneyFormatter({ amount: model.sgstTotal, currency_code: model.currency })}
-              else
-                tr
-                  td.lbl IGST:
-                  td.val #{moneyFormatter({ amount: model.igstTotal, currency_code: model.currency })}
-            else
-              tr
-                td.lbl GST:
-                td.val.text-muted 0.00 (Exempt / Nil)
-            tr.total-row
-              td.lbl Grand Total:
-              td.val #{moneyFormatter({ amount: model.total, currency_code: model.currency })}
-            if model.credit !== undefined && model.credit > 0
-              tr
-                td.lbl(style="color: #15803d;") Amount Paid:
-                td.val(style="color: #15803d;") #{moneyFormatter({ amount: model.credit, currency_code: model.currency })}
-              tr
-                td.lbl(style="color: #b91c1c;") Balance Due:
-                td.val(style="color: #b91c1c;") #{moneyFormatter({ amount: Math.max(0, model.total - model.credit), currency_code: model.currency })}
+        .bottom-right
+          .calc-row
+            span Freight
+            span #{model.freight ? Number(model.freight).toFixed(2) : ''}
+          .calc-row
+            span CGST :
+            span #{model.cgstTotal ? Number(model.cgstTotal).toFixed(2) : (model.gstEnabled && model.supplyType === 'intrastate' ? (Number(model.taxTotal || 0) / 2).toFixed(2) : '')}
+          .calc-row
+            span SGST :
+            span #{model.sgstTotal ? Number(model.sgstTotal).toFixed(2) : (model.gstEnabled && model.supplyType === 'intrastate' ? (Number(model.taxTotal || 0) / 2).toFixed(2) : '')}
+          .calc-row
+            span IGST :
+            span #{model.igstTotal ? Number(model.igstTotal).toFixed(2) : (model.gstEnabled && model.supplyType === 'interstate' ? Number(model.taxTotal || 0).toFixed(2) : '')}
+          .total-box
+            span TOTAL :
+            span #{Number(model.total || 0).toFixed(2)}
+          div(style="text-align: right; margin-top: 4px;")
+            div(style="font-size: 9.5px; font-weight: 700;") For #{settings.company_name || 'DISHA MACHINERY'}
+            div(style="height: 24px;")
+            div(style="font-size: 9px; font-weight: 600;") Authorized Signatory
 
-      .signatory-row
-        .sign-notice
-          | Computer generated bill for Disha Machinary. Valid without physical signature.
-        .sign-box
-          .sign-company For #{settings.company_name || 'Disha Machinary'}
-          .sign-line Authorized Signatory
+      .footer-banner
+        | Thanks so much for your purchase! You made our day, so we hope you have a great one yourself. See you again soon!

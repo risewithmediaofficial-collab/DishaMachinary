@@ -1,8 +1,8 @@
-﻿[
+[
   {
     "settingCategory": "company_settings",
     "settingKey": "company_name",
-    "settingValue": "Disha Machinary",
+    "settingValue": "DISHA MACHINERY",
     "valueType": "string"
   },
   {
@@ -19,8 +19,14 @@
   },
   {
     "settingCategory": "company_settings",
+    "settingKey": "company_tagline",
+    "settingValue": "[ All Kinds of Machinery, All Kinds of Welding & Wiring Equipment and foods ]",
+    "valueType": "string"
+  },
+  {
+    "settingCategory": "company_settings",
     "settingKey": "company_address",
-    "settingValue": "Plot No. 12, Industrial Estate, Machinery Hub",
+    "settingValue": "Annamalai Complex, New Busstand, Tirupattur Dist - 635601",
     "valueType": "string"
   },
   {
@@ -38,13 +44,13 @@
   {
     "settingCategory": "company_settings",
     "settingKey": "company_email",
-    "settingValue": "sales@dishamachinary.com",
+    "settingValue": "dishamachinery@gmail.com",
     "valueType": "string"
   },
   {
     "settingCategory": "company_settings",
     "settingKey": "company_phone",
-    "settingValue": "+91 98765 43210",
+    "settingValue": "9751117889 / 9626957000 / 04179-2266666 / 294650",
     "valueType": "string"
   },
   {
@@ -56,37 +62,55 @@
   {
     "settingCategory": "company_settings",
     "settingKey": "company_tax_number",
-    "settingValue": "33AABCD1234E1Z9",
+    "settingValue": "33GPNPS1888N1ZT",
     "valueType": "string"
   },
   {
     "settingCategory": "company_settings",
     "settingKey": "company_vat_number",
-    "settingValue": "33AABCD1234E1Z9",
+    "settingValue": "33GPNPS1888N1ZT",
     "valueType": "string"
   },
   {
     "settingCategory": "company_settings",
     "settingKey": "company_gstin",
-    "settingValue": "33AABCD1234E1Z9",
+    "settingValue": "33GPNPS1888N1ZT",
     "valueType": "string"
   },
   {
     "settingCategory": "company_settings",
     "settingKey": "company_reg_number",
-    "settingValue": "DM/IND/2026/089",
+    "settingValue": "DM/26-27",
+    "valueType": "string"
+  },
+  {
+    "settingCategory": "company_settings",
+    "settingKey": "company_bank_name",
+    "settingValue": "FEDERAL BANK",
     "valueType": "string"
   },
   {
     "settingCategory": "company_settings",
     "settingKey": "company_bank_account",
-    "settingValue": "",
+    "settingValue": "20695500000537",
+    "valueType": "string"
+  },
+  {
+    "settingCategory": "company_settings",
+    "settingKey": "company_bank_ifsc",
+    "settingValue": "FDRL0002069",
+    "valueType": "string"
+  },
+  {
+    "settingCategory": "company_settings",
+    "settingKey": "company_bank_branch",
+    "settingValue": "TIRUPATHUR",
     "valueType": "string"
   },
   {
     "settingCategory": "company_settings",
     "settingKey": "company_upi",
-    "settingValue": "",
+    "settingValue": "9751117889@federal",
     "valueType": "string"
   }
 ]

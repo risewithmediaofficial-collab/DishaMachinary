@@ -13,6 +13,7 @@ import useResponsive from '@/hooks/useResponsive';
 import {
   SettingOutlined,
   CustomerServiceOutlined,
+  ShopOutlined,
   AppstoreOutlined,
   InboxOutlined,
   ContainerOutlined,
@@ -23,6 +24,7 @@ import {
   CreditCardOutlined,
   MenuOutlined,
   FileOutlined,
+  FileTextOutlined,
   FilterOutlined,
   ReconciliationOutlined,
   ShoppingCartOutlined,
@@ -72,6 +74,11 @@ function Sidebar({ collapsible, isMobile = false, onItemClick }) {
       label: <Link to={'/customer'}>{translate('customers')}</Link>,
     },
     {
+      key: 'supplier',
+      icon: <ShopOutlined />,
+      label: <Link to={'/supplier'}>Suppliers</Link>,
+    },
+    {
       key: 'product',
       icon: <AppstoreOutlined />,
       label: <Link to={'/product'}>Products</Link>,
@@ -81,7 +88,11 @@ function Sidebar({ collapsible, isMobile = false, onItemClick }) {
       icon: <InboxOutlined />,
       label: <Link to={'/inventory'}>Inventory</Link>,
     },
-
+    {
+      key: 'quote',
+      icon: <FileTextOutlined />,
+      label: <Link to={'/quote'}>Quotations</Link>,
+    },
     {
       key: 'invoice',
       icon: <ContainerOutlined />,
@@ -97,7 +108,6 @@ function Sidebar({ collapsible, isMobile = false, onItemClick }) {
       icon: <CreditCardOutlined />,
       label: <Link to={'/expense'}>Expenses</Link>,
     },
-
     {
       key: 'generalSettings',
       label: <Link to={'/settings'}>{translate('settings')}</Link>,

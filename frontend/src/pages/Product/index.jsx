@@ -19,7 +19,7 @@ export default function Product() {
   const config = {
     entity,
     PANEL_TITLE: 'Products',
-    DATATABLE_TITLE: 'Product Catalog',
+    DATATABLE_TITLE: 'Product Catalog (Supplier-Linked Inventory)',
     ADD_NEW_ENTITY: 'Add Product',
     ENTITY_NAME: 'Product',
     fields,
@@ -28,6 +28,15 @@ export default function Product() {
     deleteModalLabels,
     dataTableColumns: [
       { title: translate('Product'), dataIndex: 'name' },
+      {
+        title: 'Supplier',
+        dataIndex: 'supplier',
+        render: (supplier) => (
+          <span style={{ fontWeight: 600, color: '#0284c7' }}>
+            {supplier?.name || supplier?.company || <Tag color="orange">Unassigned</Tag>}
+          </span>
+        ),
+      },
       { title: 'SKU', dataIndex: 'sku' },
       { title: 'Model', dataIndex: 'modelNumber' },
       { title: 'Category', dataIndex: 'category' },

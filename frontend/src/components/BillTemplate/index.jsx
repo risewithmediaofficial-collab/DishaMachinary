@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { Button, Tooltip, message } from 'antd';
 import {
@@ -6,8 +6,6 @@ import {
   FilePdfOutlined,
   FileTextOutlined,
   BarcodeOutlined,
-  CheckCircleOutlined,
-  DownloadOutlined,
 } from '@ant-design/icons';
 import { DOWNLOAD_BASE_URL } from '@/config/serverApiConfig';
 import { useMoney } from '@/settings';
@@ -18,7 +16,7 @@ export function numberToWords(num) {
   if (typeof num !== 'number' || isNaN(num) || num <= 0) return 'Zero Rupees Only';
   const a = [
     '', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ',
-    'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '
+    'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen ',
   ];
   const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
 
@@ -54,11 +52,20 @@ export function numberToWords(num) {
     words += inWords(remainder);
   }
   words = words.trim();
-  let resultStr = 'Rupees ' + (words || 'Zero');
+  let resultStr = 'Rupees : ' + (words || 'Zero');
   if (decimalPart > 0) {
     resultStr += ' and ' + inWords(decimalPart).trim() + ' Paise';
   }
   return resultStr + ' Only';
+}
+
+export function formatInvoiceNumber(number, year) {
+  if (!number) return '';
+  const yr = Number(year || new Date().getFullYear());
+  const y1 = yr % 100;
+  const y2 = (yr + 1) % 100;
+  const prefix = `${y1 < 10 ? '0' + y1 : y1}-${y2 < 10 ? '0' + y2 : y2}`;
+  return `${prefix}/${number}`;
 }
 
 export default function BillViewer({
@@ -68,7 +75,7 @@ export default function BillViewer({
   defaultFormat = 'a4',
   onFormatChange,
 }) {
-  const [activeFormat, setActiveFormat] = useState(defaultFormat); // 'a4' or 'thermal'
+  const [activeFormat, setActiveFormat] = useState(defaultFormat);
 
   useEffect(() => {
     setActiveFormat(defaultFormat);
@@ -87,22 +94,37 @@ export default function BillViewer({
   if (!invoice) return null;
 
   const company = {
-    name: companySettings.company_name || '',
-    address: companySettings.company_address || '',
-    state: companySettings.company_state || '',
-    country: companySettings.company_country || '',
-    phone: companySettings.company_phone || '',
-    email: companySettings.company_email || '',
-    gstin: companySettings.company_gstin || '',
-    regNo: companySettings.company_reg_number || '',
-    bank: companySettings.company_bank_account || '',
-    upi: companySettings.company_upi || '',
+    name: companySettings.company_name || 'DISHA MACHINERY',
+    tagline:
+      companySettings.company_tagline ||
+      '[ All Kinds of Machinery, All Kinds of Welding & Wiring Equipment and foods ]',
+    address:
+      companySettings.company_address ||
+      'Annamalai Complex, New Busstand, Tirupattur Dist - 635601',
+    state: companySettings.company_state || 'Tamil Nadu',
+    country: companySettings.company_country || 'India',
+    phone:
+      companySettings.company_phone ||
+      '9751117889 / 9626957000 / 04179-2266666 / 294650',
+    email: companySettings.company_email || 'dishamachinery@gmail.com',
+    gstin: companySettings.company_gstin || '33GPNPS1888N1ZT',
+    regNo: companySettings.company_reg_number || 'DM/26-27',
+    bankName: companySettings.company_bank_name || 'FEDERAL BANK',
+    bankAccount: companySettings.company_bank_account || '20695500000537',
+    bankIfsc: companySettings.company_bank_ifsc || 'FDRL0002069',
+    bankBranch: companySettings.company_bank_branch || 'TIRUPATHUR',
+    accountName: companySettings.company_name || 'DISHA MACHINERY',
+    upi: companySettings.company_upi || '9751117889@federal',
   };
 
   const client = invoice.client || {};
-  const items = invoice.items || [];
+  const items = Array.isArray(invoice.items) ? invoice.items : [];
   const currency = invoice.currency || 'INR';
   const payStatus = invoice.paymentStatus || 'unpaid';
+
+  const formattedInvoiceNo = formatInvoiceNumber(invoice.number, invoice.year);
+  const primaryMobile = (company.phone || '9751117889').split('/')[0].trim();
+  const upiQrString = `upi://pay?pa=${company.upi}&pn=${encodeURIComponent(company.name)}&am=${Number(invoice.total || 0).toFixed(2)}&cu=INR&tn=Bill%20${encodeURIComponent(formattedInvoiceNo)}`;
 
   const handlePrint = () => {
     const printableArea = document.querySelector('.bill-printable-area');
@@ -113,9 +135,6 @@ export default function BillViewer({
 
     try {
       const isThermal = activeFormat === 'thermal';
-      const measuredHeight = Math.ceil(printableArea.offsetHeight || printableArea.scrollHeight || 300);
-      const thermalPageHeight = `${measuredHeight + 12}px`;
-
       const printIframe = document.createElement('iframe');
       printIframe.style.position = 'fixed';
       printIframe.style.right = '0';
@@ -137,56 +156,26 @@ export default function BillViewer({
         <html>
           <head>
             <meta charset="utf-8" />
-            <title>Disha Machinary - Bill #${invoice.number}/${invoice.year || ''}</title>
+            <title>DISHA MACHINERY - Bill ${formattedInvoiceNo}</title>
             ${styles}
             <style>
               @page {
-                size: ${isThermal ? `80mm ${thermalPageHeight}` : 'A4 portrait'} !important;
-                margin: ${isThermal ? '0mm' : '8mm 10mm'} !important;
+                size: ${isThermal ? '80mm auto' : 'A4 portrait'} !important;
+                margin: ${isThermal ? '0mm' : '6mm 8mm'} !important;
               }
               *, *:before, *:after {
                 box-sizing: border-box !important;
               }
-              html {
-                margin: 0 !important;
-                padding: 0 !important;
-                height: auto !important;
-                min-height: 0 !important;
-                max-height: none !important;
-                background: #ffffff !important;
-              }
               body {
                 margin: 0 !important;
                 padding: 0 !important;
-                height: auto !important;
-                min-height: 0 !important;
-                max-height: none !important;
-                width: ${isThermal ? '80mm' : '100%'} !important;
-                max-width: ${isThermal ? '80mm' : '100%'} !important;
                 background: #ffffff !important;
-                display: block !important;
-                position: static !important;
-                overflow: visible !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
               }
-              .bill-paper-a4 {
+              .disha-tax-invoice {
+                border: 1.5px solid #000 !important;
                 box-shadow: none !important;
-                border: none !important;
-                padding: 0 !important;
-                margin: 0 auto !important;
-                max-width: 100% !important;
-                width: 100% !important;
-              }
-              .bill-paper-thermal {
-                box-shadow: none !important;
-                border: none !important;
-                padding: 3mm 2mm !important;
-                width: 76mm !important;
-                max-width: 76mm !important;
-                margin: 0 auto !important;
-                height: auto !important;
-                min-height: 0 !important;
               }
             </style>
           </head>
@@ -219,7 +208,9 @@ export default function BillViewer({
     window.open(`${DOWNLOAD_BASE_URL}${entity}/${entity}-thermal-${invoice._id}.pdf`, '_blank');
   };
 
-  const totalQty = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  // Min 6 rows to give realistic printed stationery look
+  const placeholderCount = Math.max(0, 6 - items.length);
+  const placeholderRows = Array.from({ length: placeholderCount });
 
   return (
     <div className="bill-viewer-container">
@@ -231,14 +222,14 @@ export default function BillViewer({
               className={`bill-format-tab ${activeFormat === 'a4' ? 'active' : ''}`}
               onClick={() => handleFormatChange('a4')}
             >
-              <FileTextOutlined /> A4 Tax Invoice
+              <FileTextOutlined /> A4 Tax Invoice (Official Printed Format)
             </button>
             <button
               type="button"
               className={`bill-format-tab ${activeFormat === 'thermal' ? 'active' : ''}`}
               onClick={() => handleFormatChange('thermal')}
             >
-              <BarcodeOutlined /> 80mm Thermal Slip
+              <BarcodeOutlined /> 80mm POS Slip
             </button>
           </div>
 
@@ -248,7 +239,7 @@ export default function BillViewer({
               icon={<PrinterOutlined />}
               onClick={handlePrint}
             >
-              Print {activeFormat === 'thermal' ? 'Thermal (80mm)' : 'A4 Bill'}
+              Print {activeFormat === 'thermal' ? 'Thermal (80mm)' : 'A4 Tax Invoice'}
             </Button>
             {activeFormat === 'a4' ? (
               <Button
@@ -269,371 +260,334 @@ export default function BillViewer({
         </div>
       )}
 
-      {/* RENDER A4 BILL */}
+      {/* ===================================================
+          A4 TAX INVOICE (EXACT REPLICA OF PHYSICAL BILL)
+          =================================================== */}
       {activeFormat === 'a4' && (
         <div className="bill-paper-a4-wrapper">
-          <div className="bill-paper-a4 bill-printable-area">
-          <div className="bill-brand-header">
-            <div className="bill-brand-left">
-              <div className="bill-emblem">D</div>
-              <div>
-                <h1 className="bill-brand-title">{company.name}</h1>
-                <p className="bill-brand-tagline">Machinery • Tools • Spares • Industrial Engineering</p>
+          <div className="bill-paper-a4 bill-printable-area disha-tax-invoice">
+            {/* 1. TOP HEADER BAR */}
+            <div className="disha-top-bar">
+              <div className="disha-top-gstin">
+                <strong>GSTIN :</strong> {company.gstin}
+              </div>
+              <div className="disha-top-title">TAX INVOICE</div>
+              <div className="disha-top-mobile">
+                <strong>Mobile :</strong> {primaryMobile}
               </div>
             </div>
-            <div className="bill-brand-right">
-              <h2 className="bill-doc-title">{invoice.gstEnabled ? 'TAX INVOICE' : 'RETAIL BILL'}</h2>
-              <span className={`bill-status-pill status-${payStatus}`}>
-                {payStatus.toUpperCase()}
-              </span>
-            </div>
-          </div>
 
-          <div className="bill-meta-bar">
-            <div>
-              <div className="bill-meta-item-label">Invoice Number</div>
-              <div className="bill-meta-item-val">#{invoice.number}/{invoice.year || ''}</div>
-            </div>
-            <div>
-              <div className="bill-meta-item-label">Invoice Date</div>
-              <div className="bill-meta-item-val">{dayjs(invoice.date).format('DD MMM YYYY')}</div>
-            </div>
-            <div>
-              <div className="bill-meta-item-label">Due Date</div>
-              <div className="bill-meta-item-val">{dayjs(invoice.expiredDate || invoice.date).format('DD MMM YYYY')}</div>
-            </div>
-            <div>
-              <div className="bill-meta-item-label">Place of Supply</div>
-              <div className="bill-meta-item-val">
-                {invoice.buyerState || company.state} ({invoice.supplyType === 'interstate' ? 'Inter-state' : 'Intra-state'})
-              </div>
-            </div>
-          </div>
-
-          <div className="bill-parties-grid">
-            <div className="bill-party-card">
-              <div className="bill-party-header">Billed By (Supplier)</div>
-              <div className="bill-party-name">{company.name}</div>
-              <div className="bill-party-line">{company.address}</div>
-              <div className="bill-party-line">{company.state}, {company.country}</div>
-              {company.gstin && (
-                <div className="bill-party-line"><strong>GSTIN:</strong> {company.gstin}</div>
-              )}
-              {company.phone && (
-                <div className="bill-party-line"><strong>Phone:</strong> {company.phone}</div>
-              )}
-              {company.email && (
-                <div className="bill-party-line"><strong>Email:</strong> {company.email}</div>
-              )}
-              {company.regNo && (
-                <div className="bill-party-line"><strong>Reg No:</strong> {company.regNo}</div>
-              )}
-            </div>
-
-            <div className="bill-party-card">
-              <div className="bill-party-header">Billed To (Customer)</div>
-              <div className="bill-party-name">{client.name || 'Valued Customer'}</div>
-              {client.businessName && (
-                <div className="bill-party-line"><strong>M/s:</strong> {client.businessName}</div>
-              )}
-              {client.address && (
-                <div className="bill-party-line">{client.address}</div>
-              )}
-              {client.phone && (
-                <div className="bill-party-line"><strong>Phone:</strong> {client.phone}</div>
-              )}
-              {client.email && (
-                <div className="bill-party-line"><strong>Email:</strong> {client.email}</div>
-              )}
-              {(invoice.buyerGstin || client.gstin) && (
-                <div className="bill-party-line"><strong>GSTIN:</strong> {invoice.buyerGstin || client.gstin}</div>
-              )}
-              {(invoice.buyerState || client.state) && (
-                <div className="bill-party-line"><strong>State:</strong> {invoice.buyerState || client.state}</div>
-              )}
-            </div>
-          </div>
-
-          <div className="bill-table-wrapper">
-            <table className="bill-main-table">
-              <thead>
-                <tr>
-                  <th className="text-center" style={{ width: 32 }}>#</th>
-                  <th>Machine / Item Details</th>
-                  <th className="text-center" style={{ width: 70 }}>HSN/SAC</th>
-                  <th className="text-center" style={{ width: 50 }}>Qty</th>
-                  <th className="text-right" style={{ width: 85 }}>Rate</th>
-                  <th className="text-right" style={{ width: 90 }}>Taxable</th>
-                  {invoice.gstEnabled && (
-                    <>
-                      <th className="text-center" style={{ width: 55 }}>GST %</th>
-                      {invoice.supplyType === 'intrastate' ? (
-                        <>
-                          <th className="text-right" style={{ width: 70 }}>CGST</th>
-                          <th className="text-right" style={{ width: 70 }}>SGST</th>
-                        </>
-                      ) : (
-                        <th className="text-right" style={{ width: 80 }}>IGST</th>
-                      )}
-                    </>
-                  )}
-                  <th className="text-right" style={{ width: 95 }}>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item, idx) => (
-                  <tr key={item._id || idx}>
-                    <td className="text-center">{idx + 1}</td>
-                    <td>
-                      <div className="bill-item-name">{item.itemName}</div>
-                      {(item.sku || item.description) && (
-                        <div className="bill-item-sub">
-                          {item.sku ? `SKU: ${item.sku}` : ''} {item.description ? `· ${item.description}` : ''}
-                        </div>
-                      )}
-                    </td>
-                    <td className="text-center">{item.hsnCode || '-'}</td>
-                    <td className="text-center">{item.quantity}</td>
-                    <td className="text-right">{moneyFormatter({ amount: item.price, currency_code: currency })}</td>
-                    <td className="text-right">{moneyFormatter({ amount: item.taxableValue || item.total, currency_code: currency })}</td>
-                    {invoice.gstEnabled && (
-                      <>
-                        <td className="text-center">{item.gstRate || 0}%</td>
-                        {invoice.supplyType === 'intrastate' ? (
-                          <>
-                            <td className="text-right">{moneyFormatter({ amount: item.cgst || 0, currency_code: currency })}</td>
-                            <td className="text-right">{moneyFormatter({ amount: item.sgst || 0, currency_code: currency })}</td>
-                          </>
-                        ) : (
-                          <td className="text-right">{moneyFormatter({ amount: item.igst || 0, currency_code: currency })}</td>
-                        )}
-                      </>
-                    )}
-                    <td className="text-right" style={{ fontWeight: 700 }}>
-                      {moneyFormatter({ amount: item.lineTotal || item.total, currency_code: currency })}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="bill-bottom-grid">
-            <div className="bill-bottom-left">
-              <div className="bill-words-card">
-                <div className="bill-words-title">Amount in Words:</div>
-                <div className="bill-words-text">{numberToWords(invoice.total)}</div>
-              </div>
-
-              {Boolean(company.bank || company.upi) && (
-                <div className="bill-bank-card">
-                  <div className="bill-bank-title">Bank & Payment Details</div>
-                  {company.bank && <div className="bill-bank-line">{company.bank}</div>}
-                  {company.upi && (
-                    <div className="bill-bank-line">UPI: {company.upi} (GPay / PhonePe / Paytm accepted)</div>
-                  )}
+            {/* 2. BRAND CENTER SECTION */}
+            <div className="disha-brand-section">
+              <div className="disha-emblem-wrap">
+                <div className="disha-emblem-circle">
+                  <span>DM</span>
                 </div>
-              )}
-
-              <div className="bill-terms-card">
-                <strong>Terms & Conditions:</strong>
-                <div>1. Warranty as per manufacturer terms. Physical & electrical damages not covered.</div>
-                <div>2. Goods once sold will not be accepted back without authorized inspection.</div>
-                <div>3. Subject to local state jurisdiction.</div>
+              </div>
+              <div className="disha-brand-info">
+                <h1 className="disha-brand-name">{company.name}</h1>
+                <div className="disha-brand-tagline">{company.tagline}</div>
+                <div className="disha-brand-address">{company.address}</div>
+                <div className="disha-brand-phones">
+                  <strong>Mobile :</strong> {company.phone}
+                </div>
               </div>
             </div>
 
-            <div className="bill-bottom-right">
-              <table className="bill-calc-table">
-                <tbody>
+            {/* 3. PARTIES & INVOICE META GRID */}
+            <div className="disha-parties-grid">
+              {/* Billed To Box */}
+              <div className="disha-party-box disha-billed-box">
+                <div className="disha-party-header">Billed to</div>
+                <div className="disha-party-name">{client.name || 'HALEEM BASHA'}</div>
+                <div className="disha-party-addr">{client.address || client.city || 'TIRUPATTUR'}</div>
+                <div className="disha-party-addr">{client.state || 'TIRUPATTUR'}</div>
+                <div className="disha-party-row">
+                  <span>GSTIN :</span> <span>{invoice.buyerGstin || client.gstin || ''}</span>
+                </div>
+                <div className="disha-party-row disha-phone-row">
+                  <span>Mobile No :</span> <span>{client.phone || '8122638760'}</span>
+                </div>
+              </div>
+
+              {/* Consignee / Shipped To Box */}
+              <div className="disha-party-box disha-shipped-box">
+                <div className="disha-party-header">Consignee / Shipped to</div>
+                <div className="disha-party-name">{invoice.consigneeName || client.name || 'HALEEM BASHA'}</div>
+                <div className="disha-party-addr">{invoice.consigneeAddress || client.address || client.city || 'TIRUPATTUR'}</div>
+                <div className="disha-party-addr">{client.state || 'TIRUPATTUR'}</div>
+                <div className="disha-party-row">
+                  <span>GSTIN :</span> <span>{invoice.consigneeGstin || invoice.buyerGstin || client.gstin || ''}</span>
+                </div>
+                <div className="disha-party-row disha-phone-row">
+                  <span>Mobile No :</span> <span>{invoice.consigneePhone || client.phone || '8122638760'}</span>
+                </div>
+              </div>
+
+              {/* Invoice Meta Box */}
+              <div className="disha-meta-box">
+                <div className="disha-meta-row">
+                  <span className="disha-meta-lbl">Invoice No :</span>
+                  <span className="disha-meta-val disha-inv-no-val">{formattedInvoiceNo}</span>
+                </div>
+                <div className="disha-meta-row">
+                  <span className="disha-meta-lbl">Invoice Date :</span>
+                  <span className="disha-meta-val">{dayjs(invoice.date).format('DD/MM/YYYY')}</span>
+                </div>
+                <div className="disha-meta-row">
+                  <span className="disha-meta-lbl">Vehicle No :</span>
+                  <span className="disha-meta-val">{invoice.vehicleNo || ''}</span>
+                </div>
+                <div className="disha-meta-row">
+                  <span className="disha-meta-lbl">Transport :</span>
+                  <span className="disha-meta-val">{invoice.transport || ''}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. MAIN ITEMS TABLE */}
+            <div className="disha-table-container">
+              <table className="disha-items-table">
+                <thead>
                   <tr>
-                    <td className="lbl">Sub Total:</td>
-                    <td className="val">{moneyFormatter({ amount: invoice.subTotal, currency_code: currency })}</td>
+                    <th style={{ width: '4%' }} rowSpan={2}>No</th>
+                    <th style={{ width: '28%' }} rowSpan={2}>Particulars</th>
+                    <th style={{ width: '9%' }} rowSpan={2}>Hsn Code</th>
+                    <th style={{ width: '10%' }} rowSpan={2}>Rate</th>
+                    <th style={{ width: '12%' }} colSpan={2}>Qty</th>
+                    <th style={{ width: '7%' }} rowSpan={2}>GST %</th>
+                    <th style={{ width: '8%' }} rowSpan={2}>CGST</th>
+                    <th style={{ width: '8%' }} rowSpan={2}>SGST</th>
+                    <th style={{ width: '8%' }} rowSpan={2}>IGST</th>
+                    <th style={{ width: '12%' }} rowSpan={2}>Amount</th>
                   </tr>
-                  {invoice.discount > 0 && (
-                    <tr>
-                      <td className="lbl">Discount:</td>
-                      <td className="val">- {moneyFormatter({ amount: invoice.discount, currency_code: currency })}</td>
-                    </tr>
-                  )}
-                  {invoice.gstEnabled ? (
-                    invoice.supplyType === 'intrastate' ? (
-                      <>
-                        <tr>
-                          <td className="lbl">CGST:</td>
-                          <td className="val">{moneyFormatter({ amount: invoice.cgstTotal, currency_code: currency })}</td>
-                        </tr>
-                        <tr>
-                          <td className="lbl">SGST:</td>
-                          <td className="val">{moneyFormatter({ amount: invoice.sgstTotal, currency_code: currency })}</td>
-                        </tr>
-                      </>
-                    ) : (
-                      <tr>
-                        <td className="lbl">IGST:</td>
-                        <td className="val">{moneyFormatter({ amount: invoice.igstTotal, currency_code: currency })}</td>
-                      </tr>
-                    )
-                  ) : (
-                    <tr>
-                      <td className="lbl">GST:</td>
-                      <td className="val text-muted">0.00 (Exempt / Nil)</td>
-                    </tr>
-                  )}
-                  <tr className="bill-grand-total-row">
-                    <td className="lbl">Grand Total:</td>
-                    <td className="val">{moneyFormatter({ amount: invoice.total, currency_code: currency })}</td>
+                  <tr>
+                    <th style={{ width: '6%', fontSize: '9.5px', padding: '3px 2px' }}>Qty/wet</th>
+                    <th style={{ width: '6%', fontSize: '9.5px', padding: '3px 2px' }}>Nos/lth</th>
                   </tr>
-                  {invoice.credit !== undefined && invoice.credit > 0 && (
-                    <>
-                      <tr>
-                        <td className="lbl" style={{ color: '#15803d' }}>Amount Paid:</td>
-                        <td className="val" style={{ color: '#15803d' }}>{moneyFormatter({ amount: invoice.credit, currency_code: currency })}</td>
-                      </tr>
-                      <tr>
-                        <td className="lbl" style={{ color: '#b91c1c' }}>Balance Due:</td>
-                        <td className="val" style={{ color: '#b91c1c' }}>{moneyFormatter({ amount: Math.max(0, invoice.total - invoice.credit), currency_code: currency })}</td>
-                      </tr>
-                    </>
-                  )}
+                </thead>
+                <tbody>
+                  {items.map((item, idx) => (
+                    <tr key={item._id || idx}>
+                      <td className="text-center">{idx + 1}</td>
+                      <td className="text-left font-bold">{item.itemName}</td>
+                      <td className="text-center">{item.hsnCode || '-'}</td>
+                      <td className="text-right">{Number(item.price || 0).toFixed(2)}</td>
+                      <td className="text-center">{item.quantity}</td>
+                      <td className="text-center"></td>
+                      <td className="text-center">
+                        {item.gstRate ? `${Number(item.gstRate).toFixed(2)}` : '0.00'}
+                      </td>
+                      <td className="text-right">
+                        {item.cgst ? Number(item.cgst).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'intrastate' ? (Number(item.taxAmount || 0) / 2).toFixed(2) : '')}
+                      </td>
+                      <td className="text-right">
+                        {item.sgst ? Number(item.sgst).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'intrastate' ? (Number(item.taxAmount || 0) / 2).toFixed(2) : '')}
+                      </td>
+                      <td className="text-right">
+                        {item.igst ? Number(item.igst).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'interstate' ? Number(item.taxAmount || 0).toFixed(2) : '')}
+                      </td>
+                      <td className="text-right font-bold">
+                        {Number(item.taxableValue || item.total || (item.quantity * item.price)).toFixed(2)}
+                      </td>
+                    </tr>
+                  ))}
+                  {placeholderRows.map((_, pIdx) => (
+                    <tr key={`ph-${pIdx}`} className="disha-placeholder-row">
+                      <td className="text-center">&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                      <td>&nbsp;</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-          </div>
 
-          <div className="bill-signatory-row">
-            <div className="bill-sign-notice">
-              Computer generated bill for Disha Machinary. Valid without physical signature.
+            {/* 5. BOTTOM SECTION: BANK, QR CODE & CALCULATION TOTALS */}
+            <div className="disha-bottom-grid">
+              {/* Bottom Left: Bank Details & Words */}
+              <div className="disha-bottom-left">
+                <div className="disha-bank-header">Bank Details</div>
+                <div className="disha-bank-line">
+                  <span className="lbl">A/C NAME :</span> <span className="val">{company.accountName}</span>
+                </div>
+                <div className="disha-bank-split">
+                  <div>
+                    <span className="lbl">A/C NO :</span> <span className="val">{company.bankAccount}</span>
+                  </div>
+                  <div>
+                    <span className="lbl">IFSC :</span> <span className="val">{company.bankIfsc}</span>
+                  </div>
+                </div>
+                <div className="disha-bank-split">
+                  <div>
+                    <span className="lbl">BANK :</span> <span className="val">{company.bankName}</span>
+                  </div>
+                  <div>
+                    <span className="lbl">BRANCH :</span> <span className="val">{company.bankBranch}</span>
+                  </div>
+                </div>
+
+                <div className="disha-words-box">
+                  {numberToWords(invoice.total)}
+                </div>
+
+                <div className="disha-terms-line">
+                  1. Goods Once sold Cannot be taken back
+                </div>
+              </div>
+
+              {/* Bottom Center: Dynamic UPI QR Code */}
+              <div className="disha-bottom-center">
+                <div className="disha-qr-box">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=115x115&data=${encodeURIComponent(upiQrString)}`}
+                    alt="UPI QR Code"
+                    className="disha-qr-img"
+                  />
+                  <div className="disha-qr-text">Scan & Pay via UPI</div>
+                </div>
+              </div>
+
+              {/* Bottom Right: Taxes & Total */}
+              <div className="disha-bottom-right">
+                <div className="disha-calc-row">
+                  <span className="lbl">Freight</span>
+                  <span className="val">{invoice.freight ? Number(invoice.freight).toFixed(2) : ''}</span>
+                </div>
+                <div className="disha-calc-row">
+                  <span className="lbl">CGST :</span>
+                  <span className="val">
+                    {invoice.cgstTotal ? Number(invoice.cgstTotal).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'intrastate' ? (Number(invoice.taxTotal || 0) / 2).toFixed(2) : '')}
+                  </span>
+                </div>
+                <div className="disha-calc-row">
+                  <span className="lbl">SGST :</span>
+                  <span className="val">
+                    {invoice.sgstTotal ? Number(invoice.sgstTotal).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'intrastate' ? (Number(invoice.taxTotal || 0) / 2).toFixed(2) : '')}
+                  </span>
+                </div>
+                <div className="disha-calc-row">
+                  <span className="lbl">IGST :</span>
+                  <span className="val">
+                    {invoice.igstTotal ? Number(invoice.igstTotal).toFixed(2) : (invoice.gstEnabled && invoice.supplyType === 'interstate' ? Number(invoice.taxTotal || 0).toFixed(2) : '')}
+                  </span>
+                </div>
+
+                <div className="disha-total-box">
+                  <span className="lbl">TOTAL :</span>
+                  <span className="val">{Number(invoice.total || 0).toFixed(2)}</span>
+                </div>
+
+                <div className="disha-sign-block">
+                  <div className="disha-for-name">For {company.name}</div>
+                  <div className="disha-sign-placeholder"></div>
+                  <div className="disha-sign-lbl">Authorized Signatory</div>
+                </div>
+              </div>
             </div>
-            <div className="bill-sign-box">
-              <div className="bill-sign-company">For {company.name}</div>
-              <div className="bill-sign-line">Authorized Signatory</div>
+
+            {/* 6. BOTTOM GREETING FOOTER */}
+            <div className="disha-footer-banner">
+              Thanks so much for your purchase! You made our day, so we hope you have a great one yourself. See you again soon!
             </div>
           </div>
         </div>
-      </div>
       )}
 
-      {/* RENDER THERMAL 80MM BILL */}
+      {/* ===================================================
+          THERMAL 80MM BILL
+          =================================================== */}
       {activeFormat === 'thermal' && (
         <div className="bill-paper-thermal bill-printable-area">
           <div className="thermal-center">
-            <div className="thermal-shop-name">{company.name}</div>
-            <div className="thermal-shop-sub">MACHINERY • SPARES • TOOLS</div>
-            <div className="thermal-shop-sub">{company.address}</div>
-            {company.phone && <div className="thermal-shop-sub">Ph: {company.phone}</div>}
-            {company.gstin && <div className="thermal-shop-sub thermal-bold">GSTIN: {company.gstin}</div>}
+            <div className="thermal-brand-title">{company.name}</div>
+            <div className="thermal-sub">ALL KINDS OF MACHINERY & SPARES</div>
+            <div className="thermal-sub">{company.address}</div>
+            <div className="thermal-sub">Mob: {company.phone}</div>
+            <div className="thermal-sub bold">GSTIN: {company.gstin}</div>
           </div>
 
           <div className="thermal-divider-double" />
+
           <div className="thermal-center">
-            <div className="thermal-doc-title">
-              {invoice.gstEnabled ? 'TAX INVOICE' : 'CASH / RETAIL RECEIPT'}
-            </div>
+            <div className="thermal-doc-title">{invoice.gstEnabled ? 'TAX INVOICE' : 'RETAIL BILL'}</div>
           </div>
 
-          <div className="thermal-meta-line">
-            <span>Bill: #{invoice.number}/{invoice.year || ''}</span>
-            <span>{dayjs(invoice.date).format('DD/MM/YY HH:mm')}</span>
+          <div className="thermal-meta-row">
+            <span>Bill No: {formattedInvoiceNo}</span>
+            <span>{dayjs(invoice.date).format('DD/MM/YY hh:mm A')}</span>
           </div>
 
-          <div className="thermal-meta-line">
+          <div className="thermal-meta-row">
             <span>Cust: {client.name || 'Walk-in Customer'}</span>
-            {client.phone && <span>Ph: {client.phone}</span>}
+            <span>{client.phone || ''}</span>
           </div>
 
-          {(invoice.buyerGstin || client.gstin) && (
-            <div className="thermal-meta-line">
-              <span>GSTIN: {invoice.buyerGstin || client.gstin}</span>
-            </div>
-          )}
+          <div className="thermal-divider-single" />
 
           <div className="thermal-items-header">
             <span>Item Description</span>
-            <span>Amount</span>
+            <span style={{ textAlign: 'right' }}>Amount</span>
           </div>
 
-          {items.map((item, idx) => (
-            <div className="thermal-item-row" key={item._id || idx}>
-              <div className="thermal-item-name">{item.itemName}</div>
+          {items.map((it, idx) => (
+            <div key={idx} className="thermal-item-row">
+              <div className="thermal-item-name">{it.itemName}</div>
               <div className="thermal-item-calc">
-                <span>{item.quantity} x {moneyFormatter({ amount: item.price, currency_code: currency })}</span>
-                <span className="thermal-bold">
-                  {moneyFormatter({ amount: item.lineTotal || item.total, currency_code: currency })}
-                </span>
+                <span>{it.quantity} x {Number(it.price).toFixed(2)}</span>
+                <span className="bold">{Number(it.quantity * it.price).toFixed(2)}</span>
               </div>
-              {(item.hsnCode || (invoice.gstEnabled && item.gstRate)) && (
-                <div className="thermal-item-gst-tag">
-                  {item.hsnCode ? `HSN:${item.hsnCode} ` : ''}
-                  {invoice.gstEnabled ? `GST:${item.gstRate || 0}%` : ''}
-                </div>
-              )}
             </div>
           ))}
 
           <div className="thermal-divider-single" />
 
-          <div className="thermal-totals-area">
-            <div className="thermal-total-line">
-              <span>Sub Total:</span>
-              <span>{moneyFormatter({ amount: invoice.subTotal, currency_code: currency })}</span>
-            </div>
-            {invoice.discount > 0 && (
-              <div className="thermal-total-line">
-                <span>Discount:</span>
-                <span>- {moneyFormatter({ amount: invoice.discount, currency_code: currency })}</span>
-              </div>
-            )}
-            {invoice.gstEnabled && (
-              invoice.supplyType === 'intrastate' ? (
-                <>
-                  <div className="thermal-total-line">
-                    <span>CGST:</span>
-                    <span>{moneyFormatter({ amount: invoice.cgstTotal, currency_code: currency })}</span>
-                  </div>
-                  <div className="thermal-total-line">
-                    <span>SGST:</span>
-                    <span>{moneyFormatter({ amount: invoice.sgstTotal, currency_code: currency })}</span>
-                  </div>
-                </>
-              ) : (
-                <div className="thermal-total-line">
-                  <span>IGST:</span>
-                  <span>{moneyFormatter({ amount: invoice.igstTotal, currency_code: currency })}</span>
-                </div>
-              )
-            )}
-            <div className="thermal-grand-total thermal-total-line">
-              <span>NET PAYABLE:</span>
-              <span>{moneyFormatter({ amount: invoice.total, currency_code: currency })}</span>
-            </div>
-            {invoice.credit !== undefined && invoice.credit > 0 && (
-              <>
-                <div className="thermal-total-line">
-                  <span>Paid Amount:</span>
-                  <span className="thermal-bold">{moneyFormatter({ amount: invoice.credit, currency_code: currency })}</span>
-                </div>
-                <div className="thermal-total-line">
-                  <span>Balance Due:</span>
-                  <span>{moneyFormatter({ amount: Math.max(0, invoice.total - invoice.credit), currency_code: currency })}</span>
-                </div>
-              </>
-            )}
+          <div className="thermal-total-row">
+            <span>Sub Total:</span>
+            <span>{Number(invoice.subTotal).toFixed(2)}</span>
           </div>
 
-          <div className="thermal-divider-single" />
-          <div className="thermal-meta-line">
-            <span>Total Items: {items.length}</span>
-            <span>Total Qty: {totalQty}</span>
+          {invoice.gstEnabled && (
+            <>
+              <div className="thermal-total-row">
+                <span>CGST:</span>
+                <span>{Number(invoice.cgstTotal || (invoice.taxTotal || 0) / 2).toFixed(2)}</span>
+              </div>
+              <div className="thermal-total-row">
+                <span>SGST:</span>
+                <span>{Number(invoice.sgstTotal || (invoice.taxTotal || 0) / 2).toFixed(2)}</span>
+              </div>
+            </>
+          )}
+
+          <div className="thermal-total-row thermal-net-total">
+            <span>NET TOTAL:</span>
+            <span>₹{Number(invoice.total || 0).toFixed(2)}</span>
+          </div>
+
+          <div className="thermal-center" style={{ marginTop: 12 }}>
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=95x95&data=${encodeURIComponent(upiQrString)}`}
+              alt="UPI QR Code"
+              style={{ width: 85, height: 85 }}
+            />
+            <div style={{ fontSize: 9, marginTop: 4 }}>Scan & Pay: {company.upi}</div>
           </div>
 
           <div className="thermal-divider-double" />
-          <div className="thermal-footer thermal-center">
-            <div className="thermal-bold">* THANK YOU FOR YOUR BUSINESS *</div>
-            <div>For Support: {company.phone}</div>
-            <div>Goods once sold subject to warranty terms.</div>
-            <div className="thermal-barcode">*DM-INV-{invoice.number}-{invoice.year}*</div>
-            <div style={{ marginTop: 3 }}>*** DISHA MACHINARY ***</div>
+
+          <div className="thermal-footer">
+            <div className="bold">Thanks so much for your purchase!</div>
+            <div>See you again soon!</div>
           </div>
         </div>
       )}

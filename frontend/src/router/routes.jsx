@@ -5,12 +5,13 @@ import { Navigate } from 'react-router-dom';
 const Logout = lazy(() => import('@/pages/Logout.jsx'));
 const NotFound = lazy(() => import('@/pages/NotFound.jsx'));
 
-
 const Customer = lazy(() => import('@/pages/Customer'));
+const Supplier = lazy(() => import('@/pages/Supplier'));
 const Product = lazy(() => import('@/pages/Product'));
 const Inventory = lazy(() => import('@/pages/Inventory'));
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const Pos = lazy(() => import('@/pages/Pos'));
+const Quote = lazy(() => import('@/pages/Quote'));
 const Invoice = lazy(() => import('@/pages/Invoice'));
 const InvoiceCreate = lazy(() => import('@/pages/Invoice/InvoiceCreate'));
 
@@ -24,7 +25,6 @@ const PaymentUpdate = lazy(() => import('@/pages/Payment/PaymentUpdate'));
 const Expense = lazy(() => import('@/pages/Expense'));
 
 const Settings = lazy(() => import('@/pages/Settings/Settings'));
-
 
 const Profile = lazy(() => import('@/pages/Profile'));
 
@@ -58,6 +58,10 @@ let routes = {
       element: <Customer />,
     },
     {
+      path: '/supplier',
+      element: <Supplier />,
+    },
+    {
       path: '/product',
       element: <Product />,
     },
@@ -65,7 +69,10 @@ let routes = {
       path: '/inventory',
       element: <Inventory />,
     },
-
+    {
+      path: '/quote',
+      element: <Quote />,
+    },
     {
       path: '/invoice',
       element: <Invoice />,
@@ -102,7 +109,6 @@ let routes = {
       path: '/payment/update/:id',
       element: <PaymentUpdate />,
     },
-
     {
       path: '/settings',
       element: <Settings />,
