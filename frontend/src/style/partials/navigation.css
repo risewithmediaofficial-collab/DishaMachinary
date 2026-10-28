@@ -1,8 +1,9 @@
 .navigation {
-  position: sticky;
+  position: fixed !important;
   height: 100dvh;
   min-width: 0;
   flex: 0 0 256px;
+  width: 256px;
   overflow-y: auto;
   overflow-x: hidden;
   top: 0;

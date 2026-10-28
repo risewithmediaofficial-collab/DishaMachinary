@@ -138,10 +138,11 @@ function Sidebar({ collapsible, isMobile = false, onItemClick }) {
         minHeight: 0,
         overflowY: 'auto',
         overflowX: 'hidden',
-        position: isMobile ? 'relative' : 'sticky',
+        position: isMobile ? 'relative' : 'fixed',
         top: 0,
         left: 0,
         width: isMobile ? '100%' : 256,
+        zIndex: 1000,
       }}
       theme={'light'}
     >
@@ -209,4 +210,3 @@ function MobileSidebar() {
     </Drawer>
   );
 }
-

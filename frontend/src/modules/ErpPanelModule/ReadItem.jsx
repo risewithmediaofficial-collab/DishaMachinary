@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Divider } from 'antd';
 
-import { Button, Row, Col, Descriptions, Statistic, Tag } from 'antd';
+import { Button, Row, Col, Descriptions, Statistic, Tag, Tooltip } from 'antd';
 import { PageHeader } from '@ant-design/pro-layout';
 import {
   EditOutlined,
@@ -181,16 +181,33 @@ export default function ReadItem({ config, selectedItem }) {
               >
                 {translate('Send by Email')}
               </Button>
-              <Button
-                type="primary"
-                icon={<EditOutlined />}
-                onClick={() => {
-                  dispatch(erp.currentAction({ actionType: 'update', data: currentErp }));
-                  navigate(`/invoice/update/${currentErp._id}`);
-                }}
-              >
-                {translate('Edit')}
-              </Button>
+              {!Boolean(
+                currentErp.stockDeducted ||
+                  ['posted', 'sent', 'paid', 'reversed', 'cancelled'].includes(currentErp.status) ||
+                  currentErp.paymentStatus === 'paid'
+              ) ? (
+                <Button
+                  type="primary"
+                  icon={<EditOutlined />}
+                  onClick={() => {
+                    dispatch(erp.currentAction({ actionType: 'update', data: currentErp }));
+                    navigate(`/invoice/update/${currentErp._id}`);
+                  }}
+                >
+                  {translate('Edit')}
+                </Button>
+              ) : (
+                <Tooltip title="Billed and posted invoices are immutable and cannot be edited">
+                  <Button
+                    type="default"
+                    icon={<EditOutlined />}
+                    disabled
+                    style={{ opacity: 0.6, cursor: 'not-allowed' }}
+                  >
+                    Locked (Billed)
+                  </Button>
+                </Tooltip>
+              )}
             </div>
           </div>
 

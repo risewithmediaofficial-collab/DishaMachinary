@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+﻿import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Alert,
@@ -69,30 +69,50 @@ export default function Dashboard() {
     loadSummary();
   }, [range]);
 
-  // Active period data for hero metric
+  // Active period data for hero metric & profitability analytics
   const currentSalesData = useMemo(() => {
     if (range && summary?.customRange) {
+      const cr = summary.customRange;
+      const sales = cr.sales || 0;
+      const netRevenue = cr.netRevenue || sales;
+      const cost = cr.cost || 0;
+      const grossProfit = cr.grossProfit || (netRevenue - cost);
+      const margin = cr.margin !== undefined ? cr.margin : (netRevenue > 0 ? Math.round((grossProfit / netRevenue) * 100) : 0);
       return {
         label: `Custom (${range[0].format('DD/MM')} - ${range[1].format('DD/MM')})`,
-        sales: summary.customRange.sales || 0,
-        bills: summary.customRange.bills || 0,
-        grossProfit: summary.customRange.grossProfit || 0,
-        collected: summary.customRange.collected || 0,
+        sales,
+        netRevenue,
+        cost,
+        grossProfit,
+        margin,
+        bills: cr.bills || 0,
+        collected: cr.collected || 0,
       };
     }
-    switch (activePeriod) {
-      case 'today':
-        return { label: 'Today', sales: summary?.today?.sales || 0, bills: summary?.today?.bills || 0, grossProfit: summary?.today?.grossProfit || 0, collected: summary?.today?.collected || 0 };
-      case 'thisWeek':
-        return { label: 'This Week', sales: summary?.thisWeek?.sales || 0, bills: summary?.thisWeek?.bills || 0, grossProfit: summary?.thisWeek?.grossProfit || 0, collected: summary?.thisWeek?.collected || 0 };
-      case 'thisYear':
-        return { label: 'This Year', sales: summary?.thisYear?.sales || 0, bills: summary?.thisYear?.bills || 0, grossProfit: summary?.thisYear?.grossProfit || 0, collected: summary?.thisYear?.collected || 0 };
-      case 'all':
-        return { label: 'All Periods', sales: summary?.thisYear?.sales || 0, bills: summary?.thisYear?.bills || 0, grossProfit: summary?.thisYear?.grossProfit || 0, collected: summary?.thisYear?.collected || 0 };
-      case 'thisMonth':
-      default:
-        return { label: 'This Month', sales: summary?.thisMonth?.sales || 0, bills: summary?.thisMonth?.bills || 0, grossProfit: summary?.thisMonth?.grossProfit || 0, collected: summary?.thisMonth?.collected || 0 };
-    }
+    const dataKey = activePeriod === 'all' ? 'allTime' : activePeriod;
+    const periodData = summary?.[dataKey] || {};
+    const labelMap = {
+      today: 'Today',
+      thisWeek: 'This Week',
+      thisMonth: 'This Month',
+      thisYear: 'This Year',
+      all: 'All Time',
+    };
+    const sales = periodData.sales || 0;
+    const netRevenue = periodData.netRevenue || sales;
+    const cost = periodData.cost || 0;
+    const grossProfit = periodData.grossProfit || (netRevenue - cost);
+    const margin = periodData.margin !== undefined ? periodData.margin : (netRevenue > 0 ? Math.round((grossProfit / netRevenue) * 100) : 0);
+    return {
+      label: labelMap[activePeriod] || 'This Month',
+      sales,
+      netRevenue,
+      cost,
+      grossProfit,
+      margin,
+      bills: periodData.bills || 0,
+      collected: periodData.collected || 0,
+    };
   }, [summary, activePeriod, range]);
 
   // All comparison periods data
@@ -101,6 +121,7 @@ export default function Dashboard() {
     { key: 'thisWeek', label: 'This Week', sales: summary?.thisWeek?.sales || 0, bills: summary?.thisWeek?.bills || 0 },
     { key: 'thisMonth', label: 'This Month', sales: summary?.thisMonth?.sales || 0, bills: summary?.thisMonth?.bills || 0 },
     { key: 'thisYear', label: 'This Year', sales: summary?.thisYear?.sales || 0, bills: summary?.thisYear?.bills || 0 },
+    { key: 'all', label: 'All Time', sales: summary?.allTime?.sales || 0, bills: summary?.allTime?.bills || 0 },
   ], [summary]);
 
   // Sales comparison periods filtered for the bar chart
@@ -139,19 +160,19 @@ export default function Dashboard() {
     }
   }, [activePeriod, range]);
 
-  // Financial comparative bar chart data
+  // Financial comparative bar chart data — tracks the selected period
   const financialFlow = useMemo(() => {
-    const sales = summary?.thisMonth?.sales || 0;
-    const collected = summary?.thisMonth?.collected || 0;
+    const sales = currentSalesData.sales || 0;
+    const collected = currentSalesData.collected || 0;
     const expenses = summary?.monthlyExpenses?.amount || 0;
-    const profit = summary?.thisMonth?.grossProfit || 0;
+    const profit = currentSalesData.grossProfit || 0;
     return [
       { label: 'Sales Revenue', value: sales, color: '#2563eb', gradient: ['#3b82f6', '#1d4ed8'] },
       { label: 'Collections', value: collected, color: '#10b981', gradient: ['#34d399', '#059669'] },
       { label: 'Gross Profit', value: Math.max(0, profit), color: '#8b5cf6', gradient: ['#a78bfa', '#6d28d9'] },
       { label: 'Expenses', value: expenses, color: '#f43f5e', gradient: ['#fb7185', '#e11d48'] },
     ];
-  }, [summary]);
+  }, [summary, currentSalesData]);
 
   // Stock figures
   const stock = summary?.stock || {};
@@ -160,9 +181,9 @@ export default function Dashboard() {
   const reservedPct = Math.round(((stock.reservedUnits || 0) / totalStockUnits) * 100);
   const damagedPct = Math.max(0, 100 - availablePct - reservedPct);
 
-  // Profit margin calculation
-  const monthlyRevenue = summary?.thisMonth?.sales || 0;
-  const monthlyProfit = summary?.thisMonth?.grossProfit || 0;
+  // Profit margin calculation — uses the currently selected period's data
+  const monthlyRevenue = currentSalesData.sales || 0;
+  const monthlyProfit = currentSalesData.grossProfit || 0;
   const marginPct = monthlyRevenue > 0 ? Math.round((monthlyProfit / monthlyRevenue) * 100) : 0;
 
   return (
@@ -379,18 +400,18 @@ export default function Dashboard() {
                 GROSS PROFIT & MARGIN
               </span>
               <Tag color="green" style={{ borderRadius: 10, fontWeight: 700 }}>
-                This Month
+                {currentSalesData.label}
               </Tag>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginTop: 10 }}>
               {/* CIRCULAR SVG PROGRESS GAUGE */}
-              <ProfitMarginGauge percentage={marginPct} />
+              <ProfitMarginGauge percentage={currentSalesData.margin} />
 
               <div>
                 <div style={{ fontSize: 12, color: '#64748b', fontWeight: 600 }}>Estimated Gross Profit</div>
                 <div style={{ fontSize: 26, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.02em', marginTop: 2 }}>
-                  {formatMoney(monthlyProfit)}
+                  {formatMoney(currentSalesData.grossProfit)}
                 </div>
                 <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
                   Based on machine cost snapshots at billing
@@ -401,26 +422,30 @@ export default function Dashboard() {
             {/* BREAKDOWN BARS */}
             <div style={{ marginTop: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
-                <span style={{ color: '#64748b' }}>Revenue Net:</span>
-                <span style={{ fontWeight: 700, color: '#0f172a' }}>{formatMoney(monthlyRevenue)}</span>
+                <span style={{ color: '#64748b' }}>Gross Sales Revenue:</span>
+                <span style={{ fontWeight: 700, color: '#0f172a' }}>{formatMoney(currentSalesData.sales)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
+                <span style={{ color: '#64748b' }}>Net Revenue (Tax Excl.):</span>
+                <span style={{ fontWeight: 700, color: '#0f172a' }}>{formatMoney(currentSalesData.netRevenue)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 6 }}>
                 <span style={{ color: '#64748b' }}>Cost of Goods (COGS):</span>
                 <span style={{ fontWeight: 700, color: '#ea580c' }}>
-                  {formatMoney(Math.max(0, monthlyRevenue - monthlyProfit))}
+                  {formatMoney(currentSalesData.cost)}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
                 <span style={{ color: '#64748b' }}>Estimated Margin:</span>
-                <span style={{ fontWeight: 800, color: '#10b981' }}>{marginPct}%</span>
+                <span style={{ fontWeight: 800, color: '#10b981' }}>{currentSalesData.margin}%</span>
               </div>
             </div>
           </div>
 
           <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 11, color: '#94a3b8' }}>Real-time Margin Tracking</span>
-            <Tag color={marginPct >= 20 ? 'success' : 'warning'} style={{ borderRadius: 8, fontWeight: 700 }}>
-              {marginPct >= 20 ? 'Healthy Margin' : 'Normal'}
+            <Tag color={currentSalesData.margin >= 20 ? 'success' : 'warning'} style={{ borderRadius: 8, fontWeight: 700 }}>
+              {currentSalesData.margin >= 20 ? 'Healthy Margin' : 'Normal'}
             </Tag>
           </div>
         </div>
@@ -731,7 +756,7 @@ export default function Dashboard() {
                 Revenue vs Inflow vs Outflow
               </div>
             </div>
-            <Tag color="purple" style={{ borderRadius: 10, fontWeight: 700 }}>This Month</Tag>
+            <Tag color="purple" style={{ borderRadius: 10, fontWeight: 700 }}>{currentSalesData.label}</Tag>
           </div>
 
           {/* COMPARATIVE HORIZONTAL BARS */}

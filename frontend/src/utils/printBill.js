@@ -1,4 +1,4 @@
-import dayjs from 'dayjs';
+﻿import dayjs from 'dayjs';
 
 export function numberToWords(num) {
   if (typeof num !== 'number' || isNaN(num) || num <= 0) return 'Zero Rupees Only';
@@ -544,6 +544,17 @@ export function generateA4Html(invoice, companySettings = {}) {
     <div class="totals-left">
       <div style="font-size: 10.5px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 4px;">Amount in Words:</div>
       <div style="font-size: 12px; font-weight: 700; color: #0f172a;">${amountWords}</div>
+      ${
+        companySettings.company_bank_account || companySettings.company_upi
+          ? `
+          <div style="margin-top: 8px; padding: 6px 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #fff; font-size: 10px;">
+            <div style="font-weight: 700; text-transform: uppercase; color: #0f172a; margin-bottom: 2px;">Bank & Payment Details</div>
+            ${companySettings.company_bank_account ? `<div>${companySettings.company_bank_account}</div>` : ''}
+            ${companySettings.company_upi ? `<div>UPI: ${companySettings.company_upi}</div>` : ''}
+          </div>
+          `
+          : ''
+      }
       <div style="margin-top: 10px; font-size: 10.5px; color: #64748b;">
         <strong>Terms & Conditions:</strong><br />
         1. Goods once sold are covered under standard manufacturer warranty.<br />

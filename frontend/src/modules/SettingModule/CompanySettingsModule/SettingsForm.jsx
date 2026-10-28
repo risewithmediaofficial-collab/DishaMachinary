@@ -105,6 +105,51 @@ export default function SettingForm() {
             <Input size="large" placeholder="Optional CIN / Reg No" style={{ borderRadius: 8 }} />
           </Form.Item>
         </Col>
+
+        {/* ===== BANK & PAYMENT DETAILS ===== */}
+        <Col span={24}>
+          <div
+            style={{
+              marginTop: 8,
+              marginBottom: 4,
+              fontWeight: 700,
+              fontSize: 13,
+              color: '#0f172a',
+              borderTop: '1px solid #f1f5f9',
+              paddingTop: 16,
+            }}
+          >
+            🏦 Bank & Payment Details (shown on invoice / bill)
+          </div>
+        </Col>
+
+        <Col span={24}>
+          <Form.Item
+            label={<span style={{ fontWeight: 600, color: '#334155' }}>Bank Account Details</span>}
+            name="company_bank_account"
+            extra="e.g. Bank: HDFC Bank | A/C: 50200012345678 | IFSC: HDFC0001234 | Branch: Industrial Estate"
+          >
+            <Input.TextArea
+              rows={2}
+              placeholder="Bank Name | Account Number | IFSC Code | Branch"
+              style={{ borderRadius: 8 }}
+            />
+          </Form.Item>
+        </Col>
+
+        <Col span={24}>
+          <Form.Item
+            label={<span style={{ fontWeight: 600, color: '#334155' }}>UPI / QR Payment ID</span>}
+            name="company_upi"
+            extra="e.g. sales@dishamachinary or 9876543210@ybl (shown on bill)"
+          >
+            <Input
+              size="large"
+              placeholder="e.g. yourname@upi (GPay / PhonePe / Paytm)"
+              style={{ borderRadius: 8 }}
+            />
+          </Form.Item>
+        </Col>
       </Row>
     </div>
   );

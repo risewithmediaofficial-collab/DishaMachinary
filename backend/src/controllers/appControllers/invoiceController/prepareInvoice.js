@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
 const roundMoney = (amount) => Number((amount + Number.EPSILON).toFixed(2));
 const normalizeState = (state) => String(state || '').trim().toLocaleLowerCase();
@@ -60,7 +60,7 @@ const calculateTotals = (items, gstEnabled, supplyType, invoiceDiscount = 0) => 
     cgstTotal,
     sgstTotal,
     igstTotal,
-    total: roundMoney(subTotal + taxTotal),
+    total: roundMoney(Math.max(0, subTotal - safeDiscount) + taxTotal),
   };
 };
 

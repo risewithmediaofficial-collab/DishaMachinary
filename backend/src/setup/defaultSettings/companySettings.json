@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "settingCategory": "company_settings",
     "settingKey": "company_name",
@@ -80,7 +80,13 @@
   {
     "settingCategory": "company_settings",
     "settingKey": "company_bank_account",
-    "settingValue": "Bank: HDFC Bank | A/C: 50200012345678 | IFSC: HDFC0001234 | Branch: Industrial Estate",
+    "settingValue": "",
+    "valueType": "string"
+  },
+  {
+    "settingCategory": "company_settings",
+    "settingKey": "company_upi",
+    "settingValue": "",
     "valueType": "string"
   }
 ]

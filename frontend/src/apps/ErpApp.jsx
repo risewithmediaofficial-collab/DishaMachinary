@@ -28,10 +28,6 @@ export default function ErpCrmApp() {
   const { pathname } = useLocation();
   const isPosRoute = pathname === '/pos';
 
-  // const { state: stateApp, appContextAction } = useAppContext();
-  // // const { app } = appContextAction;
-  // const { isNavMenuClose, currentApp } = stateApp;
-
   const { isMobile } = useResponsive();
 
   const dispatch = useDispatch();
@@ -40,16 +36,7 @@ export default function ErpCrmApp() {
     dispatch(settingsAction.list({ entity: 'setting' }));
   }, []);
 
-  // const appSettings = useSelector(selectAppSettings);
-
   const { isSuccess: settingIsloaded } = useSelector(selectSettings);
-
-  // useEffect(() => {
-  //   const { loadDefaultLang } = storePersist.get('firstVisit');
-  //   if (appSettings.idurar_app_language && !loadDefaultLang) {
-  //     window.localStorage.setItem('firstVisit', JSON.stringify({ loadDefaultLang: true }));
-  //   }
-  // }, [appSettings]);
 
   if (settingIsloaded)
     return (
@@ -73,19 +60,30 @@ export default function ErpCrmApp() {
             </Content>
           </Layout>
         ) : (
-          <Layout className={isPosRoute ? 'pos-content-shell' : undefined}>
+          <Layout
+            className={isPosRoute ? 'pos-content-shell' : undefined}
+            style={{
+              marginLeft: 256,
+              height: '100dvh',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <HeaderContent />
             <Content
               className={isPosRoute ? 'pos-content' : undefined}
               style={{
-                margin: '16px auto 24px',
-                overflow: 'initial',
-                width: '100%',
-                padding: '0 32px',
-                maxWidth: 1400,
+                flex: 1,
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                padding: '16px 32px 24px',
+                maxWidth: '100%',
               }}
             >
-              <AppRouter />
+              <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+                <AppRouter />
+              </div>
             </Content>
           </Layout>
         )}

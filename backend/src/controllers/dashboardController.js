@@ -14,37 +14,59 @@ const indiaParts = (date) => Object.fromEntries(
 const indiaMidnight = (year, month, day) => new Date(Date.UTC(year, month - 1, day) - INDIA_OFFSET_MS);
 
 const paymentTotals = async (from, to) => {
+  const matchStage = { removed: { $ne: true }, status: { $ne: 'reversed' } };
+  if (from && to) {
+    matchStage.date = { $gte: from, $lt: to };
+  }
   const [result] = await Payment.aggregate([
-    { $match: { removed: { $ne: true }, status: { $ne: 'reversed' }, date: { $gte: from, $lt: to } } },
+    { $match: matchStage },
     { $group: { _id: null, collected: { $sum: { $ifNull: ['$amount', 0] } }, receipts: { $sum: 1 } } },
   ]);
   return { collected: Number((result?.collected || 0).toFixed(2)), receipts: result?.receipts || 0 };
 };
 
 const invoiceTotals = async (from, to) => {
+  const matchStage = {
+    removed: { $ne: true },
+    status: { $nin: ['cancelled', 'reversing', 'reversed', 'refunded'] },
+  };
+  if (from && to) {
+    matchStage.date = { $gte: from, $lt: to };
+  }
+
   const [result] = await Invoice.aggregate([
-    {
-      $match: {
-        removed: { $ne: true },
-        status: { $nin: ['draft', 'cancelled', 'reversing', 'reversed', 'refunded', 'on hold'] },
-        date: { $gte: from, $lt: to },
-      },
-    },
+    { $match: matchStage },
     {
       $group: {
         _id: null,
         bills: { $sum: 1 },
         sales: {
-          $sum: {
-            $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$discount', 0] }],
-          },
+          $sum: { $ifNull: ['$total', 0] },
         },
         netRevenue: {
           $sum: {
             $subtract: [{ $ifNull: ['$subTotal', 0] }, { $ifNull: ['$discount', 0] }],
           },
         },
-        cost: { $sum: { $sum: '$items.costTotalSnapshot' } },
+        cost: {
+          $sum: {
+            $reduce: {
+              input: { $ifNull: ['$items', []] },
+              initialValue: 0,
+              in: {
+                $add: [
+                  '$$value',
+                  {
+                    $ifNull: [
+                      '$$this.costTotalSnapshot',
+                      { $multiply: [{ $ifNull: ['$$this.costPriceSnapshot', 0] }, { $ifNull: ['$$this.quantity', 0] }] }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        },
       },
     },
   ]);
@@ -53,11 +75,15 @@ const invoiceTotals = async (from, to) => {
   const sales = Number((result?.sales || 0).toFixed(2));
   const netRevenue = Number((result?.netRevenue || 0).toFixed(2));
   const cost = Number((result?.cost || 0).toFixed(2));
+  const grossProfit = Number((netRevenue - cost).toFixed(2));
+  const margin = netRevenue > 0 ? Number(((grossProfit / netRevenue) * 100).toFixed(1)) : 0;
   return {
     bills: result?.bills || 0,
     sales,
+    netRevenue,
     cost,
-    grossProfit: Number((netRevenue - cost).toFixed(2)),
+    grossProfit,
+    margin,
     ...payments,
   };
 };
@@ -85,11 +111,12 @@ const summary = async (req, res) => {
   const nextMonth = indiaMidnight(parts.year, parts.month + 1, 1);
   const nextYear = indiaMidnight(parts.year + 1, 1, 1);
 
-  const [todayTotals, weekTotals, monthTotals, yearTotals, stock, outstanding, recentPayments, monthlyExpenses] = await Promise.all([
+  const [todayTotals, weekTotals, monthTotals, yearTotals, allTimeTotals, stock, outstanding, recentPayments, monthlyExpenses] = await Promise.all([
     invoiceTotals(today, tomorrow),
     invoiceTotals(week, nextWeek),
     invoiceTotals(month, nextMonth),
     invoiceTotals(year, nextYear),
+    invoiceTotals(null, null), // All-time totals without date boundaries
     Product.aggregate([
       { $match: { removed: { $ne: true }, enabled: { $ne: false }, trackInventory: true } },
       {
@@ -118,8 +145,8 @@ const summary = async (req, res) => {
       },
     ]),
     Invoice.aggregate([
-      { $match: { removed: { $ne: true }, status: { $nin: ['draft', 'cancelled', 'reversed', 'refunded', 'on hold'] } } },
-      { $group: { _id: null, amount: { $sum: { $subtract: [{ $subtract: ['$total', { $ifNull: ['$discount', 0] }] }, { $ifNull: ['$credit', 0] }] } } } },
+      { $match: { removed: { $ne: true }, status: { $nin: ['cancelled', 'reversed', 'refunded'] } } },
+      { $group: { _id: null, amount: { $sum: { $subtract: [{ $ifNull: ['$total', 0] }, { $ifNull: ['$credit', 0] }] } } } },
     ]),
     Payment.find({ removed: { $ne: true }, status: { $ne: 'reversed' } })
       .sort({ date: -1, created: -1 })
@@ -154,6 +181,7 @@ const summary = async (req, res) => {
       thisWeek: weekTotals,
       thisMonth: monthTotals,
       thisYear: yearTotals,
+      allTime: allTimeTotals,
       customRange,
       stock: {
         products: stock[0]?.products || 0,

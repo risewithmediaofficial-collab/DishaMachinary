@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import { Button, Tooltip, message } from 'antd';
 import {
@@ -87,15 +87,16 @@ export default function BillViewer({
   if (!invoice) return null;
 
   const company = {
-    name: companySettings.company_name || 'Disha Machinary',
-    address: companySettings.company_address || 'Plot No. 12, Industrial Estate, Machinery Hub',
-    state: companySettings.company_state || 'Tamil Nadu',
-    country: companySettings.company_country || 'India',
-    phone: companySettings.company_phone || '+91 98765 43210',
-    email: companySettings.company_email || 'sales@dishamachinary.com',
-    gstin: companySettings.company_gstin || '33AABCD1234E1Z9',
-    regNo: companySettings.company_reg_number || 'DM/IND/2026/089',
-    bank: companySettings.company_bank_account || 'Bank: HDFC Bank | A/C: 50200012345678 | IFSC: HDFC0001234',
+    name: companySettings.company_name || '',
+    address: companySettings.company_address || '',
+    state: companySettings.company_state || '',
+    country: companySettings.company_country || '',
+    phone: companySettings.company_phone || '',
+    email: companySettings.company_email || '',
+    gstin: companySettings.company_gstin || '',
+    regNo: companySettings.company_reg_number || '',
+    bank: companySettings.company_bank_account || '',
+    upi: companySettings.company_upi || '',
   };
 
   const client = invoice.client || {};
@@ -424,11 +425,15 @@ export default function BillViewer({
                 <div className="bill-words-text">{numberToWords(invoice.total)}</div>
               </div>
 
-              <div className="bill-bank-card">
-                <div className="bill-bank-title">Bank & Payment Details</div>
-                <div className="bill-bank-line">{company.bank}</div>
-                <div className="bill-bank-line">UPI: sales@dishamachinary (GPay / PhonePe / Paytm accepted)</div>
-              </div>
+              {Boolean(company.bank || company.upi) && (
+                <div className="bill-bank-card">
+                  <div className="bill-bank-title">Bank & Payment Details</div>
+                  {company.bank && <div className="bill-bank-line">{company.bank}</div>}
+                  {company.upi && (
+                    <div className="bill-bank-line">UPI: {company.upi} (GPay / PhonePe / Paytm accepted)</div>
+                  )}
+                </div>
+              )}
 
               <div className="bill-terms-card">
                 <strong>Terms & Conditions:</strong>
