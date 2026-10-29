@@ -1099,6 +1099,11 @@ table.disha-items-table tr.disha-placeholder-row td {
   gap: 8px;
 }
 
+.disha-bottom-grid.disha-no-qr {
+  grid-template-columns: 1.6fr 1.4fr;
+  gap: 16px;
+}
+
 .disha-bottom-left {
   font-size: 10px;
   line-height: 1.35;

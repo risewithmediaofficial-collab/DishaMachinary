@@ -61,7 +61,7 @@ const formatCurrency = (val) => {
   return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-export function generateThermalHtml(invoice, companySettings = {}) {
+export function generateThermalHtml(invoice, companySettings = {}, entity = 'invoice') {
   const company = {
     name: companySettings.company_name || 'DISHA MACHINERY',
     address: companySettings.company_address || 'Annamalai Complex, New Busstand, Tirupattur Dist - 635601',
@@ -70,11 +70,15 @@ export function generateThermalHtml(invoice, companySettings = {}) {
     upi: companySettings.company_upi || '9751117889@federal',
   };
 
+  const isQuote = entity === 'quote' || invoice.isQuote || invoice.type === 'quote';
   const client = invoice.client || {};
   const items = Array.isArray(invoice.items) ? invoice.items : [];
   const dateStr = dayjs(invoice.date || new Date()).format('DD/MM/YYYY hh:mm A');
   const totalQty = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   const formattedInvoiceNo = formatInvoiceNumber(invoice.number, invoice.year);
+  const docNumberDisplay = isQuote
+    ? (formattedInvoiceNo.startsWith('QT-') ? formattedInvoiceNo : `QT-${formattedInvoiceNo}`)
+    : formattedInvoiceNo;
 
   const itemsRows = items
     .map(
@@ -165,11 +169,11 @@ export function generateThermalHtml(invoice, companySettings = {}) {
   <div class="divider-double"></div>
 
   <div class="center">
-    <div class="doc-title">${invoice.gstEnabled ? 'TAX INVOICE' : 'RETAIL BILL'}</div>
+    <div class="doc-title">${isQuote ? 'ESTIMATE / QUOTATION' : (invoice.gstEnabled ? 'TAX INVOICE' : 'RETAIL BILL')}</div>
   </div>
 
   <div class="meta-line">
-    <span>Invoice No: ${formattedInvoiceNo}</span>
+    <span>${isQuote ? 'Quote No:' : 'Invoice No:'} ${docNumberDisplay}</span>
     <span>${dateStr}</span>
   </div>
   <div class="meta-line">
@@ -211,15 +215,15 @@ export function generateThermalHtml(invoice, companySettings = {}) {
   </div>
 
   <div class="footer">
-    <div class="bold">Thanks so much for your purchase!</div>
-    <div>See you again soon!</div>
+    <div class="bold">${isQuote ? 'Thank you for considering our quotation!' : 'Thanks so much for your purchase!'}</div>
+    <div>${isQuote ? 'Valid for 30 days from date of issue' : 'See you again soon!'}</div>
   </div>
 </body>
 </html>
   `;
 }
 
-export function generateA4Html(invoice, companySettings = {}) {
+export function generateA4Html(invoice, companySettings = {}, entity = 'invoice') {
   const company = {
     name: companySettings.company_name || 'DISHA MACHINERY',
     tagline:
@@ -244,11 +248,15 @@ export function generateA4Html(invoice, companySettings = {}) {
     upi: companySettings.company_upi || '9751117889@federal',
   };
 
+  const isQuote = entity === 'quote' || invoice.isQuote || invoice.type === 'quote';
   const client = invoice.client || {};
   const items = Array.isArray(invoice.items) ? invoice.items : [];
   const dateStr = dayjs(invoice.date || new Date()).format('DD/MM/YYYY');
   const amountWords = numberToWords(Number(invoice.total || 0));
   const formattedInvoiceNo = formatInvoiceNumber(invoice.number, invoice.year);
+  const docNumberDisplay = isQuote
+    ? (formattedInvoiceNo.startsWith('QT-') ? formattedInvoiceNo : `QT-${formattedInvoiceNo}`)
+    : formattedInvoiceNo;
   const primaryMobile = (company.phone || '9751117889').split('/')[0].trim();
   const upiQrString = `upi://pay?pa=${company.upi}&pn=${encodeURIComponent(company.name)}&am=${Number(invoice.total || 0).toFixed(2)}&cu=INR&tn=Bill%20${encodeURIComponent(formattedInvoiceNo)}`;
 
@@ -297,7 +305,7 @@ export function generateA4Html(invoice, companySettings = {}) {
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>DISHA MACHINERY - Tax Invoice ${formattedInvoiceNo}</title>
+  <title>DISHA MACHINERY - ${isQuote ? 'Quotation' : 'Tax Invoice'} ${docNumberDisplay}</title>
   <style>
     @page {
       size: A4 portrait;
@@ -390,12 +398,12 @@ export function generateA4Html(invoice, companySettings = {}) {
     }
     .bottom-grid {
       display: grid;
-      grid-template-columns: 1.4fr 0.9fr 1.3fr;
+      grid-template-columns: ${isQuote ? '1.6fr 1.4fr' : '1.4fr 0.9fr 1.3fr'};
       border-left: 1px solid #000;
       border-right: 1px solid #000;
       border-bottom: 1px solid #000;
       padding: 6px 8px;
-      gap: 8px;
+      gap: ${isQuote ? '16px' : '8px'};
       font-size: 10.5px;
     }
     .total-box {
@@ -423,7 +431,7 @@ export function generateA4Html(invoice, companySettings = {}) {
   <div class="disha-tax-invoice">
     <div class="top-bar">
       <div><strong>GSTIN :</strong> ${company.gstin}</div>
-      <div style="font-weight: 800; font-size: 13px;">TAX INVOICE</div>
+      <div style="font-weight: 800; font-size: 13px; ${isQuote ? 'color: #0284c7;' : ''}">${isQuote ? 'QUOTATION' : 'TAX INVOICE'}</div>
       <div style="color: #991b1b; font-weight: 700;"><strong>Mobile :</strong> ${primaryMobile}</div>
     </div>
 
@@ -436,7 +444,7 @@ export function generateA4Html(invoice, companySettings = {}) {
 
     <div class="parties-grid">
       <div class="party-box">
-        <div class="party-header">Billed to</div>
+        <div class="party-header">${isQuote ? 'Quoted to' : 'Billed to'}</div>
         <div class="party-name">${client.name || 'HALEEM BASHA'}</div>
         <div style="font-weight: 700;">${client.address || client.city || 'TIRUPATTUR'}</div>
         <div style="font-weight: 700;">${client.state || 'TIRUPATTUR'}</div>
@@ -463,11 +471,11 @@ export function generateA4Html(invoice, companySettings = {}) {
 
       <div class="meta-box">
         <div class="meta-row">
-          <span style="font-weight: 600;">Invoice No :</span>
-          <span style="color: #991b1b; font-weight: 800;">${formattedInvoiceNo}</span>
+          <span style="font-weight: 600;">${isQuote ? 'Quotation No :' : 'Invoice No :'}</span>
+          <span style="color: #991b1b; font-weight: 800;">${docNumberDisplay}</span>
         </div>
         <div class="meta-row">
-          <span style="font-weight: 600;">Invoice Date :</span>
+          <span style="font-weight: 600;">${isQuote ? 'Quotation Date :' : 'Invoice Date :'}</span>
           <span style="font-weight: 700;">${dateStr}</span>
         </div>
         <div class="meta-row">
@@ -508,7 +516,9 @@ export function generateA4Html(invoice, companySettings = {}) {
 
     <div class="bottom-grid">
       <div>
-        <div style="color: #991b1b; font-weight: 700; text-decoration: underline; margin-bottom: 3px;">Bank Details</div>
+        <div style="color: #991b1b; font-weight: 700; text-decoration: underline; margin-bottom: 3px;">
+          ${isQuote ? 'Bank Details (For Quotation)' : 'Bank Details'}
+        </div>
         <div style="color: #1e40af; font-weight: 700; margin-bottom: 2px;"><strong>A/C NAME :</strong> ${company.accountName}</div>
         <div style="display: flex; justify-content: space-between; color: #1e40af; font-weight: 700; margin-bottom: 2px;">
           <span><strong>A/C NO :</strong> ${company.bankAccount}</span>
@@ -522,10 +532,13 @@ export function generateA4Html(invoice, companySettings = {}) {
           ${amountWords}
         </div>
         <div style="margin-top: 4px; font-size: 9.5px; font-weight: 600;">
-          1. Goods Once sold Cannot be taken back
+          ${isQuote ? '1. Quotation valid for 30 days from date of issue. Prices subject to confirmation upon order.' : '1. Goods Once sold Cannot be taken back'}
         </div>
       </div>
 
+      ${
+        !isQuote
+          ? `
       <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px dashed #000; border-right: 1px dashed #000;">
         <img
           src="https://api.qrserver.com/v1/create-qr-code/?size=105x105&data=${encodeURIComponent(upiQrString)}"
@@ -534,6 +547,9 @@ export function generateA4Html(invoice, companySettings = {}) {
         />
         <div style="font-size: 8.5px; font-weight: 700; margin-top: 3px; color: #1e40af;">Scan & Pay via UPI</div>
       </div>
+      `
+          : ''
+      }
 
       <div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
@@ -567,7 +583,7 @@ export function generateA4Html(invoice, companySettings = {}) {
     </div>
 
     <div class="footer-banner">
-      Thanks so much for your purchase! You made our day, so we hope you have a great one yourself. See you again soon!
+      ${isQuote ? 'Thank you for considering DISHA MACHINERY! Looking forward to doing business with you.' : 'Thanks so much for your purchase! You made our day, so we hope you have a great one yourself. See you again soon!'}
     </div>
   </div>
 </body>
@@ -575,13 +591,13 @@ export function generateA4Html(invoice, companySettings = {}) {
   `;
 }
 
-export function printInvoice(invoice, format = 'a4', companySettings = {}) {
+export function printInvoice(invoice, format = 'a4', companySettings = {}, entity = 'invoice') {
   if (!invoice) return;
 
   const isThermal = format === 'thermal';
   const htmlContent = isThermal
-    ? generateThermalHtml(invoice, companySettings)
-    : generateA4Html(invoice, companySettings);
+    ? generateThermalHtml(invoice, companySettings, entity)
+    : generateA4Html(invoice, companySettings, entity);
 
   const printIframe = document.createElement('iframe');
   printIframe.setAttribute(

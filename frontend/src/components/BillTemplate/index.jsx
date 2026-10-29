@@ -122,7 +122,11 @@ export default function BillViewer({
   const currency = invoice.currency || 'INR';
   const payStatus = invoice.paymentStatus || 'unpaid';
 
+  const isQuote = entity === 'quote' || invoice.type === 'quote' || Boolean(invoice.isQuote);
   const formattedInvoiceNo = formatInvoiceNumber(invoice.number, invoice.year);
+  const docNumberDisplay = isQuote
+    ? (formattedInvoiceNo.startsWith('QT-') ? formattedInvoiceNo : `QT-${formattedInvoiceNo}`)
+    : formattedInvoiceNo;
   const primaryMobile = (company.phone || '9751117889').split('/')[0].trim();
   const upiQrString = `upi://pay?pa=${company.upi}&pn=${encodeURIComponent(company.name)}&am=${Number(invoice.total || 0).toFixed(2)}&cu=INR&tn=Bill%20${encodeURIComponent(formattedInvoiceNo)}`;
 
@@ -156,7 +160,7 @@ export default function BillViewer({
         <html>
           <head>
             <meta charset="utf-8" />
-            <title>DISHA MACHINERY - Bill ${formattedInvoiceNo}</title>
+            <title>DISHA MACHINERY - ${isQuote ? 'Quotation' : 'Bill'} ${docNumberDisplay}</title>
             ${styles}
             <style>
               @page {
@@ -176,6 +180,9 @@ export default function BillViewer({
               .disha-tax-invoice {
                 border: 1.5px solid #000 !important;
                 box-shadow: none !important;
+              }
+              .disha-bottom-grid.disha-no-qr {
+                grid-template-columns: 1.6fr 1.4fr !important;
               }
             </style>
           </head>
@@ -222,14 +229,14 @@ export default function BillViewer({
               className={`bill-format-tab ${activeFormat === 'a4' ? 'active' : ''}`}
               onClick={() => handleFormatChange('a4')}
             >
-              <FileTextOutlined /> A4 Tax Invoice (Official Printed Format)
+              <FileTextOutlined /> {isQuote ? 'A4 Quotation' : 'A4 Tax Invoice (Official Printed Format)'}
             </button>
             <button
               type="button"
               className={`bill-format-tab ${activeFormat === 'thermal' ? 'active' : ''}`}
               onClick={() => handleFormatChange('thermal')}
             >
-              <BarcodeOutlined /> 80mm POS Slip
+              <BarcodeOutlined /> {isQuote ? '80mm Quotation Slip' : '80mm POS Slip'}
             </button>
           </div>
 
@@ -239,21 +246,21 @@ export default function BillViewer({
               icon={<PrinterOutlined />}
               onClick={handlePrint}
             >
-              Print {activeFormat === 'thermal' ? 'Thermal (80mm)' : 'A4 Tax Invoice'}
+              Print {activeFormat === 'thermal' ? (isQuote ? 'Thermal Quotation' : 'Thermal (80mm)') : (isQuote ? 'Quotation' : 'A4 Tax Invoice')}
             </Button>
             {activeFormat === 'a4' ? (
               <Button
                 icon={<FilePdfOutlined />}
                 onClick={handleDownloadA4}
               >
-                Download A4 PDF
+                Download {isQuote ? 'Quotation PDF' : 'A4 PDF'}
               </Button>
             ) : (
               <Button
                 icon={<FilePdfOutlined />}
                 onClick={handleDownloadThermal}
               >
-                Download Thermal PDF
+                Download {isQuote ? 'Quotation Thermal PDF' : 'Thermal PDF'}
               </Button>
             )}
           </div>
@@ -261,7 +268,7 @@ export default function BillViewer({
       )}
 
       {/* ===================================================
-          A4 TAX INVOICE (EXACT REPLICA OF PHYSICAL BILL)
+          A4 TAX INVOICE / QUOTATION (EXACT REPLICA OF PHYSICAL BILL)
           =================================================== */}
       {activeFormat === 'a4' && (
         <div className="bill-paper-a4-wrapper">
@@ -271,7 +278,9 @@ export default function BillViewer({
               <div className="disha-top-gstin">
                 <strong>GSTIN :</strong> {company.gstin}
               </div>
-              <div className="disha-top-title">TAX INVOICE</div>
+              <div className="disha-top-title" style={isQuote ? { color: '#0284c7' } : {}}>
+                {isQuote ? 'QUOTATION' : 'TAX INVOICE'}
+              </div>
               <div className="disha-top-mobile">
                 <strong>Mobile :</strong> {primaryMobile}
               </div>
@@ -296,9 +305,9 @@ export default function BillViewer({
 
             {/* 3. PARTIES & INVOICE META GRID */}
             <div className="disha-parties-grid">
-              {/* Billed To Box */}
+              {/* Billed To / Quoted To Box */}
               <div className="disha-party-box disha-billed-box">
-                <div className="disha-party-header">Billed to</div>
+                <div className="disha-party-header">{isQuote ? 'Quoted to' : 'Billed to'}</div>
                 <div className="disha-party-name">{client.name || 'HALEEM BASHA'}</div>
                 <div className="disha-party-addr">{client.address || client.city || 'TIRUPATTUR'}</div>
                 <div className="disha-party-addr">{client.state || 'TIRUPATTUR'}</div>
@@ -324,14 +333,14 @@ export default function BillViewer({
                 </div>
               </div>
 
-              {/* Invoice Meta Box */}
+              {/* Invoice / Quote Meta Box */}
               <div className="disha-meta-box">
                 <div className="disha-meta-row">
-                  <span className="disha-meta-lbl">Invoice No :</span>
-                  <span className="disha-meta-val disha-inv-no-val">{formattedInvoiceNo}</span>
+                  <span className="disha-meta-lbl">{isQuote ? 'Quotation No :' : 'Invoice No :'}</span>
+                  <span className="disha-meta-val disha-inv-no-val">{docNumberDisplay}</span>
                 </div>
                 <div className="disha-meta-row">
-                  <span className="disha-meta-lbl">Invoice Date :</span>
+                  <span className="disha-meta-lbl">{isQuote ? 'Quotation Date :' : 'Invoice Date :'}</span>
                   <span className="disha-meta-val">{dayjs(invoice.date).format('DD/MM/YYYY')}</span>
                 </div>
                 <div className="disha-meta-row">
@@ -411,11 +420,13 @@ export default function BillViewer({
               </table>
             </div>
 
-            {/* 5. BOTTOM SECTION: BANK, QR CODE & CALCULATION TOTALS */}
-            <div className="disha-bottom-grid">
+            {/* 5. BOTTOM SECTION: BANK, (QR ONLY FOR INVOICES) & CALCULATION TOTALS */}
+            <div className={`disha-bottom-grid ${isQuote ? 'disha-no-qr' : ''}`}>
               {/* Bottom Left: Bank Details & Words */}
               <div className="disha-bottom-left">
-                <div className="disha-bank-header">Bank Details</div>
+                <div className="disha-bank-header">
+                  {isQuote ? 'Bank Details (For Quotation)' : 'Bank Details'}
+                </div>
                 <div className="disha-bank-line">
                   <span className="lbl">A/C NAME :</span> <span className="val">{company.accountName}</span>
                 </div>
@@ -441,21 +452,25 @@ export default function BillViewer({
                 </div>
 
                 <div className="disha-terms-line">
-                  1. Goods Once sold Cannot be taken back
+                  {isQuote
+                    ? '1. Quotation valid for 30 days from date of issue. Prices subject to confirmation upon order.'
+                    : '1. Goods Once sold Cannot be taken back'}
                 </div>
               </div>
 
-              {/* Bottom Center: Dynamic UPI QR Code */}
-              <div className="disha-bottom-center">
-                <div className="disha-qr-box">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=115x115&data=${encodeURIComponent(upiQrString)}`}
-                    alt="UPI QR Code"
-                    className="disha-qr-img"
-                  />
-                  <div className="disha-qr-text">Scan & Pay via UPI</div>
+              {/* Bottom Center: Dynamic UPI QR Code (Only for Tax Invoices, REMOVED for Quotations) */}
+              {!isQuote && (
+                <div className="disha-bottom-center">
+                  <div className="disha-qr-box">
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=115x115&data=${encodeURIComponent(upiQrString)}`}
+                      alt="UPI QR Code"
+                      className="disha-qr-img"
+                    />
+                    <div className="disha-qr-text">Scan & Pay via UPI</div>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Bottom Right: Taxes & Total */}
               <div className="disha-bottom-right">
@@ -497,7 +512,9 @@ export default function BillViewer({
 
             {/* 6. BOTTOM GREETING FOOTER */}
             <div className="disha-footer-banner">
-              Thanks so much for your purchase! You made our day, so we hope you have a great one yourself. See you again soon!
+              {isQuote
+                ? 'Thank you for considering DISHA MACHINERY! Looking forward to doing business with you.'
+                : 'Thanks so much for your purchase! You made our day, so we hope you have a great one yourself. See you again soon!'}
             </div>
           </div>
         </div>
@@ -519,11 +536,13 @@ export default function BillViewer({
           <div className="thermal-divider-double" />
 
           <div className="thermal-center">
-            <div className="thermal-doc-title">{invoice.gstEnabled ? 'TAX INVOICE' : 'RETAIL BILL'}</div>
+            <div className="thermal-doc-title">
+              {isQuote ? 'ESTIMATE / QUOTATION' : (invoice.gstEnabled ? 'TAX INVOICE' : 'RETAIL BILL')}
+            </div>
           </div>
 
           <div className="thermal-meta-row">
-            <span>Bill No: {formattedInvoiceNo}</span>
+            <span>{isQuote ? 'Quote No:' : 'Bill No:'} {docNumberDisplay}</span>
             <span>{dayjs(invoice.date).format('DD/MM/YY hh:mm A')}</span>
           </div>
 
@@ -574,20 +593,22 @@ export default function BillViewer({
             <span>₹{Number(invoice.total || 0).toFixed(2)}</span>
           </div>
 
-          <div className="thermal-center" style={{ marginTop: 12 }}>
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=95x95&data=${encodeURIComponent(upiQrString)}`}
-              alt="UPI QR Code"
-              style={{ width: 85, height: 85 }}
-            />
-            <div style={{ fontSize: 9, marginTop: 4 }}>Scan & Pay: {company.upi}</div>
-          </div>
+          {!isQuote && (
+            <div className="thermal-center" style={{ marginTop: 12 }}>
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=95x95&data=${encodeURIComponent(upiQrString)}`}
+                alt="UPI QR Code"
+                style={{ width: 85, height: 85 }}
+              />
+              <div style={{ fontSize: 9, marginTop: 4 }}>Scan & Pay: {company.upi}</div>
+            </div>
+          )}
 
           <div className="thermal-divider-double" />
 
           <div className="thermal-footer">
-            <div className="bold">Thanks so much for your purchase!</div>
-            <div>See you again soon!</div>
+            <div className="bold">{isQuote ? 'Thank you for considering our quotation!' : 'Thanks so much for your purchase!'}</div>
+            <div>{isQuote ? 'Valid for 30 days from issue' : 'See you again soon!'}</div>
           </div>
         </div>
       )}
